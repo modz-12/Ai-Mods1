@@ -60,6 +60,7 @@
             transition: background var(--transition), color var(--transition), font-size 0.2s;
             direction: rtl;
         }
+        /* حجم الخط */
         body.font-small {
             font-size: 14px;
         }
@@ -853,28 +854,6 @@
             font-size: 0.7rem;
             color: var(--text-secondary);
         }
-
-        /* ====== Bot selector in chat ====== */
-        .bot-selector-container {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-        }
-        .bot-selector-container select {
-            max-width: 200px;
-            padding: 0.3rem 0.6rem;
-            border-radius: 6px;
-            background: var(--surface);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-        .bot-selector-container label {
-            font-size: 0.85rem;
-            margin: 0;
-        }
     </style>
 </head>
 <body>
@@ -947,10 +926,6 @@
             <!-- مالك -->
             <div class="sidebar-section" id="ownerSection" style="display:none;">
                 <p class="sidebar-section-title">إدارة المالك</p>
-                <button class="nav-link" data-page="all-bots" data-tooltip="لوحة البوتات">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M8 2v20M16 2v20M2 8h20M2 16h20"/></svg>
-                    <span class="nav-label">لوحة البوتات</span>
-                </button>
                 <button class="nav-link" data-page="analytics" data-tooltip="التحليلات">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
                     <span class="nav-label">التحليلات</span>
@@ -1035,13 +1010,6 @@
                     </div>
                 </div>
                 <div class="card" style="padding:0;overflow:hidden;">
-                    <!-- Bot selector inside chat (for moderators) -->
-                    <div id="botSelectorContainer" class="bot-selector-container" style="display:none;">
-                        <label for="botSelector">🤖 البوت:</label>
-                        <select id="botSelector">
-                            <option value="">الرئيسي (Modz)</option>
-                        </select>
-                    </div>
                     <div class="chat-container" id="chatContainer">
                         <div class="chat-messages" id="chatMessages"></div>
                         <div id="debugPanel" class="debug-panel" style="display:none;margin:.5rem;background:#1a1a2e;color:#e0e0e0;font-family:monospace;font-size:.75rem;padding:1rem;border-radius:8px;max-height:400px;overflow-y:auto;white-space:pre-wrap;"></div>
@@ -1132,16 +1100,21 @@
                 </div>
             </div>
 
-            <!-- Bot Management (ربوتي) - للمشرفين -->
+            <!-- Bot Management (ربوتي) -->
             <div id="page-bot-management" style="display:none;">
                 <h2 style="font-size:1.3rem;margin-bottom:1rem;">🤖 ربوتي</h2>
-                <div id="botManagementContainer"></div>
-            </div>
-
-            <!-- All Bots (لوحة البوتات) - للمالك -->
-            <div id="page-all-bots" style="display:none;">
-                <h2 style="font-size:1.3rem;margin-bottom:1rem;">🤖 لوحة البوتات (جميع البوتات)</h2>
-                <div id="allBotsContainer"></div>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">إدارة الكلمات المفتاحية والردود</span>
+                        <button class="btn btn-primary btn-sm" id="addBotKeywordBtn">+ إضافة كلمة/رد</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>الكلمة المفتاحية</th><th>الرد</th><th>إيموجي</th><th>صورة</th><th>إجراءات</th></tr></thead>
+                            <tbody id="botKeywordsTable"></tbody>
+                        </table>
+                    </div>
+                    <div id="botKeywordsEmpty" class="empty-state" style="display:none;"><p>لا توجد كلمات مفتاحية مضافة.</p></div>
+                </div>
             </div>
 
             <!-- Admin Chat (تواصل أدمن) -->
@@ -1156,7 +1129,7 @@
                 </div>
             </div>
 
-            <!-- Bot Settings (إعداداتي) - للمشرف -->
+            <!-- Bot Settings (إعداداتي) -->
             <div id="page-bot-settings" style="display:none;">
                 <h2 style="font-size:1.3rem;margin-bottom:1rem;">⚙️ إعداداتي</h2>
                 <div class="card">
@@ -1311,9 +1284,6 @@
         let userRole = 'user';
         let currentPage = 'landing';
         let currentConversationId = null;
-        let currentBotId = null; // null = البوت الرئيسي (Modz)
-        let userBots = []; // بوتات المشرف (المشرف يرى بوتاته فقط)
-        let allBots = []; // كل البوتات (للمالك)
         let isDarkMode = false;
         let debugMode = false;
         let settingsCache = {};
@@ -1411,7 +1381,7 @@
         }
 
         // ============================================================
-        // ARABIC NORMALIZER & KNOWLEDGE ENGINE (معدل لدعم botId)
+        // ARABIC NORMALIZER & KNOWLEDGE ENGINE (from original)
         // ============================================================
         const ArabicNormalizer = {
             normalize(text) {
@@ -1476,29 +1446,26 @@
             aliasWeight: 20,
             qualityWeight: 10,
 
-            // تعديل: نمرر botId للبحث في معرفة بوت محدد
-            async search(question, context = {}, botId = null) {
+            async search(question, context = {}) {
                 const normQ = ArabicNormalizer.normalize(question);
                 const qKeywords = ArabicNormalizer.extractKeywords(question);
                 if (qKeywords.length === 0) return { found: false, reason: 'empty_query' };
 
                 let knowledge = [];
-                // نبحث في الكاش أولاً، لكن الكاش يعتمد على البوت (يمكن تحسينه)
-                // للبساطة، سنقرأ من Firestore حسب البوت
-                try {
-                    let qry;
-                    if (botId) {
-                        qry = query(collection(db, 'knowledge'), where('botId', '==', botId), where('active', '==', true),
-                            limit(200));
-                    } else {
-                        qry = query(collection(db, 'knowledge'), where('active', '==', true), limit(200));
+                if (knowledgeCache.length > 0 && Date.now() - knowledgeLoadedAt < 60000) {
+                    knowledge = knowledgeCache.filter(k => k.active !== false);
+                } else {
+                    try {
+                        const snap = await getDocs(query(collection(db, 'knowledge'), where('active', '==', true),
+                        limit(200)));
+                        knowledge = [];
+                        snap.forEach(d => { knowledge.push({ id: d.id, ...d.data() }); });
+                        knowledgeCache = knowledge;
+                        knowledgeLoadedAt = Date.now();
+                    } catch (e) {
+                        console.error('Error loading knowledge:', e);
+                        return { found: false, reason: 'db_error' };
                     }
-                    const snap = await getDocs(qry);
-                    knowledge = [];
-                    snap.forEach(d => { knowledge.push({ id: d.id, ...d.data() }); });
-                } catch (e) {
-                    console.error('Error loading knowledge:', e);
-                    return { found: false, reason: 'db_error' };
                 }
 
                 if (knowledge.length === 0) return { found: false, reason: 'no_knowledge' };
@@ -1549,7 +1516,7 @@
         };
 
         // ============================================================
-        // MEMORY SYSTEM
+        // MEMORY SYSTEM (from original)
         // ============================================================
         const MemorySystem = {
             conversationMemory: [],
@@ -1626,9 +1593,6 @@
                     await loadUserSettings(user.uid);
                     await MemorySystem.loadFromFirestore(user.uid);
                     await loadSettings();
-                    // تحميل البوتات
-                    await loadUserBots();
-                    await loadAllBots(); // للمالك
                     showPage('chat');
                     updateUIForUser();
                 } else {
@@ -1644,8 +1608,11 @@
             try {
                 const snap = await getDoc(doc(db, 'users', uid));
                 if (snap.exists()) {
-                    window._userData = snap.data();
+                    const data = snap.data();
+                    // Store in a global for quick access
+                    window._userData = data;
                 } else {
+                    // Create default user doc if missing
                     await setDoc(doc(db, 'users', uid), {
                         email: currentUser.email,
                         displayName: currentUser.displayName || '',
@@ -1694,6 +1661,7 @@
         }
 
         function applyUserSettings() {
+            // Theme
             if (userSettings.theme === 'dark') {
                 document.body.classList.add('dark-mode');
                 document.getElementById('sDarkMode').checked = true;
@@ -1703,10 +1671,12 @@
                 document.getElementById('sDarkMode').checked = false;
                 isDarkMode = false;
             }
+            // Font size
             const size = userSettings.fontSize || 'medium';
             document.body.className = document.body.className.replace(/font-\w+/g, '');
             document.body.classList.add(`font-${size}`);
             document.getElementById('sFontSize').value = size;
+            // Memory limit
             document.getElementById('sMemoryLimit').value = userSettings.memoryLimit || 20;
             MemorySystem.maxConversationLength = userSettings.memoryLimit || 20;
         }
@@ -1715,15 +1685,18 @@
             const isModerator = userRole === 'moderator' || userRole === 'admin';
             const isOwner = userRole === 'owner';
 
-            document.getElementById('moderatorSection').style.display = (isModerator || isOwner) ? '' : 'none';
-            document.getElementById('ownerSection').style.display = isOwner ? '' : 'none';
+            const moderatorSection = document.getElementById('moderatorSection');
+            const ownerSection = document.getElementById('ownerSection');
+
+            if (moderatorSection) moderatorSection.style.display = (isModerator || isOwner) ? '' : 'none';
+            if (ownerSection) ownerSection.style.display = isOwner ? '' : 'none';
 
             document.querySelectorAll('[data-page="bot-management"], [data-page="admin-chat"], [data-page="bot-settings"]')
                 .forEach(btn => {
                     btn.style.display = (isModerator || isOwner) ? '' : 'none';
                 });
             document.querySelectorAll(
-                    '[data-page="all-bots"], [data-page="analytics"], [data-page="reports"], [data-page="ratings"], [data-page="users-management"], [data-page="promotions"]'
+                    '[data-page="analytics"], [data-page="reports"], [data-page="ratings"], [data-page="users-management"], [data-page="promotions"]'
                     )
                 .forEach(btn => {
                     btn.style.display = isOwner ? '' : 'none';
@@ -1731,6 +1704,10 @@
         }
 
         function updateUIForUser() {
+            const info = document.getElementById('currentUserInfo');
+            if (info) info.textContent = currentUser ? `مسجل كـ: ${currentUser.email} (الدور: ${userRole})` :
+            'غير مسجل';
+            // Update sidebar user
             const userData = window._userData || {};
             document.getElementById('sidebarUserName').textContent = userData.displayName || currentUser?.email || 'زائر';
             document.getElementById('sidebarUserRole').textContent = userRole === 'owner' ? 'مالك' : userRole === 'admin' ?
@@ -1743,8 +1720,6 @@
             if (currentUser) {
                 loadConversationsList();
                 loadChatRooms();
-                // تحديث محدد البوت في شاشة المحادثة
-                renderBotSelector();
             }
         }
 
@@ -1793,16 +1768,16 @@
             document.querySelectorAll('.nav-link').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.page === page);
             });
+            // Close sidebar
             document.getElementById('sidebar')?.classList.remove('mobile-open');
             document.getElementById('sidebarOverlay')?.classList.remove('visible');
             document.getElementById('mobileToggle')?.setAttribute('aria-expanded', 'false');
             document.body.style.overflow = '';
-            // تحميل البيانات حسب الصفحة
+            // Load page data
             if (page === 'profile') loadProfile();
             if (page === 'settings') loadSettingsIntoForm();
             if (page === 'messages') loadChatRooms();
-            if (page === 'bot-management') loadBotManagement();
-            if (page === 'all-bots') loadAllBotsPage();
+            if (page === 'bot-management') loadBotKeywords();
             if (page === 'admin-chat') loadAdminChat();
             if (page === 'bot-settings') loadMyBotKeywords();
             if (page === 'analytics') loadAnalytics();
@@ -1820,59 +1795,7 @@
         }
 
         // ============================================================
-        // BOTS FUNCTIONS
-        // ============================================================
-        async function loadUserBots() {
-            if (!currentUser || !isModerator()) return;
-            try {
-                const snap = await getDocs(query(collection(db, 'bots'), where('ownerId', '==', currentUser.uid)));
-                userBots = [];
-                snap.forEach(d => userBots.push({ id: d.id, ...d.data() }));
-            } catch (e) { console.error(e); }
-        }
-
-        async function loadAllBots() {
-            if (!currentUser || userRole !== 'owner') return;
-            try {
-                const snap = await getDocs(query(collection(db, 'bots'), orderBy('createdAt', 'desc')));
-                allBots = [];
-                snap.forEach(d => allBots.push({ id: d.id, ...d.data() }));
-            } catch (e) { console.error(e); }
-        }
-
-        // محدد البوت في شاشة المحادثة (للمشرفين والمالك)
-        function renderBotSelector() {
-            const container = document.getElementById('botSelectorContainer');
-            const select = document.getElementById('botSelector');
-            if (!container || !select) return;
-
-            // نتحقق من الصلاحية
-            if (!isModerator()) {
-                container.style.display = 'none';
-                return;
-            }
-
-            container.style.display = 'flex';
-            // نملأ الخيارات
-            let options = '<option value="">الرئيسي (Modz)</option>';
-            const bots = userRole === 'owner' ? allBots : userBots;
-            bots.forEach(b => {
-                options += `<option value="${b.id}">${escapeHtml(b.name)}</option>`;
-            });
-            select.innerHTML = options;
-            select.value = currentBotId || '';
-            select.addEventListener('change', () => {
-                currentBotId = select.value || null;
-                toast(`تم التبديل إلى ${currentBotId ? 'بوت مخصص' : 'البوت الرئيسي (Modz)'}`);
-                // يمكن إعادة تحميل المحادثة الحالية إذا أردنا
-                if (currentConversationId) {
-                    loadConversation();
-                }
-            });
-        }
-
-        // ============================================================
-        // CHAT (معدل لاستخدام currentBotId)
+        // CHAT (from original, with minor adjustments)
         // ============================================================
         async function loadConversation() {
             const container = document.getElementById('chatMessages');
@@ -1969,8 +1892,7 @@
                 MemorySystem.addToConversation('user', question);
 
                 const context = MemorySystem.getContextObject();
-                // نمرر currentBotId للبحث
-                const result = await KnowledgeEngine.search(question, context, currentBotId);
+                const result = await KnowledgeEngine.search(question, context);
                 MemorySystem.addImportantContext(question);
 
                 let responseText = '';
@@ -1989,16 +1911,15 @@
                         'لا أملك معلومات مؤكدة عن هذا السؤال حاليًا.';
                     responseText = noAnswerMsg;
                     MemorySystem.addToConversation('assistant', responseText, { noAnswer: true });
-                    // حفظ السؤال غير المجاب (لكل بوت)
+                    // Save unanswered
                     try {
                         const normQ = ArabicNormalizer.normalize(question);
                         const existing = await getDocs(query(collection(db, 'unansweredQuestions'), where(
-                            'normalizedQuestion', '==', normQ), where('botId', '==', currentBotId || null)));
+                            'normalizedQuestion', '==', normQ)));
                         if (existing.empty) {
                             await addDoc(collection(db, 'unansweredQuestions'), {
                                 question,
                                 normalizedQuestion: normQ,
-                                botId: currentBotId || null,
                                 userId: currentUser.uid,
                                 bestScore: result.bestScore || 0,
                                 count: 1,
@@ -2012,7 +1933,7 @@
                     } catch (e) { console.error(e); }
                     await addDoc(collection(db, 'notifications'), {
                         type: 'unanswered',
-                        message: `سؤال غير مجاب (${currentBotId ? 'بوت' : 'Modz'}): "${question.substring(0, 80)}"`,
+                        message: `سؤال غير مجاب: "${question.substring(0, 80)}"`,
                         read: false,
                         createdAt: serverTimestamp()
                     });
@@ -2023,7 +1944,6 @@
                     content: responseText,
                     knowledgeId,
                     confidence,
-                    botId: currentBotId || null,
                     createdAt: serverTimestamp()
                 });
                 await updateDoc(doc(db, 'conversations', currentConversationId), { updatedAt: serverTimestamp() });
@@ -2037,7 +1957,7 @@
                     const debugPanel = document.getElementById('debugPanel');
                     if (debugPanel) {
                         debugPanel.style.display = 'block';
-                        let debugText = `=== DEBUG ===\nسؤال: ${question}\nمطبع: ${ArabicNormalizer.normalize(question)}\nبوت: ${currentBotId || 'Modz'}\n`;
+                        let debugText = `=== DEBUG ===\nسؤال: ${question}\nمطبع: ${ArabicNormalizer.normalize(question)}\n`;
                         if (result.allScores) {
                             debugText += `\n--- Top Matches ---\n`;
                             result.allScores.forEach((r, i) => {
@@ -2063,7 +1983,6 @@
                 const ref = await addDoc(collection(db, 'conversations'), {
                     userId: currentUser.uid,
                     title: 'محادثة جديدة',
-                    botId: currentBotId || null,
                     createdAt: serverTimestamp(),
                     updatedAt: serverTimestamp()
                 });
@@ -2144,7 +2063,6 @@
                         currentAnswer: msg.content,
                         suggestedAnswer: text,
                         reason,
-                        botId: currentBotId || null,
                         status: 'pending',
                         createdAt: serverTimestamp()
                     });
@@ -2173,6 +2091,7 @@
                 document.getElementById('profilePhone').querySelector('span').textContent = data.phoneNumber || 'غير مضاف';
                 document.getElementById('profileEmail').querySelector('span').textContent = data.email || '—';
                 document.getElementById('profileRole').querySelector('span').textContent = data.role || 'user';
+                // Show edit button only for own profile
                 document.getElementById('editProfileBtn').style.display = (targetUid === currentUser?.uid) ? '' : 'none';
             } catch (e) { console.error(e);
                 toast('خطأ في تحميل البروفايل', 'error'); }
@@ -2202,6 +2121,7 @@
                         phoneNumber,
                         updatedAt: serverTimestamp()
                     });
+                    // Update auth profile
                     await updateProfile(currentUser, { displayName, photoURL });
                     window._userData = { ...window._userData, displayName, bio, photoURL, phoneNumber };
                     closeModal();
@@ -2342,6 +2262,7 @@
                     const otherUser = snap.docs[0];
                     const otherUid = otherUser.id;
                     if (otherUid === currentUser.uid) { toast('لا يمكنك المحادثة مع نفسك', 'warning'); return; }
+                    // Check if room already exists
                     const existing = await getDocs(query(collection(db, 'chatRooms'), where('participants',
                         'array-contains', currentUser.uid)));
                     let found = false;
@@ -2377,134 +2298,48 @@
         // ============================================================
         // BOT MANAGEMENT (ربوتي) - للمشرفين
         // ============================================================
-        async function loadBotManagement() {
-            const container = document.getElementById('botManagementContainer');
-            if (!container) return;
-            if (!isModerator()) { container.innerHTML = '<p>غير مصرح</p>'; return; }
-
-            await loadUserBots();
-            if (userBots.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <p>ليس لديك بوتات. أنشئ بوتك الأول!</p>
-                        <button class="btn btn-primary" id="createBotBtn">+ إنشاء بوت</button>
-                    </div>`;
-                document.getElementById('createBotBtn')?.addEventListener('click', showCreateBotModal);
-                return;
-            }
-            let html = `<div style="display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;">`;
-            userBots.forEach(b => {
-                html += `
-                    <div class="card" style="flex:1;min-width:200px;">
-                        <h4>${escapeHtml(b.name)}</h4>
-                        <p style="color:var(--text-secondary);font-size:0.85rem;">${escapeHtml(b.description||'')}</p>
-                        <button class="btn btn-sm btn-outline" onclick="window._manageBot('${b.id}')">إدارة الكلمات</button>
-                        <button class="btn btn-sm btn-danger" onclick="window._deleteBot('${b.id}')">حذف</button>
-                    </div>`;
-            });
-            html += `</div>
-                <button class="btn btn-primary" id="createBotBtn">+ بوت جديد</button>
-                <div id="botKeywordsArea" style="margin-top:1rem;"></div>`;
-            container.innerHTML = html;
-            document.getElementById('createBotBtn')?.addEventListener('click', showCreateBotModal);
-            window._manageBot = (botId) => { showBotKeywords(botId); };
-            window._deleteBot = async (botId) => {
-                if (!confirm('حذف هذا البوت وجميع كلماته؟')) return;
-                try {
-                    const snap = await getDocs(query(collection(db, 'knowledge'), where('botId', '==', botId)));
-                    const batch = writeBatch(db);
-                    snap.forEach(d => batch.delete(d.ref));
-                    await batch.commit();
-                    await deleteDoc(doc(db, 'bots', botId));
-                    toast('تم حذف البوت');
-                    loadBotManagement();
-                    loadUserBots();
-                    renderBotSelector();
-                } catch (e) { console.error(e);
-                    toast('خطأ', 'error'); }
-            };
-        }
-
-        function showCreateBotModal() {
-            const html = `
-                <div class="form-group"><label>اسم البوت</label><input type="text" id="botName" placeholder="مثلاً: بوت الطبخ" /></div>
-                <div class="form-group"><label>الوصف</label><textarea id="botDesc" placeholder="وصف مختصر"></textarea></div>
-                <div class="checkbox-group"><input type="checkbox" id="botPublic" /><label for="botPublic">عام (يمكن للجميع استخدامه)</label></div>
-                <button class="btn btn-primary" id="saveBotBtn">إنشاء</button>`;
-            showModal(html, { title: 'بوت جديد' });
-            document.getElementById('saveBotBtn').addEventListener('click', async () => {
-                const name = document.getElementById('botName').value.trim();
-                const description = document.getElementById('botDesc').value.trim();
-                const isPublic = document.getElementById('botPublic').checked;
-                if (!name) { toast('أدخل اسماً', 'warning'); return; }
-                try {
-                    await addDoc(collection(db, 'bots'), {
-                        ownerId: currentUser.uid,
-                        name,
-                        description,
-                        isPublic,
-                        createdAt: serverTimestamp(),
-                        updatedAt: serverTimestamp()
-                    });
-                    closeModal();
-                    toast('تم إنشاء البوت');
-                    loadBotManagement();
-                    loadUserBots();
-                    renderBotSelector();
-                    if (userRole === 'owner') loadAllBots();
-                } catch (e) { console.error(e);
-                    toast('خطأ', 'error'); }
-            });
-        }
-
-        async function showBotKeywords(botId) {
-            const area = document.getElementById('botKeywordsArea');
-            if (!area) return;
-            area.innerHTML = '<div class="skeleton" style="height:40px;"></div>';
+        async function loadBotKeywords() {
+            const tbody = document.getElementById('botKeywordsTable');
+            const empty = document.getElementById('botKeywordsEmpty');
+            if (!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="5" class="skeleton" style="height:40px;"></td></tr>';
             try {
-                const snap = await getDocs(query(collection(db, 'knowledge'), where('botId', '==', botId), where('type',
-                    '==', 'bot')));
+                const snap = await getDocs(query(collection(db, 'knowledge'), where('type', '==', 'bot'), orderBy(
+                    'createdAt', 'desc'), limit(200)));
                 const items = [];
                 snap.forEach(d => items.push({ id: d.id, ...d.data() }));
-                let html = `<div class="card"><div class="card-header"><span class="card-title">كلمات البوت</span>
-                    <button class="btn btn-primary btn-sm" onclick="window._addBotKeyword('${botId}')">+ إضافة</button>
-                </div>`;
-                if (items.length === 0) {
-                    html += `<div class="empty-state"><p>لا توجد كلمات مفتاحية.</p></div>`;
-                } else {
-                    html += `<div class="table-wrapper"><table><thead><tr><th>الكلمة</th><th>الرد</th><th>إيموجي</th><th>صورة</th><th>إجراءات</th></tr></thead><tbody>`;
-                    items.forEach(k => {
-                        html += `<tr>
-                            <td>${escapeHtml(k.question)}</td>
-                            <td>${escapeHtml((k.answer||'').substring(0,50))}</td>
-                            <td>${escapeHtml(k.emoji||'')}</td>
-                            <td>${k.image ? `<a href="${escapeHtml(k.image)}" target="_blank">رابط</a>` : '—'}</td>
-                            <td><button class="btn btn-sm btn-danger" onclick="window._delBotKeyword('${k.id}')">حذف</button></td>
-                        </tr>`;
-                    });
-                    html += `</tbody></table></div>`;
+                tbody.innerHTML = '';
+                if (items.length === 0) { empty.style.display = ''; return; }
+                empty.style.display = 'none';
+                for (const k of items) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                <td>${escapeHtml(k.question||'')}</td>
+                <td>${escapeHtml((k.answer||'').substring(0,50))}</td>
+                <td>${escapeHtml(k.emoji||'')}</td>
+                <td>${k.image ? `<a href="${escapeHtml(k.image)}" target="_blank">رابط</a>` : '—'}</td>
+                <td><button class="btn btn-sm btn-danger" onclick="window._delBotKeyword('${k.id}')">حذف</button></td>`;
+                    tbody.appendChild(tr);
                 }
-                html += `</div>`;
-                area.innerHTML = html;
-                window._addBotKeyword = (bid) => { showAddBotKeywordModal(bid); };
                 window._delBotKeyword = async (id) => {
                     if (!confirm('حذف هذه الكلمة؟')) return;
                     try { await deleteDoc(doc(db, 'knowledge', id));
                         toast('تم الحذف');
-                        showBotKeywords(botId); } catch (e) { toast('خطأ', 'error'); }
+                        loadBotKeywords(); } catch (e) { toast('خطأ', 'error'); }
                 };
             } catch (e) { console.error(e);
-                area.innerHTML = '<p style="color:var(--error);">خطأ في التحميل</p>'; }
+                tbody.innerHTML = '';
+                empty.style.display = ''; }
         }
 
-        function showAddBotKeywordModal(botId) {
+        function showAddBotKeyword() {
             const html = `
-                <div class="form-group"><label>الكلمة المفتاحية</label><input type="text" id="botKeyword" placeholder="مرحباً" /></div>
-                <div class="form-group"><label>الرد</label><textarea id="botAnswer" placeholder="الرد المناسب..."></textarea></div>
-                <div class="form-group"><label>إيموجي (اختياري)</label><input type="text" id="botEmoji" placeholder="😊" /></div>
-                <div class="form-group"><label>رابط صورة (اختياري)</label><input type="url" id="botImage" placeholder="https://..." /></div>
-                <button class="btn btn-primary" id="saveBotKeywordBtn">إضافة</button>`;
-            showModal(html, { title: 'إضافة كلمة مفتاحية للبوت' });
+            <div class="form-group"><label>الكلمة المفتاحية</label><input type="text" id="botKeyword" placeholder="مرحباً" /></div>
+            <div class="form-group"><label>الرد</label><textarea id="botAnswer" placeholder="الرد المناسب..."></textarea></div>
+            <div class="form-group"><label>إيموجي (اختياري)</label><input type="text" id="botEmoji" placeholder="😊" /></div>
+            <div class="form-group"><label>رابط صورة (اختياري)</label><input type="url" id="botImage" placeholder="https://..." /></div>
+            <button class="btn btn-primary" id="saveBotKeywordBtn">إضافة</button>`;
+            showModal(html, { title: 'إضافة كلمة مفتاحية' });
             document.getElementById('saveBotKeywordBtn').addEventListener('click', async () => {
                 const question = document.getElementById('botKeyword').value.trim();
                 const answer = document.getElementById('botAnswer').value.trim();
@@ -2514,7 +2349,6 @@
                 try {
                     await addDoc(collection(db, 'knowledge'), {
                         type: 'bot',
-                        botId: botId,
                         question,
                         answer,
                         emoji,
@@ -2531,99 +2365,10 @@
                     });
                     closeModal();
                     toast('تمت الإضافة');
-                    showBotKeywords(botId);
+                    loadBotKeywords();
                 } catch (e) { console.error(e);
                     toast('خطأ', 'error'); }
             });
-        }
-
-        // ============================================================
-        // ALL BOTS (لوحة البوتات) - للمالك
-        // ============================================================
-        async function loadAllBotsPage() {
-            const container = document.getElementById('allBotsContainer');
-            if (!container) return;
-            if (userRole !== 'owner') { container.innerHTML = '<p>غير مصرح</p>'; return; }
-
-            await loadAllBots();
-            let html = `<div class="card">
-                <div class="card-header">
-                    <span class="card-title">جميع البوتات (${allBots.length})</span>
-                    <button class="btn btn-primary btn-sm" id="createBotGlobalBtn">+ بوت جديد</button>
-                </div>
-                <div style="display:flex;flex-wrap:wrap;gap:1rem;">`;
-            if (allBots.length === 0) {
-                html += `<div class="empty-state"><p>لا توجد بوتات بعد.</p></div>`;
-            } else {
-                allBots.forEach(b => {
-                    html += `
-                        <div class="card" style="flex:1;min-width:200px;">
-                            <h4>${escapeHtml(b.name)}</h4>
-                            <p style="color:var(--text-secondary);font-size:0.85rem;">${escapeHtml(b.description||'')}</p>
-                            <p style="font-size:0.75rem;color:var(--text-secondary);">المالك: ${escapeHtml(b.ownerId)}</p>
-                            <button class="btn btn-sm btn-outline" onclick="window._manageBotGlobal('${b.id}')">إدارة الكلمات</button>
-                            <button class="btn btn-sm btn-danger" onclick="window._deleteBotGlobal('${b.id}')">حذف</button>
-                        </div>`;
-                });
-            }
-            html += `</div></div>
-                <div id="globalBotKeywordsArea" style="margin-top:1rem;"></div>`;
-            container.innerHTML = html;
-            document.getElementById('createBotGlobalBtn')?.addEventListener('click', showCreateBotModal);
-            window._manageBotGlobal = async (botId) => {
-                const area = document.getElementById('globalBotKeywordsArea');
-                if (!area) return;
-                // نعرض كلمات البوت في الأسفل
-                area.innerHTML = '<div class="skeleton" style="height:40px;"></div>';
-                try {
-                    const snap = await getDocs(query(collection(db, 'knowledge'), where('botId', '==', botId)));
-                    const items = [];
-                    snap.forEach(d => items.push({ id: d.id, ...d.data() }));
-                    let html2 = `<div class="card"><div class="card-header"><span class="card-title">كلمات البوت</span>
-                        <button class="btn btn-primary btn-sm" onclick="window._addBotKeywordGlobal('${botId}')">+ إضافة</button>
-                    </div>`;
-                    if (items.length === 0) {
-                        html2 += `<div class="empty-state"><p>لا توجد كلمات.</p></div>`;
-                    } else {
-                        html2 += `<div class="table-wrapper"><table><thead><tr><th>الكلمة</th><th>الرد</th><th>إيموجي</th><th>صورة</th><th>إجراءات</th></tr></thead><tbody>`;
-                        items.forEach(k => {
-                            html2 += `<tr>
-                                <td>${escapeHtml(k.question)}</td>
-                                <td>${escapeHtml((k.answer||'').substring(0,50))}</td>
-                                <td>${escapeHtml(k.emoji||'')}</td>
-                                <td>${k.image ? `<a href="${escapeHtml(k.image)}" target="_blank">رابط</a>` : '—'}</td>
-                                <td><button class="btn btn-sm btn-danger" onclick="window._delBotKeywordGlobal('${k.id}')">حذف</button></td>
-                            </tr>`;
-                        });
-                        html2 += `</tbody></table></div>`;
-                    }
-                    html2 += `</div>`;
-                    area.innerHTML = html2;
-                    window._addBotKeywordGlobal = (bid) => { showAddBotKeywordModal(bid); };
-                    window._delBotKeywordGlobal = async (id) => {
-                        if (!confirm('حذف هذه الكلمة؟')) return;
-                        try { await deleteDoc(doc(db, 'knowledge', id));
-                            toast('تم الحذف');
-                            loadAllBotsPage(); } catch (e) { toast('خطأ', 'error'); }
-                    };
-                } catch (e) { console.error(e);
-                    area.innerHTML = '<p style="color:var(--error);">خطأ</p>'; }
-            };
-            window._deleteBotGlobal = async (botId) => {
-                if (!confirm('حذف هذا البوت وجميع كلماته؟')) return;
-                try {
-                    const snap = await getDocs(query(collection(db, 'knowledge'), where('botId', '==', botId)));
-                    const batch = writeBatch(db);
-                    snap.forEach(d => batch.delete(d.ref));
-                    await batch.commit();
-                    await deleteDoc(doc(db, 'bots', botId));
-                    toast('تم حذف البوت');
-                    loadAllBotsPage();
-                    loadAllBots();
-                    renderBotSelector();
-                } catch (e) { console.error(e);
-                    toast('خطأ', 'error'); }
-            };
         }
 
         // ============================================================
@@ -2724,6 +2469,7 @@
               <div class="stat-card"><div class="stat-value">${pendingSugg}</div><div class="stat-label">اقتراحات معلقة</div></div>
               <div class="stat-card"><div class="stat-value">${totalConvs}</div><div class="stat-label">المحادثات</div></div>`;
 
+                // Simple chart (dummy)
                 const chartDiv = document.getElementById('analyticsChart');
                 if (chartDiv) {
                     chartDiv.innerHTML =
@@ -2796,7 +2542,6 @@
                         version: 1,
                         active: true,
                         sourceSuggestion: id,
-                        botId: s.botId || null,
                         usageCount: 0,
                         helpfulCount: 0,
                         unhelpfulCount: 0,
@@ -2819,6 +2564,7 @@
             summaryDiv.innerHTML = '<div class="skeleton" style="height:40px;"></div>';
             popularDiv.innerHTML = '<div class="skeleton" style="height:40px;"></div>';
             try {
+                // Get rating stats from knowledge
                 const snap = await getDocs(query(collection(db, 'knowledge'), where('active', '==', true)));
                 let totalHelpful = 0,
                     totalUnhelpful = 0;
@@ -2840,6 +2586,7 @@
                 <div><strong>👎 غير مفيد</strong> <span style="font-size:1.5rem;color:var(--error);">${totalUnhelpful}</span></div>
                 <div><strong>📊 نسبة الفائدة</strong> <span style="font-size:1.5rem;color:var(--primary);">${totalHelpful+totalUnhelpful > 0 ? Math.round(totalHelpful/(totalHelpful+totalUnhelpful)*100) : 0}%</span></div>
               </div>`;
+                // Popular keywords
                 const sorted = Object.entries(popularKeywords).sort((a, b) => b[1] - a[1]).slice(0, 10);
                 if (sorted.length === 0) { popularDiv.innerHTML =
                 '<div class="empty-state"><p>لا توجد بيانات كافية.</p></div>'; return; }
@@ -2970,9 +2717,7 @@
                     const page = btn.dataset.page;
                     if (page === 'logout') return;
                     const modPages = ['bot-management', 'admin-chat', 'bot-settings'];
-                    const ownerPages = ['all-bots', 'analytics', 'reports', 'ratings', 'users-management',
-                        'promotions'
-                    ];
+                    const ownerPages = ['analytics', 'reports', 'ratings', 'users-management', 'promotions'];
                     if (modPages.includes(page) && !['moderator', 'admin', 'owner'].includes(userRole)) {
                         toast('هذه الصفحة للمشرفين', 'error');
                         return;
@@ -3126,6 +2871,9 @@
             });
             document.getElementById('newChatRoomBtn')?.addEventListener('click', createNewChatRoom);
 
+            // Bot Management
+            document.getElementById('addBotKeywordBtn')?.addEventListener('click', showAddBotKeyword);
+
             // Admin Chat
             document.getElementById('sendAdminChatMsg')?.addEventListener('click', sendAdminChatMessage);
             document.getElementById('adminChatInput')?.addEventListener('keydown', (e) => {
@@ -3154,9 +2902,8 @@
             window.addEventListener('offline', () => { isOnline = false;
                 toast('⚠️ لا يوجد اتصال بالإنترنت', 'warning'); });
 
-            console.log('✅ المساعد المعرفي الذكي - v2.2 (بوتات متعددة)');
-            console.log('📚 البوت الرئيسي: Modz');
-            console.log('👥 المشرفون يديرون بوتاتهم الخاصة، والمالك يدير الكل.');
+            console.log('✅ المساعد المعرفي الذكي - Production Ready v2.1');
+            console.log('📚 جميع الميزات الجديدة مضافة: بروفايل، إعدادات، تواصل، ربوتي، تواصل أدمن، إعداداتي، تحليلات، تقارير، تقييم، مستخدمين، ترقيات.');
         }
 
         document.addEventListener('DOMContentLoaded', initApp);
