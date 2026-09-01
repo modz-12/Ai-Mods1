@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI MODZ — منصة المعرفة الذكية</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <!-- ================= AUTH SCREEN ================= -->
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <div class="brand">
+        <span class="brand-mark">AI</span>
+        <span class="brand-name">MODZ</span>
+      </div>
+      <p class="auth-tag">منصة معرفة ذكية يغذيها الإنسان، ويفهمها الذكاء الاصطناعي.</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">تسجيل الدخول</button>
+        <button class="auth-tab" data-tab="register">حساب جديد</button>
+      </div>
+
+      <form id="login-form" class="auth-form">
+        <label>البريد الإلكتروني<input type="email" id="login-email" required autocomplete="email" /></label>
+        <label>كلمة المرور<input type="password" id="login-password" required autocomplete="current-password" /></label>
+        <div class="auth-error" id="login-error"></div>
+        <button type="submit" class="btn btn-primary btn-block">دخول</button>
+      </form>
+
+      <form id="register-form" class="auth-form hidden">
+        <label>الاسم<input type="text" id="register-name" required /></label>
+        <label>البريد الإلكتروني<input type="email" id="register-email" required autocomplete="email" /></label>
+        <label>كلمة المرور<input type="password" id="register-password" required minlength="6" autocomplete="new-password" /></label>
+        <div class="auth-error" id="register-error"></div>
+        <button type="submit" class="btn btn-primary btn-block">إنشاء الحساب</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= APP SHELL ================= -->
+  <div id="app-shell" class="app-shell hidden">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="brand small">
+        <span class="brand-mark">AI</span>
+        <span class="brand-name">MODZ</span>
+      </div>
+
+      <nav class="nav-group">
+        <p class="nav-label">أنت</p>
+        <a href="#/chat" class="nav-link" data-route="chat">💬 المحادثة</a>
+        <a href="#/conversations" class="nav-link" data-route="conversations">🗂️ محادثاتي</a>
+        <a href="#/feedback" class="nav-link" data-route="feedback">📝 ملاحظاتي</a>
+        <a href="#/profile" class="nav-link" data-route="profile">👤 ملفي الشخصي</a>
+      </nav>
+
+      <nav class="nav-group" id="nav-moderator">
+        <p class="nav-label">الإشراف</p>
+        <a href="#/mod/dashboard" class="nav-link" data-route="mod/dashboard">📊 لوحة المشرف</a>
+        <a href="#/mod/knowledge" class="nav-link" data-route="mod/knowledge">📚 قاعدة المعرفة</a>
+        <a href="#/mod/feedback" class="nav-link" data-route="mod/feedback">📥 مراجعة الملاحظات</a>
+        <a href="#/mod/gemini-data" class="nav-link" data-route="mod/gemini-data">✨ بيانات Gemini</a>
+        <a href="#/mod/contributions" class="nav-link" data-route="mod/contributions">🏅 مساهماتي</a>
+        <a href="#/mod/team" class="nav-link" data-route="mod/team">👥 الفريق</a>
+        <a href="#/mod/team-chat" class="nav-link" data-route="mod/team-chat">💬 محادثة الفريق</a>
+      </nav>
+
+      <nav class="nav-group" id="nav-owner">
+        <p class="nav-label">المالك</p>
+        <a href="#/owner/dashboard" class="nav-link" data-route="owner/dashboard">🏛️ لوحة المالك</a>
+        <a href="#/owner/users" class="nav-link" data-route="owner/users">👤 المستخدمون</a>
+        <a href="#/owner/moderators" class="nav-link" data-route="owner/moderators">🛡️ المشرفون</a>
+        <a href="#/owner/audit-logs" class="nav-link" data-route="owner/audit-logs">🧾 سجل العمليات</a>
+        <a href="#/owner/instructions" class="nav-link" data-route="owner/instructions">🧭 تعليمات AI</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <div class="avatar" id="user-avatar">؟</div>
+          <div class="user-meta">
+            <span id="user-email">—</span>
+            <span id="user-role" class="role-badge">user</span>
+          </div>
+        </div>
+        <button id="logout-btn" class="btn btn-ghost btn-block">تسجيل الخروج</button>
+      </div>
+    </aside>
+
+    <div class="mobile-topbar">
+      <button id="mobile-menu-btn" class="icon-btn">☰</button>
+      <span class="brand small"><span class="brand-mark">AI</span><span class="brand-name">MODZ</span></span>
+      <button id="mobile-search-btn" class="icon-btn">🔍</button>
+    </div>
+
+    <main class="main-view" id="main-view">
+      <!-- Views are rendered here by app.js -->
+    </main>
+
+    <nav class="bottom-nav">
+      <a href="#/chat" data-route="chat">💬<span>محادثة</span></a>
+      <a href="#/conversations" data-route="conversations">🗂️<span>محادثاتي</span></a>
+      <a href="#/feedback" data-route="feedback">📝<span>ملاحظات</span></a>
+      <a href="#/profile" data-route="profile">👤<span>ملفي</span></a>
+    </nav>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+  <div id="modal-root"></div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

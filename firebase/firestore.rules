@@ -1,0 +1,151 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Helpers ----------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myUid() {
+      return request.auth.uid;
+    }
+
+    // Role is read from the users/{uid} document (source of truth),
+    // not from a custom claim, so a demotion by the Owner is effective
+    // immediately without waiting for a token refresh.
+    function myRole() {
+      return isSignedIn()
+        ? get(/databases/$(database)/documents/users/$(myUid())).data.role
+        : 'anonymous';
+    }
+
+    function isOwner() {
+      return isSignedIn() && myRole() == 'owner';
+    }
+
+    function isModerator() {
+      return isSignedIn() && (myRole() == 'moderator' || myRole() == 'owner');
+    }
+
+    // ---------- users ----------
+    // A user may read/update their own profile but can NEVER write `role`
+    // themselves — role changes only ever happen via the Admin-SDK-backed
+    // /api/moderators endpoints, which bypass client rules entirely.
+    match /users/{uid} {
+      allow get: if isOwner() || (isSignedIn() && myUid() == uid);
+      allow list: if isOwner();
+      allow create: if isSignedIn() && myUid() == uid
+                    && request.resource.data.role == 'user';
+      allow update: if isOwner()
+                    || (isSignedIn() && myUid() == uid
+                        && request.resource.data.role == resource.data.role
+                        && request.resource.data.status == resource.data.status);
+      allow delete: if false;
+
+      // Per-user private memory — never mixed across users, never owner-readable
+      // by default (kept out of admin dashboards per spec's privacy intent).
+      match /memory/{doc} {
+        allow read, write: if isSignedIn() && myUid() == uid;
+      }
+    }
+
+    // ---------- profiles (simple public-ish profile info, spec 8) ----------
+    match /profiles/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && myUid() == uid;
+    }
+
+    // ---------- knowledge ----------
+    match /knowledge/{id} {
+      allow get: if isModerator() || resource.data.status == 'approved';
+      // A non-staff query MUST filter `where status == 'approved'` (the backend
+      // always does this) — Firestore rejects any list query whose filters don't
+      // match this per-document condition, so unapproved drafts can never leak.
+      allow list: if isModerator() || resource.data.status == 'approved';
+      allow create, update, delete: if isModerator();
+    }
+
+    match /knowledgeVersions/{id} {
+      allow read: if isModerator();
+      allow write: if false; // written only by the trusted backend (Admin SDK)
+    }
+
+    // ---------- feedback ----------
+    match /feedback/{id} {
+      allow create: if isSignedIn() && request.resource.data.userId == myUid();
+      allow get: if isModerator() || (isSignedIn() && resource.data.userId == myUid());
+      allow list: if isModerator() || (isSignedIn() && resource.data.userId == myUid());
+      allow update: if isModerator();
+      allow delete: if isOwner();
+    }
+
+    // ---------- geminiData ----------
+    // Never exposed to plain users (spec 8 explicitly forbids this).
+    match /geminiData/{id} {
+      allow read, write: if isModerator();
+    }
+
+    // ---------- conversations & messages (owner-of-data, not platform Owner) ----------
+    match /conversations/{id} {
+      allow get, list: if isSignedIn() && resource.data.ownerId == myUid();
+      allow create: if isSignedIn() && request.resource.data.ownerId == myUid();
+      allow update, delete: if isSignedIn() && resource.data.ownerId == myUid();
+    }
+
+    match /conversationMessages/{id} {
+      // Every message must belong to a conversation owned by the requester —
+      // resolved with a lookup rather than trusting anything in the query.
+      allow get, list: if isSignedIn()
+        && get(/databases/$(database)/documents/conversations/$(resource.data.conversationId)).data.ownerId == myUid();
+      allow create, update, delete: if false; // only the trusted backend appends messages
+    }
+
+    // ---------- moderatorData / moderatorProfiles ----------
+    match /moderatorData/{id} {
+      allow read: if isOwner() || (isModerator() && resource.data.moderatorId == myUid());
+      allow write: if false; // backend-only
+    }
+
+    match /moderatorProfiles/{uid} {
+      allow read: if isModerator();
+      allow write: if false; // backend-only (role promotion flow)
+    }
+
+    // ---------- teamChats (staff-only, never visible to plain users) ----------
+    match /teamChats/{chatId} {
+      allow get, list: if isModerator() && myUid() in resource.data.participants;
+      allow create, update: if false; // backend-only, validates participant roles
+
+      match /messages/{msgId} {
+        allow read: if isModerator()
+                    && myUid() in get(/databases/$(database)/documents/teamChats/$(chatId)).data.participants;
+        allow write: if false; // backend-only
+      }
+    }
+
+    // ---------- instructions (owner authors AI behavior rules) ----------
+    match /instructions/{id} {
+      allow read: if isOwner();
+      allow write: if false; // backend-only
+    }
+
+    // ---------- auditLogs (owner-only, immutable) ----------
+    match /auditLogs/{id} {
+      allow read: if isOwner();
+      allow write: if false; // backend-only, append-only via Admin SDK
+    }
+
+    // ---------- platformData (global settings/stats snapshots) ----------
+    match /platformData/{id} {
+      allow read: if isOwner();
+      allow write: if false;
+    }
+
+    // Default deny for anything not explicitly matched above.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
