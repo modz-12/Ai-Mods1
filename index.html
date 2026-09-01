@@ -875,6 +875,99 @@
             font-size: 0.85rem;
             margin: 0;
         }
+
+        /* ============================================================
+           MODERN VISUAL LAYER — تحسينات بصرية بدون حذف أي ميزة
+           ============================================================ */
+        :root {
+            --bg: #f4f7fb;
+            --surface: rgba(255,255,255,.92);
+            --surface-solid: #ffffff;
+            --primary: #6d5dfc;
+            --primary-hover: #5848e8;
+            --primary-2: #00b8d9;
+            --text: #172033;
+            --text-secondary: #64748b;
+            --border: rgba(148,163,184,.24);
+            --shadow: 0 12px 35px rgba(31,41,55,.08);
+            --shadow-lg: 0 24px 70px rgba(31,41,55,.14);
+            --sidebar-bg: #0b1020;
+            --sidebar-text: #e7eaff;
+            --sidebar-active: linear-gradient(135deg,#6d5dfc,#4f46e5);
+            --sidebar-hover: rgba(255,255,255,.08);
+            --radius: 16px;
+            --transition: .25s cubic-bezier(.2,.7,.2,1);
+        }
+        .dark-mode {
+            --bg: #070b16;
+            --surface: rgba(15,23,42,.88);
+            --surface-solid: #0f172a;
+            --text: #f7f8ff;
+            --text-secondary: #a5b0c7;
+            --border: rgba(148,163,184,.16);
+            --shadow: 0 14px 40px rgba(0,0,0,.28);
+            --shadow-lg: 0 28px 90px rgba(0,0,0,.42);
+            --sidebar-bg: #050813;
+            --sidebar-hover: rgba(255,255,255,.075);
+        }
+        body {
+            background:
+                radial-gradient(circle at 10% 5%, rgba(109,93,252,.10), transparent 28rem),
+                radial-gradient(circle at 90% 15%, rgba(0,184,217,.08), transparent 26rem),
+                var(--bg);
+        }
+        body::before {
+            content:""; position:fixed; inset:0; pointer-events:none; z-index:-1;
+            background-image:linear-gradient(rgba(99,102,241,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.025) 1px,transparent 1px);
+            background-size:32px 32px;
+            mask-image:linear-gradient(to bottom,black,transparent 85%);
+        }
+        .app-container { min-height:100vh; }
+        .main-content { max-width:1380px; padding-left:1.35rem; padding-right:1.35rem; }
+        .sidebar { border-left:1px solid rgba(255,255,255,.06); backdrop-filter:blur(18px); }
+        .sidebar-logo { background:linear-gradient(135deg,rgba(109,93,252,.16),rgba(0,184,217,.05)); }
+        .sidebar-logo svg { filter:drop-shadow(0 0 12px rgba(109,93,252,.5)); }
+        .nav-link { margin:2px 8px; width:calc(100% - 16px); border-radius:12px; border-right:3px solid transparent; }
+        .nav-link.active { background:var(--sidebar-active); border-right-color:rgba(255,255,255,.9); box-shadow:0 8px 22px rgba(79,70,229,.25); }
+        .nav-link:hover:not(.active) { transform:translateX(-2px); }
+        .card, .stat-card { border-color:var(--border); box-shadow:var(--shadow); backdrop-filter:blur(14px); }
+        .card { background:var(--surface); border-radius:var(--radius); }
+        .card:hover { border-color:rgba(109,93,252,.25); }
+        .stat-card { transition:transform var(--transition),box-shadow var(--transition),border-color var(--transition); }
+        .stat-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:rgba(109,93,252,.28); }
+        .stat-value { background:linear-gradient(135deg,var(--primary),var(--primary-2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+        .btn { min-height:40px; border-radius:11px; transition:transform var(--transition),box-shadow var(--transition),background var(--transition),border-color var(--transition); }
+        .btn-primary { background:linear-gradient(135deg,var(--primary),#4f46e5); box-shadow:0 8px 22px rgba(99,102,241,.20); }
+        .btn-primary:hover { background:linear-gradient(135deg,#7b6cff,#5848e8); box-shadow:0 12px 28px rgba(99,102,241,.30); }
+        .btn-outline { background:rgba(255,255,255,.38); backdrop-filter:blur(8px); }
+        .dark-mode .btn-outline { background:rgba(15,23,42,.5); }
+        input, select, textarea { border-radius:11px; background:var(--surface-solid); border-color:var(--border); transition:box-shadow var(--transition),border-color var(--transition),transform var(--transition); }
+        input:focus, select:focus, textarea:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 4px rgba(109,93,252,.12); }
+        .chat-container { background:linear-gradient(180deg,rgba(255,255,255,.12),transparent); }
+        .message { box-shadow:0 4px 15px rgba(15,23,42,.06); }
+        .message.user { background:linear-gradient(135deg,var(--primary),#5145e5); box-shadow:0 8px 20px rgba(99,102,241,.18); }
+        .message.assistant { background:var(--surface-solid); }
+        .chat-input-area { background:rgba(255,255,255,.35); backdrop-filter:blur(12px); }
+        .dark-mode .chat-input-area { background:rgba(2,6,23,.35); }
+        .modal-overlay { background:rgba(2,6,23,.62); backdrop-filter:blur(7px); }
+        .modal { border:1px solid var(--border); box-shadow:var(--shadow-lg); }
+        .toast { border:1px solid var(--border); box-shadow:var(--shadow-lg); backdrop-filter:blur(12px); }
+        .landing { padding:3rem 0; }
+        .landing-hero { font-size:clamp(2rem,6vw,4.2rem); font-weight:900; letter-spacing:-.04em; background:linear-gradient(135deg,var(--text) 20%,var(--primary) 55%,var(--primary-2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+        .landing-sub { max-width:800px; margin:1rem auto 2rem; color:var(--text-secondary); font-size:1.05rem; }
+        .landing-features { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem; max-width:1100px; margin:0 auto 1.5rem; }
+        .landing-feature { min-height:125px; display:flex; flex-direction:column; justify-content:center; text-align:center; transition:transform var(--transition); }
+        .landing-feature:hover { transform:translateY(-5px); }
+        .health-dot { box-shadow:0 0 0 4px rgba(16,185,129,.12); }
+        .mobile-toggle-btn { background:linear-gradient(135deg,var(--primary),#4f46e5); }
+        .mobile-toggle-btn:hover { background:linear-gradient(135deg,#7b6cff,#5848e8); }
+        ::selection { background:rgba(109,93,252,.25); color:inherit; }
+        :focus-visible { outline:3px solid rgba(0,184,217,.42); outline-offset:2px; }
+        @media (max-width:900px) { .landing-features { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+        @media (max-width:768px) { .main-content { padding:.75rem; } .landing { padding:2rem 0; } .landing-features { grid-template-columns:1fr; } .landing-hero { font-size:2.2rem; } }
+        @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.001ms !important; } }
+        @media print { .sidebar,.mobile-toggle-btn,.sidebar-overlay,.toast-container { display:none !important; } .main-content { max-width:none; padding:0; } .card { box-shadow:none; } }
+
     </style>
 </head>
 <body>
@@ -1861,14 +1954,15 @@
             });
             select.innerHTML = options;
             select.value = currentBotId || '';
-            select.addEventListener('change', () => {
+            // استخدام onchange بدل addEventListener يمنع تراكم المستمعين عند إعادة رسم القائمة.
+            select.onchange = () => {
                 currentBotId = select.value || null;
-                toast(`تم التبديل إلى ${currentBotId ? 'بوت مخصص' : 'البوت الرئيسي (Modz)'}`);
-                // يمكن إعادة تحميل المحادثة الحالية إذا أردنا
-                if (currentConversationId) {
-                    loadConversation();
-                }
-            });
+                currentConversationId = null;
+                MemorySystem.resetConversation();
+                toast(`تم التبديل إلى ${currentBotId ? 'البوت المخصص' : 'البوت الرئيسي (Modz)'}`);
+                loadConversationsList();
+                if (currentPage === 'chat') loadConversation();
+            };
         }
 
         // ============================================================
@@ -2728,11 +2822,21 @@
                 if (chartDiv) {
                     chartDiv.innerHTML =
                         '<div style="display:flex;align-items:flex-end;gap:.4rem;height:120px;padding:.5rem 0;">';
-                    for (let i = 0; i < 7; i++) {
-                        const h = Math.floor(Math.random() * 80 + 20);
+                    const now = new Date();
+                    const dailyCounts = Array(7).fill(0);
+                    convSnap.forEach(d => {
+                        const data = d.data();
+                        const ts = data.createdAt?.toDate ? data.createdAt.toDate() : (data.createdAt ? new Date(data.createdAt) : null);
+                        if (!ts || Number.isNaN(ts.getTime())) return;
+                        const dayDiff = Math.floor((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - new Date(ts.getFullYear(), ts.getMonth(), ts.getDate())) / 86400000);
+                        if (dayDiff >= 0 && dayDiff < 7) dailyCounts[6 - dayDiff]++;
+                    });
+                    const maxCount = Math.max(1, ...dailyCounts);
+                    dailyCounts.forEach((count, i) => {
+                        const h = Math.max(8, Math.round((count / maxCount) * 100));
                         chartDiv.innerHTML +=
-                            `<div style="flex:1;background:var(--primary);border-radius:4px 4px 0 0;height:${h}px;min-width:8px;position:relative;"><div class="chart-bar-label">${i+1}</div></div>`;
-                    }
+                            `<div title="${count} محادثة" style="flex:1;background:linear-gradient(180deg,var(--primary),var(--primary-2));border-radius:7px 7px 2px 2px;height:${h}px;min-width:12px;position:relative;transition:height .35s ease;"><div class="chart-bar-label">${count}</div></div>`;
+                    });
                     chartDiv.innerHTML += '</div>';
                 }
             } catch (e) { console.error(e);
@@ -3158,6 +3262,32 @@
             console.log('📚 البوت الرئيسي: Modz');
             console.log('👥 المشرفون يديرون بوتاتهم الخاصة، والمالك يدير الكل.');
         }
+
+
+        // ============================================================
+        // STABILITY & ACCESSIBILITY GUARD
+        // ============================================================
+        window.addEventListener('error', (event) => {
+            console.error('[UI ERROR]', event.error || event.message);
+            if (debugMode) toast('حدث خطأ في الواجهة — راجع وضع التصحيح', 'error');
+        });
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('[ASYNC ERROR]', event.reason);
+            if (debugMode) toast('حدث خطأ غير متوقع في عملية غير متزامنة', 'error');
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('modalContainer');
+                if (modal?.innerHTML) closeModal();
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar?.classList.contains('mobile-open')) {
+                    sidebar.classList.remove('mobile-open');
+                    document.getElementById('sidebarOverlay')?.classList.remove('visible');
+                    document.getElementById('mobileToggle')?.setAttribute('aria-expanded','false');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
