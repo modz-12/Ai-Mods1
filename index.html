@@ -36,15 +36,15 @@
 
         /* Layout */
         .app-container { display:flex; min-height:100vh; }
-        .main-content { flex:1; margin-right:280px; transition:margin var(--transition); padding:1.5rem; max-width:var(--max-width); margin-left:auto; }
-        .sidebar-collapsed .main-content { margin-right:80px; }
-        .sidebar-collapsed .sidebar { width:80px; }
-        .sidebar-collapsed .sidebar .nav-label, .sidebar-collapsed .sidebar .sidebar-logo span, .sidebar-collapsed .sidebar .badge, .sidebar-collapsed .sidebar .sidebar-section-title { display:none; }
-        .sidebar-collapsed .sidebar .nav-link { justify-content:center; padding:.7rem; }
-        .sidebar-collapsed .sidebar .sidebar-logo { justify-content:center; }
+        .main-content { flex:1; width:100%; margin-right:0; transition:filter var(--transition); padding:1.5rem; max-width:var(--max-width); margin-left:auto; margin-right:auto; }
+        .sidebar-collapsed .main-content { margin-right:0; }
+        .sidebar-collapsed .sidebar { width:280px; }
 
-        /* Sidebar */
-        .sidebar { width:280px; background:var(--sidebar-bg); color:var(--sidebar-text); height:100vh; position:fixed; top:0; right:0; z-index:1000; transition:width var(--transition), transform var(--transition); display:flex; flex-direction:column; overflow-y:auto; box-shadow:2px 0 10px rgba(0,0,0,.1); }
+        /* Sidebar — off-canvas, opened only from the hamburger */
+        .sidebar { width:290px; background:var(--sidebar-bg); color:var(--sidebar-text); height:100dvh; position:fixed; top:0; right:0; z-index:2001; transform:translateX(105%); transition:transform .28s ease, box-shadow .28s ease; display:flex; flex-direction:column; overflow-y:auto; box-shadow:-12px 0 35px rgba(0,0,0,.18); }
+        .sidebar.mobile-open { transform:translateX(0); box-shadow:-18px 0 45px rgba(0,0,0,.28); }
+        .sidebar-overlay { position:fixed; inset:0; background:rgba(15,23,42,.48); backdrop-filter:blur(2px); z-index:2000; opacity:0; visibility:hidden; transition:opacity .22s ease, visibility .22s ease; }
+        .sidebar-overlay.visible { opacity:1; visibility:visible; }
         .sidebar-logo { display:flex; align-items:center; gap:.6rem; padding:1.2rem 1.25rem; font-size:1.15rem; font-weight:700; border-bottom:1px solid rgba(255,255,255,.08); }
         .sidebar-logo svg { width:30px; height:30px; flex-shrink:0; }
         .sidebar-section { padding:.8rem 0 .3rem 0; }
@@ -56,6 +56,17 @@
         .badge { background:var(--error); color:#fff; font-size:.68rem; padding:.1rem .5rem; border-radius:99px; margin-right:auto; }
         .sidebar-collapse-btn { position:absolute; bottom:15px; right:15px; background:rgba(255,255,255,.1); border-radius:50%; width:38px; height:38px; display:flex; align-items:center; justify-content:center; transition:background .2s; }
         .sidebar-collapse-btn:hover { background:rgba(255,255,255,.2); }
+
+        .sidebar-header-actions { margin-right:auto; display:flex; gap:.35rem; }
+        .sidebar-close-btn { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--sidebar-text); background:rgba(255,255,255,.08); }
+        .sidebar-close-btn:hover { background:rgba(255,255,255,.16); }
+        .nav-link { min-height:46px; }
+        .nav-link svg { stroke-width:2.1; }
+        .role-pill { display:inline-flex; align-items:center; gap:.3rem; }
+        .moderator-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+        .moderator-card { border:1px solid var(--border); border-radius:12px; padding:1rem; background:var(--surface); }
+        .sidebar-footer { margin-top:auto; padding:.7rem 0 1rem; }
+        .sidebar-user { margin:.5rem .8rem; padding:.8rem; border:1px solid rgba(255,255,255,.08); border-radius:12px; background:rgba(255,255,255,.04); }
 
         /* Cards */
         .card { background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding:var(--card-pad); border:1px solid var(--border); margin-bottom:1rem; }
@@ -158,22 +169,25 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .sidebar { transform:translateX(100%); width:280px; }
-            .sidebar.mobile-open { transform:translateX(0); }
-            .main-content { margin-right:0; padding:.8rem; }
-            .sidebar-collapsed .main-content { margin-right:0; }
+            .sidebar { width:min(88vw, 320px); }
+            .main-content { padding:.8rem; }
             .sidebar-collapse-btn { display:none; }
-            .message { max-width:90%; }
-            .stats-grid { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); }
+            .message { max-width:92%; }
+            .stats-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
             .landing-hero { font-size:1.8rem; }
             .modal { width:98%; padding:1rem; }
             .form-row { flex-direction:column; }
             .hide-mobile { display:none !important; }
-            .chat-container { height:calc(100vh - 180px); }
+            .chat-container { height:calc(100dvh - 180px); min-height:360px; }
             .table-wrapper { min-width:100%; }
         }
-        .mobile-toggle-btn { display:none; position:fixed; top:1rem; right:1rem; z-index:1001; background:var(--primary); color:#fff; border-radius:50%; width:42px; height:42px; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(99,102,241,.4); }
-        @media (max-width:768px) { .mobile-toggle-btn { display:flex; } }
+        .mobile-toggle-btn { display:flex; position:fixed; top:1rem; right:1rem; z-index:1999; background:var(--primary); color:#fff; border-radius:12px; width:46px; height:46px; align-items:center; justify-content:center; box-shadow:0 8px 24px rgba(99,102,241,.32); font-size:1.25rem; transition:transform .2s, background .2s; }
+        .mobile-toggle-btn:hover { transform:translateY(-1px); background:var(--primary-hover); }
+        .sidebar-open .mobile-toggle-btn { z-index:2003; }
+        @media (min-width:769px) {
+            .mobile-toggle-btn { top:1.1rem; right:1.1rem; }
+            .main-content { padding-top:4.6rem; }
+        }
 
         /* Debug panel */
         .debug-panel { background:#1a1a2e; color:#e0e0e0; font-family:monospace; font-size:.75rem; padding:1rem; border-radius:8px; max-height:400px; overflow-y:auto; white-space:pre-wrap; }
@@ -201,7 +215,8 @@
 <body>
 
 <!-- Mobile Toggle -->
-<button class="mobile-toggle-btn" id="mobileToggle" aria-label="القائمة">☰</button>
+<button class="mobile-toggle-btn" id="mobileToggle" aria-label="فتح القائمة" aria-expanded="false">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
 <!-- App Container -->
 <div class="app-container" id="appContainer">
@@ -209,30 +224,31 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 .35-.05.69-.13 1.02A5.5 5.5 0 0119.5 12c0 .45-.05.88-.15 1.3A3.5 3.5 0 0116 19.5c0 .55-.13 1.07-.36 1.53A4.5 4.5 0 0112 17a4.5 4.5 0 01-3.64 4.03A3.5 3.5 0 018 19.5a5.5 5.5 0 01-4.35-4.7A4 4 0 014.5 8a4 4 0 013.63-4A4 4 0 0112 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span>المساعد الذكي</span>
+            <span>المساعد الذكي</span><div class="sidebar-header-actions"><button class="sidebar-close-btn" id="sidebarClose" aria-label="إغلاق القائمة">✕</button></div>
         </div>
         <div class="sidebar-section"><p class="sidebar-section-title">الرئيسية</p>
-            <button class="nav-link active" data-page="chat" data-tooltip="المحادثة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span class="nav-label">المحادثة</span></button>
-            <button class="nav-link" data-page="dashboard" data-tooltip="لوحة التحكم"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span class="nav-label">لوحة التحكم</span></button>
+            <button class="nav-link active" data-page="chat" data-tooltip="المحادثة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14z"/></svg><span class="nav-label">المحادثة</span></button>
+        </div>
+        <div class="sidebar-section" id="moderatorSection" style="display:none;"><p class="sidebar-section-title">مساحة المشرف</p>
             <button class="nav-link" data-page="knowledge" data-tooltip="قاعدة المعرفة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span class="nav-label">قاعدة المعرفة</span></button>
             <button class="nav-link" data-page="suggestions" data-tooltip="الاقتراحات"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span class="nav-label">الاقتراحات</span> <span class="badge" id="suggBadge" style="display:none;">0</span></button>
             <button class="nav-link" data-page="unanswered" data-tooltip="الأسئلة غير المجابة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 9a3 3 0 015.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg><span class="nav-label">أسئلة غير مجابة</span> <span class="badge" id="unansBadge" style="display:none;">0</span></button>
         </div>
-        <div class="sidebar-section" id="adminSection"><p class="sidebar-section-title">الإدارة</p>
+        <div class="sidebar-section" id="ownerSection" style="display:none;"><p class="sidebar-section-title">إدارة المالك</p>
+            <button class="nav-link" data-page="dashboard" data-tooltip="لوحة التحكم"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span class="nav-label">لوحة التحكم</span></button>
             <button class="nav-link" data-page="analytics" data-tooltip="الإحصائيات"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg><span class="nav-label">الإحصائيات</span></button>
-            <button class="nav-link" data-page="notifications" data-tooltip="الإشعارات"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="nav-label">الإشعارات</span> <span class="badge" id="notifBadge" style="display:none;">0</span></button>
+            <button class="nav-link" data-page="notifications" data-tooltip="الإشعارات"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 .45-.05.88-.15 1.3A3.5 3.5 0 0116 19.5c0 .55-.13 1.07-.36 1.53A4.5 4.5 0 0112 17a4.5 4.5 0 01-3.64 4.03A3.5 3.5 0 018 19.5a5.5 5.5 0 01-4.35-4.7A4 4 0 014.5 8a4 4 0 013.63-4A4 4 0 0112 2z"/></svg><span class="nav-label">الإشعارات</span> <span class="badge" id="notifBadge" style="display:none;">0</span></button>
             <button class="nav-link" data-page="audit" data-tooltip="سجل العمليات"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span class="nav-label">سجل العمليات</span></button>
-            <button class="nav-link" data-page="upgrades" data-tooltip="مركز الترقيات"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span class="nav-label">مركز الترقيات</span></button>
+            <button class="nav-link" data-page="upgrades" data-tooltip="الترقيات"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span class="nav-label">الترقيات</span></button>
             <button class="nav-link" data-page="health" data-tooltip="حالة النظام"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span class="nav-label">حالة النظام</span></button>
-        </div>
-        <div class="sidebar-section" id="ownerSection" style="display:none;"><p class="sidebar-section-title">المالك</p>
             <button class="nav-link" data-page="users" data-tooltip="المستخدمون"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span class="nav-label">المستخدمون</span></button>
+            <button class="nav-link" data-page="moderators" data-tooltip="المشرفون"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span class="nav-label">المشرفون</span></button>
         </div>
         <div class="sidebar-section"><p class="sidebar-section-title">عام</p>
             <button class="nav-link" data-page="settings" data-tooltip="الإعدادات"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span class="nav-label">الإعدادات</span></button>
             <button class="nav-link" id="logoutSidebar" data-tooltip="تسجيل الخروج"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="nav-label">تسجيل الخروج</span></button>
         </div>
-        <button class="sidebar-collapse-btn" id="sidebarCollapse" data-tooltip="طي/توسيع">◀</button>
+        <button class="sidebar-collapse-btn" id="sidebarCollapse" data-tooltip="إغلاق القائمة" style="display:none;">◀</button>
     </aside>
 
     <!-- Main Content -->
@@ -346,9 +362,24 @@
             <div class="card"><div class="table-wrapper"><table><thead><tr><th>السؤال</th><th>عدد المرات</th><th>أفضل تطابق</th><th>التاريخ</th><th>إجراء</th></tr></thead><tbody id="unansTableBody"></tbody></table></div><div id="unansEmpty" class="empty-state" style="display:none;"><p>لا توجد أسئلة غير مجابة.</p></div></div>
         </div>
 
+        <!-- Moderators Page (Owner) -->
+        <div id="page-moderators" style="display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:.7rem;flex-wrap:wrap;">
+                <div>
+                    <h2 style="font-size:1.3rem;">🛡️ المشرفون</h2>
+                    <p style="color:var(--text-secondary);font-size:.86rem;">إضافة وإدارة المشرفين وصلاحياتهم.</p>
+                </div>
+                <button class="btn btn-primary btn-sm" id="addModeratorBtn">+ إضافة مشرف</button>
+            </div>
+            <div class="moderator-grid" id="moderatorsGrid"></div>
+            <div id="moderatorsEmpty" class="empty-state" style="display:none;">
+                <p>لا يوجد مشرفون مضافون بعد.</p>
+            </div>
+        </div>
+
         <!-- Users Page (Owner) -->
         <div id="page-users" style="display:none;">
-            <h2 style="font-size:1.3rem;margin-bottom:1rem;">👥 المستخدمون</h2>
+            <h2 style="font-size:1.3rem;margin-bottom:1rem;">👥 المستخدمون</h2><p style="color:var(--text-secondary);font-size:.86rem;margin-top:-.7rem;margin-bottom:1rem;">إدارة الحسابات والأدوار — متاحة للمالك فقط.</p>
             <div class="card"><div class="table-wrapper"><table><thead><tr><th>البريد الإلكتروني</th><th>الدور</th><th>تاريخ التسجيل</th><th>إجراءات</th></tr></thead><tbody id="usersTableBody"></tbody></table></div><div id="usersEmpty" class="empty-state" style="display:none;"><p>لا يوجد مستخدمون.</p></div></div>
         </div>
 
@@ -376,7 +407,7 @@
         <!-- Upgrades Page -->
         <div id="page-upgrades" style="display:none;">
             <h2 style="font-size:1.3rem;margin-bottom:1rem;">⚡ مركز الترقيات</h2>
-            <div class="card" style="margin-bottom:1rem;"><div class="card-header"><span class="card-title">الإصدار الحالي</span><span id="currentVersionBadge" class="tag tag-active">v1.0.0</span></div><p id="versionDetails" style="color:var(--text-secondary);"></p></div>
+            <div class="card" style="margin-bottom:1rem;"><div class="card-header"><span class="card-title">الإصدار الحالي</span><span id="currentVersionBadge" class="tag tag-active">v2.0.0</span></div><p id="versionDetails" style="color:var(--text-secondary);"></p></div>
             <div class="card" style="margin-bottom:1rem;"><div class="card-header"><span class="card-title">إضافة ترقية جديدة</span></div>
                 <div class="form-row">
                     <div class="form-group"><label>الإصدار</label><input type="text" id="upVersion" placeholder="1.2.0"></div>
@@ -840,18 +871,28 @@ async function loadUserRole(uid) {
 }
 
 function updateSidebarForRole() {
-    const isAdmin = userRole === 'owner' || userRole === 'moderator' || userRole === 'admin';
-    document.getElementById('adminSection').style.display = isAdmin ? '' : 'none';
-    document.getElementById('ownerSection').style.display = userRole === 'owner' ? '' : 'none';
-    // Hide individual admin nav links if not admin
-    document.querySelectorAll('[data-page="analytics"], [data-page="notifications"], [data-page="audit"], [data-page="upgrades"], [data-page="health"]').forEach(btn => {
-        btn.style.display = isAdmin ? '' : 'none';
+    const isModerator = userRole === 'moderator' || userRole === 'admin';
+    const isOwner = userRole === 'owner';
+
+    const moderatorSection = document.getElementById('moderatorSection');
+    const ownerSection = document.getElementById('ownerSection');
+
+    if (moderatorSection) moderatorSection.style.display = (isModerator || isOwner) ? '' : 'none';
+    if (ownerSection) ownerSection.style.display = isOwner ? '' : 'none';
+
+    // Moderator permissions: knowledge + suggestions + unanswered.
+    document.querySelectorAll('[data-page="knowledge"], [data-page="suggestions"], [data-page="unanswered"]').forEach(btn => {
+        btn.style.display = (isModerator || isOwner) ? '' : 'none';
     });
-    if (userRole === 'owner') {
-        document.querySelectorAll('[data-page="users"]').forEach(btn => btn.style.display = '');
-    } else {
-        document.querySelectorAll('[data-page="users"]').forEach(btn => btn.style.display = 'none');
-    }
+
+    // Owner-only pages.
+    document.querySelectorAll('[data-page="dashboard"], [data-page="analytics"], [data-page="notifications"], [data-page="audit"], [data-page="upgrades"], [data-page="health"], [data-page="users"], [data-page="moderators"]').forEach(btn => {
+        btn.style.display = isOwner ? '' : 'none';
+    });
+
+    // The tester/debug controls remain for moderators and owner.
+    const debugBtn = document.getElementById('debugToggle');
+    if (debugBtn) debugBtn.style.display = (isModerator || isOwner) ? 'inline-flex' : 'none';
 }
 
 function updateUIForUser() {
@@ -910,7 +951,7 @@ function showPage(page) {
     document.querySelectorAll('.nav-link').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.page === page);
     });
-    document.getElementById('sidebar')?.classList.remove('mobile-open');
+    document.getElementById('sidebar')?.classList.remove('mobile-open'); document.getElementById('sidebarOverlay')?.classList.remove('visible'); document.getElementById('mobileToggle')?.setAttribute('aria-expanded','false'); document.body.style.overflow='';
     if (page === 'dashboard') loadDashboardData();
     if (page === 'knowledge') loadKnowledgeList();
     if (page === 'suggestions') loadSuggestions();
@@ -922,6 +963,7 @@ function showPage(page) {
     if (page === 'health') loadHealth();
     if (page === 'settings') loadSettingsIntoForm();
     if (page === 'users') loadUsers();
+    if (page === 'moderators') loadModerators();
     if (page === 'chat') loadConversation();
 }
 
@@ -1787,6 +1829,176 @@ async function loadUsers() {
     } catch (e) { console.error(e); tbody.innerHTML = ''; empty.style.display = ''; }
 }
 
+
+// ============ MODERATOR MANAGEMENT (OWNER ONLY) ============
+async function loadModerators() {
+    const grid = document.getElementById('moderatorsGrid');
+    const empty = document.getElementById('moderatorsEmpty');
+    if (!grid || userRole !== 'owner') return;
+
+    grid.innerHTML = '<div class="skeleton" style="height:120px;border-radius:12px;"></div>';
+    try {
+        const snap = await getDocs(query(collection(db, 'admins'), orderBy('assignedAt', 'desc'), limit(100)));
+        const items = [];
+        snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+
+        grid.innerHTML = '';
+        if (!items.length) {
+            if (empty) empty.style.display = '';
+            return;
+        }
+        if (empty) empty.style.display = 'none';
+
+        for (const item of items) {
+            const userSnap = await getDoc(doc(db, 'users', item.id));
+            const u = userSnap.exists() ? userSnap.data() : {};
+            const roleLabel = item.role === 'admin' ? 'مدير' : item.role === 'moderator' ? 'مشرف' : item.role === 'owner' ? 'مالك' : item.role;
+            const card = document.createElement('div');
+            card.className = 'moderator-card';
+            card.innerHTML = `
+                <div style="display:flex;justify-content:space-between;gap:.5rem;align-items:center;margin-bottom:.7rem;">
+                    <strong>${escapeHtml(u.email || item.email || item.id)}</strong>
+                    <span class="tag ${item.role === 'owner' ? 'tag-approved' : 'tag-active'}">${escapeHtml(roleLabel)}</span>
+                </div>
+                <small style="color:var(--text-secondary);display:block;margin-bottom:.8rem;">
+                    تمت الإضافة: ${formatDate(item.assignedAt)}
+                </small>
+                ${item.role !== 'owner' ? `
+                    <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
+                        <button class="btn btn-sm btn-outline" data-mod-action="moderator" data-uid="${item.id}">مشرف</button>
+                        <button class="btn btn-sm btn-outline" data-mod-action="admin" data-uid="${item.id}">مدير</button>
+                        <button class="btn btn-sm btn-danger" data-mod-action="remove" data-uid="${item.id}">إزالة الصلاحية</button>
+                    </div>` : '<small style="color:var(--text-secondary);">حساب المالك محمي.</small>'}
+            `;
+            grid.appendChild(card);
+        }
+
+        grid.querySelectorAll('[data-mod-action]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const uid = btn.dataset.uid;
+                const action = btn.dataset.modAction;
+                if (action === 'remove') {
+                    await setModeratorRole(uid, 'user');
+                } else {
+                    await setModeratorRole(uid, action);
+                }
+            });
+        });
+    } catch (e) {
+        console.error(e);
+        grid.innerHTML = '<div class="empty-state"><p>تعذر تحميل المشرفين.</p></div>';
+    }
+}
+
+async function setModeratorRole(uid, role) {
+    if (userRole !== 'owner' || !uid || !currentUser) {
+        toast('غير مصرح', 'error'); return;
+    }
+    if (uid === currentUser.uid) {
+        toast('لا يمكن تغيير صلاحيات حساب المالك الحالي من هنا', 'warning'); return;
+    }
+    try {
+        const userRef = doc(db, 'users', uid);
+        const adminRef = doc(db, 'admins', uid);
+
+        if (role === 'user') {
+            await setDoc(userRef, { role: 'user', updatedAt: serverTimestamp() }, { merge: true });
+            await deleteDoc(adminRef);
+            await logAudit('Removed moderator/admin role', uid);
+            toast('تمت إزالة صلاحيات الإدارة');
+        } else {
+            const userSnap = await getDoc(userRef);
+            const email = userSnap.exists() ? (userSnap.data().email || '') : '';
+            await setDoc(adminRef, {
+                role,
+                email,
+                assignedBy: currentUser.uid,
+                assignedAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            }, { merge: true });
+            await setDoc(userRef, { role, updatedAt: serverTimestamp() }, { merge: true });
+            await logAudit(`Assigned ${role}`, uid);
+            toast(role === 'moderator' ? 'تم تعيين المستخدم مشرفًا' : 'تم تعيين المستخدم مديرًا');
+        }
+        await loadModerators();
+        await loadUsers();
+    } catch (e) {
+        console.error(e);
+        toast('تعذر تحديث صلاحيات المشرف', 'error');
+    }
+}
+
+function showAddModerator() {
+    if (userRole !== 'owner') { toast('غير مصرح', 'error'); return; }
+
+    const html = `
+        <div class="form-group">
+            <label for="moderatorEmail">البريد الإلكتروني للمستخدم</label>
+            <input id="moderatorEmail" type="email" placeholder="user@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+            <label for="moderatorRole">الصلاحية</label>
+            <select id="moderatorRole">
+                <option value="moderator">مشرف — إدارة المعرفة والاقتراحات والأسئلة غير المجابة</option>
+                <option value="admin">مدير — صلاحيات إدارية أوسع</option>
+            </select>
+        </div>
+        <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:1rem;">
+            يجب أن يكون الحساب مسجلًا بالفعل في الموقع. لا يتم إنشاء حساب Firebase من لوحة المالك.
+        </p>
+        <button class="btn btn-primary" id="confirmAddModerator" style="width:100%;justify-content:center;">إضافة الصلاحية</button>
+    `;
+    showModal(html, { title: 'إضافة مشرف' });
+
+    document.getElementById('confirmAddModerator').addEventListener('click', async () => {
+        const email = document.getElementById('moderatorEmail').value.trim().toLowerCase();
+        const role = document.getElementById('moderatorRole').value;
+        if (!email) { toast('أدخل البريد الإلكتروني', 'warning'); return; }
+
+        const btn = document.getElementById('confirmAddModerator');
+        showLoading(btn, 'جاري البحث...');
+
+        try {
+            const snap = await getDocs(query(collection(db, 'users'), where('email', '==', email), limit(1)));
+            if (snap.empty) {
+                toast('لا يوجد حساب بهذا البريد. اجعل المستخدم يسجل حسابًا أولًا.', 'warning');
+                return;
+            }
+            const userDoc = snap.docs[0];
+            const uid = userDoc.id;
+
+            if (uid === currentUser.uid) {
+                toast('أنت المالك بالفعل', 'warning');
+                return;
+            }
+
+            await setDoc(doc(db, 'admins', uid), {
+                role,
+                email,
+                assignedBy: currentUser.uid,
+                assignedAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            }, { merge: true });
+
+            await updateDoc(doc(db, 'users', uid), {
+                role,
+                updatedAt: serverTimestamp()
+            });
+
+            await logAudit(`Added ${role}`, uid);
+            closeModal();
+            toast(role === 'moderator' ? 'تمت إضافة المشرف بنجاح' : 'تمت إضافة المدير بنجاح');
+            await loadModerators();
+            await loadUsers();
+        } catch (e) {
+            console.error(e);
+            toast('تعذر إضافة المشرف. تحقق من صلاحيات Firestore.', 'error');
+        } finally {
+            hideLoading(btn);
+        }
+    });
+}
+
 // ============ NOTIFICATIONS ============
 async function loadNotifications() {
     const container = document.getElementById('notifList');
@@ -1890,13 +2102,14 @@ async function loadHealth() {
     const grid = document.getElementById('healthGrid');
     const testResult = document.getElementById('healthTestResult');
     if (!grid) return;
+    const onlineStatus = navigator.onLine;
     const components = [
-        { name: 'Firebase Auth', status: 'operational', desc: 'يعمل' },
-        { name: 'Firestore', status: 'operational', desc: 'متصل' },
+        { name: 'Firebase Auth', status: onlineStatus ? 'operational' : 'warning', desc: onlineStatus ? 'يعمل' : 'بانتظار الاتصال' },
+        { name: 'Firestore', status: onlineStatus ? 'operational' : 'warning', desc: onlineStatus ? 'متصل' : 'غير متصل' },
         { name: 'Knowledge Engine', status: 'operational', desc: 'جاهز' },
         { name: 'Memory System', status: 'operational', desc: 'نشط' },
         { name: 'Suggestions', status: 'operational', desc: 'نشط' },
-        { name: 'Analytics', status: 'operational', desc: 'نشط' }
+        { name: 'Analytics', status: onlineStatus ? 'operational' : 'warning', desc: onlineStatus ? 'نشط' : 'بانتظار الاتصال' }
     ];
     grid.innerHTML = components.map(c => `<div class="stat-card"><span class="health-dot ${c.status === 'operational' ? 'health-operational' : c.status === 'warning' ? 'health-warning' : 'health-error'}"></span><div class="stat-label">${c.name}: ${c.desc}</div></div>`).join('');
     testResult.innerHTML = '<p style="color:var(--success);">✅ جميع الأنظمة تعمل بشكل طبيعي.</p>';
@@ -1991,26 +2204,32 @@ function initApp() {
     // Show landing by default
     showPage('landing');
 
-    // Sidebar collapse
-    document.getElementById('sidebarCollapse')?.addEventListener('click', () => {
-        document.getElementById('appContainer').classList.toggle('sidebar-collapsed');
+    // Off-canvas sidebar: closed by default, opened by the 3-lines button.
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const mobileToggle = document.getElementById('mobileToggle');
+    const sidebarClose = document.getElementById('sidebarClose');
+
+    function setSidebarOpen(open) {
+        if (!sidebar) return;
+        sidebar.classList.toggle('mobile-open', open);
+        sidebarOverlay?.classList.toggle('visible', open);
+        mobileToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+        sidebarOverlay?.setAttribute('aria-hidden', open ? 'false' : 'true');
+        document.body.style.overflow = open ? 'hidden' : '';
+        document.body.classList.toggle('sidebar-open', open);
+    }
+
+    mobileToggle?.addEventListener('click', () => setSidebarOpen(!sidebar?.classList.contains('mobile-open')));
+    sidebarClose?.addEventListener('click', () => setSidebarOpen(false));
+    sidebarOverlay?.addEventListener('click', () => setSidebarOpen(false));
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') setSidebarOpen(false);
     });
 
-    // Mobile toggle
-    document.getElementById('mobileToggle')?.addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('mobile-open');
-    });
-
-    // Close sidebar on outside click (mobile)
-    document.addEventListener('click', (e) => {
-        if (window.innerWidth <= 768) {
-            const sidebar = document.getElementById('sidebar');
-            const toggle = document.getElementById('mobileToggle');
-            if (sidebar.classList.contains('mobile-open') && !sidebar.contains(e.target) && e.target !== toggle) {
-                sidebar.classList.remove('mobile-open');
-            }
-        }
-    });
+    // Keep the old collapse control harmless for compatibility.
+    document.getElementById('sidebarCollapse')?.addEventListener('click', () => setSidebarOpen(false));
 
     // Dark mode toggle from settings
     document.getElementById('sDarkMode')?.addEventListener('change', (e) => {
@@ -2060,7 +2279,7 @@ function initApp() {
         localStorage.removeItem('draftMessage');
     }
 
-    console.log('✅ المساعد المعرفي الذكي - Production Ready');
+    console.log('✅ المساعد المعرفي الذكي - Production Ready • v2.0.0');
     console.log('📚 Knowledge Engine: جاهز');
     console.log('🧠 Memory System: جاهز');
     console.log('🔐 Authentication: جاهز');
@@ -2070,9 +2289,14 @@ function setupNavigation() {
     document.querySelectorAll('.nav-link').forEach(btn => {
         btn.addEventListener('click', () => {
             const page = btn.dataset.page;
-            if (page === 'dashboard' || page === 'knowledge' || page === 'suggestions' || page === 'unanswered' || page === 'analytics' || page === 'notifications' || page === 'audit' || page === 'upgrades' || page === 'health' || page === 'users') {
-                if (userRole === 'user') { toast('غير مصرح لك بالوصول', 'error'); return; }
-                if (page === 'users' && userRole !== 'owner') { toast('غير مصرح لك بالوصول', 'error'); return; }
+            const moderatorPages = ['knowledge','suggestions','unanswered'];
+            const ownerPages = ['dashboard','analytics','notifications','audit','upgrades','health','users','moderators'];
+
+            if (moderatorPages.includes(page) && !['moderator','admin','owner'].includes(userRole)) {
+                toast('هذه الصفحة متاحة للمشرفين والمالك فقط', 'error'); return;
+            }
+            if (ownerPages.includes(page) && userRole !== 'owner') {
+                toast('هذه الصفحة متاحة للمالك فقط', 'error'); return;
             }
             showPage(page);
         });
@@ -2099,6 +2323,7 @@ function setupAdminEvents() {
     document.getElementById('importKnowledgeBtn')?.addEventListener('click', importKnowledge);
     document.getElementById('knowledgeTesterBtn')?.addEventListener('click', showKnowledgeTester);
     document.getElementById('mergeKnowledgeBtn')?.addEventListener('click', showMergeKnowledge);
+    document.getElementById('addModeratorBtn')?.addEventListener('click', showAddModerator);
     document.getElementById('knowledgeSearch')?.addEventListener('input', debounce(loadKnowledgeList, 400));
     document.getElementById('knowledgeFilter')?.addEventListener('change', loadKnowledgeList);
     document.getElementById('addUpgradeBtn')?.addEventListener('click', async () => {
@@ -2205,12 +2430,9 @@ window._resolveUnans = async (id) => {
 };
 window._changeRole = async (uid, newRole) => {
     if (userRole !== 'owner') { toast('غير مصرح', 'error'); return; }
-    try {
-        await setDoc(doc(db, 'admins', uid), { role: newRole, assignedBy: currentUser.uid, assignedAt: serverTimestamp() }, { merge: true });
-        toast('تم تغيير الدور');
-        loadUsers();
-        await logAudit('Changed role', uid);
-    } catch (e) { console.error(e); toast('خطأ', 'error'); }
+    if (!['user','moderator','admin'].includes(newRole)) { toast('دور غير صالح', 'error'); return; }
+    if (uid === currentUser.uid) { toast('لا يمكن تغيير صلاحيات المالك الحالي', 'warning'); return; }
+    await setModeratorRole(uid, newRole);
 };
 
 // Start the app
