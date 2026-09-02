@@ -692,15 +692,6 @@ function escapeHtml(str) {
 }
 function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
 function safeText(text) { return escapeHtml(String(text || '')); }
-
-function firestoreErrorMessage(error, fallback = 'حدث خطأ غير متوقع.') {
-    const code = String(error?.code || '');
-    if (code.includes('permission-denied')) return 'ليس لديك صلاحية لتنفيذ هذه العملية.';
-    if (code.includes('failed-precondition')) return 'تحتاج قاعدة البيانات إلى فهرس Firestore لهذه العملية.';
-    if (code.includes('unavailable')) return 'الخدمة غير متاحة مؤقتًا. تحقق من الإنترنت وحاول مرة أخرى.';
-    if (code.includes('deadline-exceeded')) return 'انتهت مهلة الاتصال. حاول مرة أخرى.';
-    return fallback;
-}
 function debounce(fn, delay) {
     let timeout;
     return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => fn(...args), delay); };
@@ -1349,10 +1340,7 @@ async function sendDmMessage() {
     try {
         await addDoc(collection(db, 'dms', dmId, 'messages'), { senderId: currentUser.uid, text, createdAt: serverTimestamp() });
         await setDoc(doc(db, 'dms', dmId), { lastMessage: text, updatedAt: serverTimestamp() }, { merge: true });
-    } catch (e) {
-        console.error('DM send error:', e);
-        toast(firestoreErrorMessage(e, 'تعذر إرسال الرسالة.'), 'error');
-    }
+    } catch (e) { console.error(e); toast('تعذر إرسال الرسالة', 'error'); }
 }
 
 async function loadAdminContactList() {
@@ -1449,17 +1437,12 @@ async function rateMessage(msg, helpful) {
             rating: helpful ? 'helpful' : 'unhelpful',
             ratedAt: serverTimestamp()
         });
-        // Update the knowledge counter independently so a counter-rule problem
-        // cannot make the user's rating operation fail.
+        // Update knowledge helpful/unhelpful counters if knowledgeId exists
         if (msg.knowledgeId) {
-            try {
-                const kRef = doc(db, 'knowledge', msg.knowledgeId);
-                await updateDoc(kRef, {
-                    [helpful ? 'helpfulCount' : 'unhelpfulCount']: increment(1)
-                });
-            } catch (counterError) {
-                console.warn('Rating counter update failed:', counterError);
-            }
+            const kRef = doc(db, 'knowledge', msg.knowledgeId);
+            await updateDoc(kRef, {
+                [helpful ? 'helpfulCount' : 'unhelpfulCount']: increment(1)
+            });
         }
         toast(helpful ? 'شكرًا لتقييمك!' : 'شكرًا لملاحظاتك');
         if (!helpful) {
@@ -1513,13 +1496,8 @@ async function sendMessage() {
             confidence = result.confidence;
             MemorySystem.addToConversation('assistant', responseText, { knowledgeId, confidence });
             if (result.match.category) MemorySystem.addImportantContext(result.match.category);
-            // Statistics counters must never make the chat itself fail.
-            // Firestore rules should allow only the counter fields to be incremented by signed-in users.
-            try {
-                await updateDoc(doc(db, 'knowledge', knowledgeId), { usageCount: increment(1) });
-            } catch (counterError) {
-                console.warn('Usage counter update failed; continuing chat:', counterError);
-            }
+            // Increment usage count
+            await updateDoc(doc(db, 'knowledge', knowledgeId), { usageCount: increment(1) });
         } else {
             const noAnswerMsg = settingsCache.site?.noAnswerMessage || 'لا أملك معلومات مؤكدة عن هذا السؤال حاليًا.';
             responseText = noAnswerMsg;
@@ -1554,9 +1532,7 @@ async function sendMessage() {
                     read: false,
                     createdAt: serverTimestamp()
                 });
-            } catch (e) {
-                console.warn('Unanswered question write failed:', e);
-            }
+            } catch (e) { console.error(e); }
         }
 
         await addDoc(collection(db, 'conversations', currentConversationId, 'messages'), {
@@ -1567,11 +1543,7 @@ async function sendMessage() {
             imageURL: responseImage,
             createdAt: serverTimestamp()
         });
-        try {
-            await updateDoc(doc(db, 'conversations', currentConversationId), { updatedAt: serverTimestamp() });
-        } catch (conversationMetaError) {
-            console.warn('Conversation metadata update failed:', conversationMetaError);
-        }
+        await updateDoc(doc(db, 'conversations', currentConversationId), { updatedAt: serverTimestamp() });
 
         const thinkingEl = document.getElementById('thinking-indicator');
         if (thinkingEl) thinkingEl.remove();
@@ -1746,20 +1718,17 @@ async function loadKnowledgeList() {
         const pagDiv = document.getElementById('knowledgePagination');
         if (pagDiv) {
             pagDiv.innerHTML = '';
-            if (snaps.size === knowledgePageSize && knowledgeLastVisible) {
+            if (knowledgeLastVisible) {
                 const nextBtn = document.createElement('button');
                 nextBtn.className = 'btn btn-outline btn-sm';
                 nextBtn.textContent = 'التالي';
-                nextBtn.onclick = () => loadKnowledgeList();
+                nextBtn.onclick = () => { knowledgeLastVisible = knowledgeLastVisible; loadKnowledgeList(); };
                 pagDiv.appendChild(nextBtn);
             }
             const prevBtn = document.createElement('button');
             prevBtn.className = 'btn btn-outline btn-sm';
-            prevBtn.textContent = 'الأولى';
-            prevBtn.onclick = () => {
-                knowledgeLastVisible = null;
-                loadKnowledgeList();
-            };
+            prevBtn.textContent = 'السابق';
+            prevBtn.onclick = () => { knowledgeLastVisible = null; loadKnowledgeList(); };
             pagDiv.appendChild(prevBtn);
         }
         window._editK = async (id) => { await showEditKnowledge(id); };
@@ -2288,10 +2257,7 @@ async function loadDashboardData() {
             recentDiv.appendChild(p);
         });
         if (auditSnap.empty) recentDiv.innerHTML = '<p style="color:var(--text-secondary);">لا توجد نشاطات بعد.</p>';
-    } catch (e) {
-        console.error('Dashboard load error:', e);
-        statsDiv.innerHTML = `<p style="color:var(--error);">${escapeHtml(firestoreErrorMessage(e, 'خطأ في تحميل البيانات.'))}</p>`;
-    }
+    } catch (e) { console.error(e); statsDiv.innerHTML = '<p style="color:var(--error);">خطأ في تحميل البيانات</p>'; }
 }
 
 // ============ USERS MANAGEMENT (Owner) ============
@@ -2556,10 +2522,7 @@ async function logAudit(action, itemId, before = null, after = null) {
             after: after ? JSON.stringify(after).substring(0, 500) : null,
             createdAt: serverTimestamp()
         });
-    } catch (e) {
-        // Audit logging is secondary; never block the primary operation.
-        console.warn('Audit log skipped:', e);
-    }
+    } catch (e) { console.error('Audit log error:', e); }
 }
 
 async function loadAuditLogs() {
@@ -2914,14 +2877,8 @@ function setupAdminEvents() {
     document.getElementById('knowledgeTesterBtn')?.addEventListener('click', showKnowledgeTester);
     document.getElementById('mergeKnowledgeBtn')?.addEventListener('click', showMergeKnowledge);
     document.getElementById('addModeratorBtn')?.addEventListener('click', showAddModerator);
-    document.getElementById('knowledgeSearch')?.addEventListener('input', debounce(() => {
-        knowledgeLastVisible = null;
-        loadKnowledgeList();
-    }, 400));
-    document.getElementById('knowledgeFilter')?.addEventListener('change', () => {
-        knowledgeLastVisible = null;
-        loadKnowledgeList();
-    });
+    document.getElementById('knowledgeSearch')?.addEventListener('input', debounce(loadKnowledgeList, 400));
+    document.getElementById('knowledgeFilter')?.addEventListener('change', loadKnowledgeList);
     document.getElementById('addUpgradeBtn')?.addEventListener('click', async () => {
         const version = document.getElementById('upVersion').value.trim();
         const title = document.getElementById('upTitle').value.trim();
@@ -3045,14 +3002,6 @@ window._changeRole = async (uid, newRole) => {
     if (uid === currentUser.uid) { toast('لا يمكن تغيير صلاحيات المالك الحالي', 'warning'); return; }
     await setModeratorRole(uid, newRole);
 };
-
-// Global diagnostics: keep real Firebase errors visible in the browser console.
-window.addEventListener('unhandledrejection', (event) => {
-    const reason = event?.reason;
-    if (reason?.code?.startsWith?.('permission-denied')) {
-        console.error('Firestore permission-denied:', reason);
-    }
-});
 
 // Start the app
 document.addEventListener('DOMContentLoaded', initApp);
