@@ -625,6 +625,14 @@ let userProfileCache = {};
 let currentUserData = {};
 
 // ============ UTILITIES ============
+function isStaff() {
+    return ['moderator', 'admin', 'owner'].includes(userRole);
+}
+
+function isOwner() {
+    return userRole === 'owner';
+}
+
 function toast(message, type = 'success') {
     const container = document.getElementById('toastContainer');
     const el = document.createElement('div');
@@ -695,10 +703,10 @@ function safeText(text) { return escapeHtml(String(text || '')); }
 
 function firestoreErrorMessage(error, fallback = 'حدث خطأ غير متوقع.') {
     const code = String(error?.code || '');
-    if (code.includes('permission-denied')) return 'ليس لديك صلاحية لتنفيذ هذه العملية.';
-    if (code.includes('failed-precondition')) return 'تحتاج قاعدة البيانات إلى فهرس Firestore لهذه العملية.';
-    if (code.includes('unavailable')) return 'الخدمة غير متاحة مؤقتًا. تحقق من الإنترنت وحاول مرة أخرى.';
-    if (code.includes('deadline-exceeded')) return 'انتهت مهلة الاتصال. حاول مرة أخرى.';
+    if (code.includes('permission-denied')) return '⚠️ ليس لديك صلاحية لتنفيذ هذه العملية.';
+    if (code.includes('failed-precondition')) return '⚠️ تحتاج قاعدة البيانات إلى فهرس Firestore لهذه العملية.';
+    if (code.includes('unavailable')) return '⚠️ الخدمة غير متاحة مؤقتًا. تحقق من الإنترنت وحاول مرة أخرى.';
+    if (code.includes('deadline-exceeded')) return '⏱️ انتهت مهلة الاتصال. حاول مرة أخرى.';
     return fallback;
 }
 function debounce(fn, delay) {
@@ -996,7 +1004,6 @@ async function loadUserRole(uid) {
         if (adminDoc.exists()) {
             userRole = adminDoc.data().role || 'user';
         } else {
-            // Fallback: check users collection for role (legacy)
             const userDoc = await getDoc(doc(db, 'users', uid));
             if (userDoc.exists() && userDoc.data().role) {
                 userRole = userDoc.data().role;
@@ -1024,30 +1031,24 @@ function updateSidebarForRole() {
     if (moderatorSection) moderatorSection.style.display = (isModerator || isOwner) ? '' : 'none';
     if (ownerSection) ownerSection.style.display = isOwner ? '' : 'none';
 
-    // Moderator permissions: knowledge + suggestions + unanswered.
     document.querySelectorAll('[data-page="knowledge"], [data-page="suggestions"], [data-page="unanswered"]').forEach(btn => {
         btn.style.display = (isModerator || isOwner) ? '' : 'none';
     });
 
-    // Moderator-only extra pages (contact admins / my bot stats).
     document.querySelectorAll('[data-page="adminContact"], [data-page="mybot"]').forEach(btn => {
         btn.style.display = (isModerator || isOwner) ? '' : 'none';
     });
 
-    // Owner-only pages.
     document.querySelectorAll('[data-page="dashboard"], [data-page="analytics"], [data-page="ratings"], [data-page="notifications"], [data-page="audit"], [data-page="upgrades"], [data-page="health"], [data-page="users"], [data-page="moderators"]').forEach(btn => {
         btn.style.display = isOwner ? '' : 'none';
     });
-    // Suggestions button appears twice (moderator section "الاقتراحات" + owner "التقارير") — both point to the same page.
     document.querySelectorAll('[data-page="suggestions"]').forEach(btn => {
         btn.style.display = (isModerator || isOwner) ? '' : 'none';
     });
 
-    // The tester/debug controls remain for moderators and owner.
     const debugBtn = document.getElementById('debugToggle');
     if (debugBtn) debugBtn.style.display = (isModerator || isOwner) ? 'inline-flex' : 'none';
 
-    // Admin-only settings cards: AI tuning + debug are staff-only, site + security are owner-only.
     const aiCard = document.getElementById('settingsAICard');
     const siteCard = document.getElementById('settingsSiteCard');
     const securityCard = document.getElementById('settingsSecurityCard');
@@ -1085,7 +1086,6 @@ async function loadSettings() {
         if (siteSnap.exists()) {
             const d = siteSnap.data();
             settingsCache.site = d;
-            // Only fall back to the site-wide default when the signed-in user has no personal preference saved yet.
             if (d.darkMode && (currentUserData.darkMode === undefined)) applyDarkMode(true);
             document.getElementById('sSiteName') && (document.getElementById('sSiteName').value = d.siteName || '');
             document.getElementById('sWelcome') && (document.getElementById('sWelcome').value = d.welcomeMessage || '');
@@ -1114,7 +1114,6 @@ function applyDarkMode(enable) {
 function applyThemeColor(hex) {
     if (!hex) return;
     document.documentElement.style.setProperty('--primary', hex);
-    // Derive a slightly darker hover shade.
     try {
         const c = hex.replace('#', '');
         const r = Math.max(0, parseInt(c.substring(0, 2), 16) - 24);
@@ -1164,7 +1163,10 @@ async function loadProfilePage(uid) {
             openDmWith(uid, p.name || 'مستخدم');
             showPage('messages');
         };
-    } catch (e) { console.error(e); toast('تعذر تحميل البروفايل', 'error'); }
+    } catch (e) {
+        console.error(e);
+        toast('تعذر تحميل البروفايل', 'error');
+    }
 }
 
 function setupMessagingEvents() {
@@ -1246,136 +1248,141 @@ function loadSettingsIntoForm() {
     if (document.getElementById('sDebugMode')) document.getElementById('sDebugMode').checked = debugMode;
 }
 
-// ============ MESSAGING SYSTEM (user-to-user) ============
-function dmIdFor(a, b) { return [a, b].sort().join('_'); }
+function setupNavigation() {
+    document.querySelectorAll('.nav-link').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const page = btn.dataset.page;
+            const moderatorPages = ['knowledge','suggestions','unanswered'];
+            const ownerPages = ['dashboard','analytics','notifications','audit','upgrades','health','users','moderators'];
 
-async function ensureDmDoc(peerUid, peerName) {
-    const dmId = dmIdFor(currentUser.uid, peerUid);
-    const ref = doc(db, 'dms', dmId);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) {
-        const myProfile = await getDoc(doc(db, 'profiles', currentUser.uid));
-        const myName = myProfile.exists() ? (myProfile.data().name || currentUser.email) : currentUser.email;
-        await setDoc(ref, {
-            participants: [currentUser.uid, peerUid],
-            participantNames: { [currentUser.uid]: myName, [peerUid]: peerName || '' },
-            lastMessage: '',
-            updatedAt: serverTimestamp(),
-            createdAt: serverTimestamp()
+            if (moderatorPages.includes(page) && !isStaff()) {
+                toast('هذه الصفحة متاحة للمشرفين والمالك فقط', 'error'); return;
+            }
+            if (ownerPages.includes(page) && !isOwner()) {
+                toast('هذه الصفحة متاحة للمالك فقط', 'error'); return;
+            }
+            showPage(page);
         });
-    }
-    return dmId;
-}
-
-async function openDmWith(peerUid, peerName) {
-    if (!currentUser || peerUid === currentUser.uid) return;
-    currentDmPeerId = peerUid;
-    const dmId = await ensureDmDoc(peerUid, peerName);
-    document.getElementById('dmHeader').textContent = peerName || 'محادثة';
-    if (dmUnsubscribe) { dmUnsubscribe(); dmUnsubscribe = null; }
-    const msgsQuery = query(collection(db, 'dms', dmId, 'messages'), orderBy('createdAt', 'asc'), limit(200));
-    dmUnsubscribe = onSnapshot(msgsQuery, (snap) => {
-        const container = document.getElementById('dmMessages');
-        if (!container) return;
-        container.innerHTML = '';
-        snap.forEach(d => {
-            const m = d.data();
-            const div = document.createElement('div');
-            div.className = `message ${m.senderId === currentUser.uid ? 'user' : 'assistant'}`;
-            div.textContent = m.text || '';
-            container.appendChild(div);
-        });
-        container.scrollTop = container.scrollHeight;
     });
-    loadDmContactsList();
 }
 
-async function loadMessagesPage() {
-    if (!currentUser) { document.getElementById('dmMessages').innerHTML = '<div class="empty-state"><p>يجب تسجيل الدخول للتواصل.</p></div>'; return; }
-    loadDmContactsList();
-    const search = document.getElementById('msgUserSearch');
-    if (search && !search.dataset.wired) {
-        search.dataset.wired = '1';
-        search.addEventListener('input', debounce(async () => {
-            const term = search.value.trim();
-            const resultsDiv = document.getElementById('msgSearchResults');
-            if (!term) { resultsDiv.innerHTML = ''; return; }
-            try {
-                const snap = await getDocs(query(collection(db, 'profiles'), orderBy('name'), limit(100)));
-                const termLower = term.toLowerCase();
-                const matches = [];
-                snap.forEach(d => {
-                    if (d.id === currentUser.uid) return;
-                    const p = d.data();
-                    if ((p.name || '').toLowerCase().includes(termLower)) matches.push({ id: d.id, ...p });
-                });
-                resultsDiv.innerHTML = matches.slice(0, 10).map(m => `<div class="notif-item" style="cursor:pointer;" data-uid="${m.id}" data-name="${escapeHtml(m.name || '')}"><span class="notif-dot" style="background:var(--success);"></span><div><p style="font-size:.85rem;">${escapeHtml(m.name || 'مستخدم')}</p></div></div>`).join('') || '<p style="padding:.5rem;color:var(--text-secondary);font-size:.82rem;">لا نتائج.</p>';
-                resultsDiv.querySelectorAll('[data-uid]').forEach(el => {
-                    el.addEventListener('click', () => { openDmWith(el.dataset.uid, el.dataset.name); resultsDiv.innerHTML=''; search.value=''; });
-                });
-            } catch (e) { console.error(e); }
-        }, 350));
-    }
+function setupChatEvents() {
+    document.getElementById('sendBtn')?.addEventListener('click', sendMessage);
+    document.getElementById('chatInput')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+    document.getElementById('newChatBtn')?.addEventListener('click', () => { createNewConversation(); });
+    document.getElementById('chatHistoryBtn')?.addEventListener('click', showConversationHistory);
+    document.getElementById('suggestImproveBtn')?.addEventListener('click', () => {
+        const lastAssistant = [...document.querySelectorAll('.message.assistant')].pop();
+        if (lastAssistant) showSuggestImproveModal({ content: lastAssistant.textContent });
+        else toast('لا توجد رسالة لتحسينها', 'warning');
+    });
 }
 
-async function loadDmContactsList() {
-    if (!currentUser) return;
-    const container = document.getElementById('dmContactsList');
-    if (!container) return;
-    try {
-        const snap = await getDocs(query(collection(db, 'dms'), where('participants', 'array-contains', currentUser.uid), orderBy('updatedAt', 'desc'), limit(30)));
-        container.innerHTML = '';
-        if (snap.empty) { container.innerHTML = '<p style="padding:.6rem;color:var(--text-secondary);font-size:.82rem;">لا توجد محادثات بعد.</p>'; return; }
-        snap.forEach(d => {
-            const dm = d.data();
-            const peerId = (dm.participants || []).find(p => p !== currentUser.uid);
-            const peerName = (dm.participantNames && dm.participantNames[peerId]) || 'مستخدم';
-            const div = document.createElement('div');
-            div.className = 'notif-item';
-            div.style.cursor = 'pointer';
-            div.innerHTML = `<span class="notif-dot"></span><div><p style="font-size:.85rem;">${escapeHtml(peerName)}</p><small style="color:var(--text-secondary)">${escapeHtml((dm.lastMessage || '').substring(0, 40))}</small></div>`;
-            div.addEventListener('click', () => openDmWith(peerId, peerName));
-            container.appendChild(div);
-        });
-    } catch (e) { console.error(e); }
-}
-
-async function sendDmMessage() {
-    const input = document.getElementById('dmInput');
-    const text = input.value.trim();
-    if (!text || !currentUser || !currentDmPeerId) return;
-    input.value = '';
-    const dmId = dmIdFor(currentUser.uid, currentDmPeerId);
-    try {
-        await addDoc(collection(db, 'dms', dmId, 'messages'), { senderId: currentUser.uid, text, createdAt: serverTimestamp() });
-        await setDoc(doc(db, 'dms', dmId), { lastMessage: text, updatedAt: serverTimestamp() }, { merge: true });
-    } catch (e) {
-        console.error('DM send error:', e);
-        toast(firestoreErrorMessage(e, 'تعذر إرسال الرسالة.'), 'error');
-    }
-}
-
-async function loadAdminContactList() {
-    const container = document.getElementById('adminContactList');
-    if (!container) return;
-    container.innerHTML = '<div class="skeleton" style="height:50px;"></div>';
-    try {
-        const snap = await getDocs(collection(db, 'admins'));
-        container.innerHTML = '';
-        const items = [];
-        snap.forEach(d => { if (d.id !== currentUser.uid) items.push({ id: d.id, ...d.data() }); });
-        if (items.length === 0) { container.innerHTML = '<p style="color:var(--text-secondary);">لا يوجد مشرفون آخرون حاليًا.</p>'; return; }
-        for (const item of items) {
-            const profSnap = await getDoc(doc(db, 'profiles', item.id));
-            const name = profSnap.exists() ? (profSnap.data().name || item.email) : item.email;
-            const div = document.createElement('div');
-            div.className = 'notif-item';
-            div.style.cssText = 'cursor:pointer;justify-content:space-between;';
-            div.innerHTML = `<div style="display:flex;gap:.6rem;align-items:center;"><span class="notif-dot" style="background:var(--info);"></span><p style="font-size:.9rem;">${escapeHtml(name || 'مستخدم')} <span class="tag tag-active">${escapeHtml(item.role || '')}</span></p></div>`;
-            div.addEventListener('click', () => { openDmWith(item.id, name); showPage('messages'); });
-            container.appendChild(div);
+function setupAdminEvents() {
+    document.getElementById('addKnowledgeBtn')?.addEventListener('click', () => {
+        if (!isStaff()) {
+            toast('غير مصرح لك بإضافة معرفة', 'error');
+            return;
         }
-    } catch (e) { console.error(e); container.innerHTML = '<p style="color:var(--error);">خطأ في التحميل.</p>'; }
+        showAddKnowledge();
+    });
+    document.getElementById('exportKnowledgeBtn')?.addEventListener('click', exportKnowledge);
+    document.getElementById('importKnowledgeBtn')?.addEventListener('click', importKnowledge);
+    document.getElementById('knowledgeTesterBtn')?.addEventListener('click', showKnowledgeTester);
+    document.getElementById('mergeKnowledgeBtn')?.addEventListener('click', showMergeKnowledge);
+    document.getElementById('addModeratorBtn')?.addEventListener('click', () => {
+        if (!isOwner()) { toast('غير مصرح لك', 'error'); return; }
+        showAddModerator();
+    });
+    document.getElementById('knowledgeSearch')?.addEventListener('input', debounce(() => {
+        knowledgeLastVisible = null;
+        loadKnowledgeList();
+    }, 400));
+    document.getElementById('knowledgeFilter')?.addEventListener('change', () => {
+        knowledgeLastVisible = null;
+        loadKnowledgeList();
+    });
+    document.getElementById('addUpgradeBtn')?.addEventListener('click', async () => {
+        const version = document.getElementById('upVersion').value.trim();
+        const title = document.getElementById('upTitle').value.trim();
+        const desc = document.getElementById('upDesc').value.trim();
+        const status = document.getElementById('upStatus').value;
+        const type = document.getElementById('upType').value;
+        if (!version || !title) { toast('أدخل الإصدار والعنوان', 'warning'); return; }
+        try {
+            await addDoc(collection(db, 'upgrades'), {
+                version, title, description: desc, status, type,
+                createdBy: currentUser.uid, createdAt: serverTimestamp()
+            });
+            toast('تمت إضافة الترقية');
+            document.getElementById('upVersion').value = '';
+            document.getElementById('upTitle').value = '';
+            document.getElementById('upDesc').value = '';
+            loadUpgrades();
+        } catch (e) { console.error(e); toast('خطأ', 'error'); }
+    });
+}
+
+function setupSettingsEvents() {
+    document.getElementById('saveAISettings')?.addEventListener('click', async () => {
+        const threshold = parseFloat(document.getElementById('sThreshold').value) || 60;
+        const kwWeight = parseFloat(document.getElementById('sKeywordWeight').value) || 30;
+        const simWeight = parseFloat(document.getElementById('sSimilarityWeight').value) || 25;
+        const ctxWeight = parseFloat(document.getElementById('sContextWeight').value) || 15;
+        KnowledgeEngine.threshold = threshold;
+        KnowledgeEngine.keywordWeight = kwWeight;
+        KnowledgeEngine.similarityWeight = simWeight;
+        KnowledgeEngine.contextWeight = ctxWeight;
+        try {
+            await setDoc(doc(db, 'settings', 'ai'), { threshold, keywordWeight: kwWeight, similarityWeight: simWeight, contextWeight: ctxWeight, updatedAt: serverTimestamp() }, { merge: true });
+            toast('تم حفظ إعدادات الذكاء');
+        } catch (e) { console.error(e); toast('خطأ', 'error'); }
+    });
+    document.getElementById('saveSiteSettings')?.addEventListener('click', async () => {
+        const siteName = document.getElementById('sSiteName').value.trim();
+        const welcome = document.getElementById('sWelcome').value.trim();
+        const noAnswer = document.getElementById('sNoAnswer').value.trim();
+        const darkMode = document.getElementById('sSiteDarkDefault').checked;
+        try {
+            await setDoc(doc(db, 'settings', 'site'), { siteName, welcomeMessage: welcome, noAnswerMessage: noAnswer, darkMode, updatedAt: serverTimestamp() }, { merge: true });
+            toast('تم حفظ إعدادات الموقع');
+        } catch (e) { console.error(e); toast('خطأ', 'error'); }
+    });
+    document.getElementById('saveAppearanceBtn')?.addEventListener('click', async () => {
+        if (!currentUser) return;
+        const themeColor = document.getElementById('sThemeColor').value;
+        const fontSize = document.getElementById('sFontSize').value;
+        const darkMode = document.getElementById('sDarkMode').checked;
+        try {
+            await setDoc(doc(db, 'users', currentUser.uid), { themeColor, fontSize, darkMode, updatedAt: serverTimestamp() }, { merge: true });
+            currentUserData.themeColor = themeColor;
+            currentUserData.fontSize = fontSize;
+            currentUserData.darkMode = darkMode;
+            applyThemeColor(themeColor);
+            applyFontSize(fontSize);
+            applyDarkMode(darkMode);
+            toast('تم حفظ المظهر');
+        } catch (e) { console.error(e); toast('خطأ في حفظ المظهر', 'error'); }
+    });
+    document.getElementById('saveDebugMode')?.addEventListener('click', async () => {
+        const enabled = document.getElementById('sDebugMode').checked;
+        debugMode = enabled;
+        try {
+            await setDoc(doc(db, 'settings', 'debug'), { enabled, updatedAt: serverTimestamp() }, { merge: true });
+            const panel = document.getElementById('debugPanel');
+            if (panel) panel.style.display = enabled ? 'block' : 'none';
+            toast(enabled ? 'تم تفعيل وضع التصحيح' : 'تم إيقاف وضع التصحيح');
+        } catch (e) { console.error(e); toast('خطأ', 'error'); }
+    });
+    document.getElementById('saveSecuritySettings')?.addEventListener('click', async () => {
+        const allowRegister = document.getElementById('sAllowRegister').checked;
+        try {
+            await setDoc(doc(db, 'settings', 'security'), { allowRegister, updatedAt: serverTimestamp() }, { merge: true });
+            toast('تم حفظ إعدادات الأمان');
+        } catch (e) { console.error(e); toast('خطأ', 'error'); }
+    });
 }
 
 // ============ CHAT ============
@@ -1449,8 +1456,6 @@ async function rateMessage(msg, helpful) {
             rating: helpful ? 'helpful' : 'unhelpful',
             ratedAt: serverTimestamp()
         });
-        // Update the knowledge counter independently so a counter-rule problem
-        // cannot make the user's rating operation fail.
         if (msg.knowledgeId) {
             try {
                 const kRef = doc(db, 'knowledge', msg.knowledgeId);
@@ -1466,7 +1471,10 @@ async function rateMessage(msg, helpful) {
             const improveBtn = document.querySelector(`#msg-${msg.id} .message-actions button[title="اقتراح تحسين"]`);
             if (improveBtn) improveBtn.click();
         }
-    } catch (e) { console.error(e); toast('خطأ في التقييم', 'error'); }
+    } catch (e) {
+        console.error('Rate message error:', e);
+        toast('خطأ في التقييم', 'error');
+    }
 }
 
 async function sendMessage() {
@@ -1513,8 +1521,6 @@ async function sendMessage() {
             confidence = result.confidence;
             MemorySystem.addToConversation('assistant', responseText, { knowledgeId, confidence });
             if (result.match.category) MemorySystem.addImportantContext(result.match.category);
-            // Statistics counters must never make the chat itself fail.
-            // Firestore rules should allow only the counter fields to be incremented by signed-in users.
             try {
                 await updateDoc(doc(db, 'knowledge', knowledgeId), { usageCount: increment(1) });
             } catch (counterError) {
@@ -1525,7 +1531,7 @@ async function sendMessage() {
             responseText = noAnswerMsg;
             MemorySystem.addToConversation('assistant', responseText, { noAnswer: true });
 
-            // Save unanswered question
+            // Save unanswered question — non‑critical, catch errors.
             try {
                 const normQ = ArabicNormalizer.normalize(question);
                 const existing = await getDocs(query(collection(db, 'unansweredQuestions'), where('normalizedQuestion', '==', normQ)));
@@ -1544,9 +1550,11 @@ async function sendMessage() {
                     const docRef = existing.docs[0].ref;
                     await updateDoc(docRef, { count: increment(1), lastSeen: serverTimestamp() });
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                console.warn('Failed to save unanswered question:', e);
+            }
 
-            // Add notification for admin
+            // Notification (non‑critical)
             try {
                 await addDoc(collection(db, 'notifications'), {
                     type: 'unanswered',
@@ -1555,7 +1563,7 @@ async function sendMessage() {
                     createdAt: serverTimestamp()
                 });
             } catch (e) {
-                console.warn('Unanswered question write failed:', e);
+                console.warn('Failed to add notification:', e);
             }
         }
 
@@ -1742,7 +1750,6 @@ async function loadKnowledgeList() {
                 </td>`;
             tbody.appendChild(tr);
         }
-        // Pagination
         const pagDiv = document.getElementById('knowledgePagination');
         if (pagDiv) {
             pagDiv.innerHTML = '';
@@ -1764,13 +1771,23 @@ async function loadKnowledgeList() {
         }
         window._editK = async (id) => { await showEditKnowledge(id); };
         window._delK = async (id) => {
+            if (!isStaff()) { toast('غير مصرح', 'error'); return; }
             if (!confirm('حذف هذا العنصر؟')) return;
             try { await deleteDoc(doc(db, 'knowledge', id)); toast('تم الحذف'); loadKnowledgeList(); await logAudit('Deleted knowledge', id); } catch (e) { toast('خطأ', 'error'); }
         };
-    } catch (e) { console.error(e); tbody.innerHTML = ''; empty.style.display = ''; }
+    } catch (e) {
+        console.error(e);
+        tbody.innerHTML = '';
+        empty.style.display = '';
+        toast('خطأ في تحميل المعرفة', 'error');
+    }
 }
 
 async function showAddKnowledge() {
+    if (!isStaff()) {
+        toast('غير مصرح لك بإضافة معرفة', 'error');
+        return;
+    }
     const html = `
         <div class="form-group"><label>السؤال الأساسي *</label><input type="text" id="kQuestion" placeholder="كيف أغير كلمة المرور؟"></div>
         <div class="form-group"><label>الإجابة *</label><textarea id="kAnswer" placeholder="الإجابة الكاملة..."></textarea></div>
@@ -1835,11 +1852,15 @@ async function showAddKnowledge() {
             toast('تمت الإضافة بنجاح');
             await logAudit('Created knowledge', 'new');
             loadKnowledgeList();
-        } catch (e) { console.error(e); toast('خطأ في الحفظ', 'error'); }
+        } catch (e) {
+            console.error(e);
+            toast(firestoreErrorMessage(e, 'خطأ في الحفظ'), 'error');
+        }
     });
 }
 
 async function showEditKnowledge(id) {
+    if (!isStaff()) { toast('غير مصرح', 'error'); return; }
     try {
         const snap = await getDoc(doc(db, 'knowledge', id));
         if (!snap.exists()) { toast('غير موجود', 'error'); return; }
@@ -1879,7 +1900,6 @@ async function showEditKnowledge(id) {
             };
             try {
                 await updateDoc(doc(db, 'knowledge', id), updatedData);
-                // Save version history
                 await addDoc(collection(db, 'knowledgeVersions'), {
                     knowledgeId: id,
                     version: k.version || 1,
@@ -1995,6 +2015,7 @@ function showKnowledgeTester() {
 }
 
 function showMergeKnowledge() {
+    if (!isStaff()) { toast('غير مصرح', 'error'); return; }
     const html = `
         <div class="form-group"><label>اختر العنصر الأول</label><input type="text" id="mergeFirst" placeholder="بحث..."></div>
         <div class="form-group"><label>اختر العنصر الثاني</label><input type="text" id="mergeSecond" placeholder="بحث..."></div>
@@ -2058,6 +2079,10 @@ function showMergeKnowledge() {
 
 // ============ SUGGESTIONS ============
 async function loadSuggestions() {
+    if (!isStaff()) {
+        document.getElementById('suggTableBody').innerHTML = '<tr><td colspan="5">غير مصرح لك بعرض الاقتراحات.</td></tr>';
+        return;
+    }
     const tbody = document.getElementById('suggTableBody');
     const empty = document.getElementById('suggEmpty');
     if (!tbody) return;
@@ -2081,16 +2106,20 @@ async function loadSuggestions() {
         }
         window._approveSugg = async (id) => { await handleSuggestion(id, true); };
         window._rejectSugg = async (id) => { await handleSuggestion(id, false); };
-    } catch (e) { console.error(e); tbody.innerHTML = ''; empty.style.display = ''; }
+    } catch (e) {
+        console.error(e);
+        tbody.innerHTML = '';
+        empty.style.display = '';
+        toast('خطأ في تحميل الاقتراحات', 'error');
+    }
 }
 
 async function handleSuggestion(id, approve) {
-    if (userRole === 'user') { toast('غير مصرح', 'error'); return; }
+    if (!isStaff()) { toast('غير مصرح', 'error'); return; }
     try {
         const snap = await getDoc(doc(db, 'suggestions', id));
         if (!snap.exists()) return;
         const s = snap.data();
-        // Check duplicate before approving
         if (approve) {
             const similar = await KnowledgeEngine.checkSimilar(s.question);
             if (similar.length > 0 && !confirm(`يوجد ${similar.length} عنصر مشابه. هل تريد الاستمرار؟`)) return;
@@ -2131,6 +2160,10 @@ async function handleSuggestion(id, approve) {
 
 // ============ UNANSWERED ============
 async function loadUnanswered() {
+    if (!isStaff()) {
+        document.getElementById('unansTableBody').innerHTML = '<tr><td colspan="5">غير مصرح لك بعرض الأسئلة غير المجابة.</td></tr>';
+        return;
+    }
     const tbody = document.getElementById('unansTableBody');
     const empty = document.getElementById('unansEmpty');
     if (!tbody) return;
@@ -2178,11 +2211,79 @@ async function loadUnanswered() {
             toast('تم وضع علامة كمحلول');
             loadUnanswered();
         };
-    } catch (e) { console.error(e); tbody.innerHTML = ''; empty.style.display = ''; }
+    } catch (e) {
+        console.error(e);
+        tbody.innerHTML = '';
+        empty.style.display = '';
+        toast('خطأ في تحميل الأسئلة غير المجابة', 'error');
+    }
 }
 
 // ============ DASHBOARD ============
+async function loadDashboardData() {
+    if (!isOwner()) {
+        document.getElementById('dashStats').innerHTML = '<div class="empty-state"><p>⚠️ هذه الصفحة متاحة للمالك فقط.</p></div>';
+        return;
+    }
+    const statsDiv = document.getElementById('dashStats');
+    if (!statsDiv) return;
+    statsDiv.innerHTML = '<div class="skeleton" style="height:80px;"></div>'.repeat(6);
+    try {
+        const [usersCount, knowledgeSnap, pendingSuggCount, convsCount, unansCount] = await Promise.all([
+            getCountFromServer(collection(db, 'users')),
+            getDocs(query(collection(db, 'knowledge'), limit(500))),
+            getCountFromServer(query(collection(db, 'suggestions'), where('status', '==', 'pending'))),
+            getCountFromServer(collection(db, 'conversations')),
+            getCountFromServer(collection(db, 'unansweredQuestions'))
+        ]);
+        const totalUsers = usersCount.data().count;
+        const knowledgeItems = [];
+        knowledgeSnap.forEach(d => knowledgeItems.push({ id: d.id, ...d.data() }));
+        const totalKnowledge = knowledgeItems.length;
+        const pendingSugg = pendingSuggCount.data().count;
+        const totalConvs = convsCount.data().count;
+        const totalUnans = unansCount.data().count;
+        const avgConf = totalKnowledge ? Math.round(knowledgeItems.reduce((s, k) => s + (k.qualityScore || 0), 0) / totalKnowledge * 10) : 0;
+
+        statsDiv.innerHTML = `
+            <div class="stat-card"><div class="stat-value">${totalUsers}</div><div class="stat-label">المستخدمون</div></div>
+            <div class="stat-card"><div class="stat-value">${totalKnowledge}</div><div class="stat-label">عناصر المعرفة</div></div>
+            <div class="stat-card"><div class="stat-value">${pendingSugg}</div><div class="stat-label">اقتراحات معلقة</div></div>
+            <div class="stat-card"><div class="stat-value">${totalConvs}</div><div class="stat-label">المحادثات</div></div>
+            <div class="stat-card"><div class="stat-value">${totalUnans}</div><div class="stat-label">أسئلة غير مجابة</div></div>
+            <div class="stat-card"><div class="stat-value">${avgConf}%</div><div class="stat-label">متوسط الثقة</div></div>`;
+
+        const topQDiv = document.getElementById('topQuestions');
+        const byUsage = [...knowledgeItems].sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0)).slice(0, 5);
+        topQDiv.innerHTML = byUsage.length ? byUsage.map(k => `<p style="padding:.3rem;border-bottom:1px solid var(--border);font-size:.85rem;">${escapeHtml((k.question || '').substring(0, 50))} <small style="color:var(--text-secondary)">(${k.usageCount || 0})</small></p>`).join('') : '<p style="color:var(--text-secondary);">لا توجد بيانات كافية.</p>';
+        const topADiv = document.getElementById('topAnswers');
+        const byHelpful = [...knowledgeItems].sort((a, b) => (b.helpfulCount || 0) - (a.helpfulCount || 0)).slice(0, 5);
+        topADiv.innerHTML = byHelpful.length ? byHelpful.map(k => `<p style="padding:.3rem;border-bottom:1px solid var(--border);font-size:.85rem;">${escapeHtml((k.question || '').substring(0, 50))} <small style="color:var(--text-secondary)">(👍 ${k.helpfulCount || 0})</small></p>`).join('') : '<p style="color:var(--text-secondary);">لا توجد بيانات كافية.</p>';
+        const confDiv = document.getElementById('avgConfidence');
+        if (confDiv) confDiv.textContent = `${avgConf}%`;
+        const recentDiv = document.getElementById('recentActivity');
+        recentDiv.innerHTML = '';
+        const auditSnap = await getDocs(query(collection(db, 'auditLogs'), orderBy('createdAt', 'desc'), limit(10)));
+        auditSnap.forEach(d => {
+            const log = d.data();
+            const p = document.createElement('p');
+            p.style.cssText = 'padding:.3rem;border-bottom:1px solid var(--border);font-size:.85rem;';
+            p.textContent = `${log.action || 'عملية'} - ${timeAgo(log.createdAt)}`;
+            recentDiv.appendChild(p);
+        });
+        if (auditSnap.empty) recentDiv.innerHTML = '<p style="color:var(--text-secondary);">لا توجد نشاطات بعد.</p>';
+    } catch (e) {
+        console.error('Dashboard load error:', e);
+        statsDiv.innerHTML = `<p style="color:var(--error);">${firestoreErrorMessage(e, 'خطأ في تحميل البيانات.')}</p>`;
+    }
+}
+
+// ============ ANALYTICS ============
 async function loadAnalytics() {
+    if (!isOwner()) {
+        document.getElementById('analyticsStats').innerHTML = '<div class="empty-state"><p>⚠️ هذه الصفحة متاحة للمالك فقط.</p></div>';
+        return;
+    }
     const statsDiv = document.getElementById('analyticsStats');
     const chartDiv = document.getElementById('analyticsChart');
     const ratioDiv = document.getElementById('helpfulRatio');
@@ -2210,7 +2311,6 @@ async function loadAnalytics() {
             <div class="stat-card"><div class="stat-value">${totalUnhelpful}</div><div class="stat-label">تقييمات غير مفيدة</div></div>
             <div class="stat-card"><div class="stat-value">${unans.length}</div><div class="stat-label">أسئلة غير مجابة</div></div>`;
 
-        // Activity over the last 7 days, based on unanswered-question timestamps.
         const days = [];
         for (let i = 6; i >= 0; i--) {
             const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0);
@@ -2234,68 +2334,18 @@ async function loadAnalytics() {
         audits.forEach(a => { const key = a.userRole || 'user'; byUser[key] = (byUser[key] || 0) + 1; });
         const entries = Object.entries(byUser);
         activityDiv.innerHTML = entries.length ? entries.map(([role, count]) => `<p style="padding:.3rem;border-bottom:1px solid var(--border);font-size:.85rem;">${escapeHtml(role)}: ${count} عملية</p>`).join('') : '<p style="color:var(--text-secondary);">لا توجد نشاطات بعد.</p>';
-    } catch (e) { console.error(e); statsDiv.innerHTML = '<p style="color:var(--error);">خطأ في التحميل.</p>'; }
-}
-
-async function loadDashboardData() {
-    const statsDiv = document.getElementById('dashStats');
-    if (!statsDiv) return;
-    statsDiv.innerHTML = '<div class="skeleton" style="height:80px;"></div>'.repeat(6);
-    try {
-        // Real-time aggregate counts (no dependency on a separate "statistics" collection).
-        const [usersCount, knowledgeSnap, pendingSuggCount, convsCount, unansCount] = await Promise.all([
-            getCountFromServer(collection(db, 'users')),
-            getDocs(query(collection(db, 'knowledge'), limit(500))),
-            getCountFromServer(query(collection(db, 'suggestions'), where('status', '==', 'pending'))),
-            getCountFromServer(collection(db, 'conversations')),
-            getCountFromServer(collection(db, 'unansweredQuestions'))
-        ]);
-        const totalUsers = usersCount.data().count;
-        const knowledgeItems = [];
-        knowledgeSnap.forEach(d => knowledgeItems.push({ id: d.id, ...d.data() }));
-        const totalKnowledge = knowledgeItems.length;
-        const pendingSugg = pendingSuggCount.data().count;
-        const totalConvs = convsCount.data().count;
-        const totalUnans = unansCount.data().count;
-        const avgConf = totalKnowledge ? Math.round(knowledgeItems.reduce((s, k) => s + (k.qualityScore || 0), 0) / totalKnowledge * 10) : 0;
-
-        statsDiv.innerHTML = `
-            <div class="stat-card"><div class="stat-value">${totalUsers}</div><div class="stat-label">المستخدمون</div></div>
-            <div class="stat-card"><div class="stat-value">${totalKnowledge}</div><div class="stat-label">عناصر المعرفة</div></div>
-            <div class="stat-card"><div class="stat-value">${pendingSugg}</div><div class="stat-label">اقتراحات معلقة</div></div>
-            <div class="stat-card"><div class="stat-value">${totalConvs}</div><div class="stat-label">المحادثات</div></div>
-            <div class="stat-card"><div class="stat-value">${totalUnans}</div><div class="stat-label">أسئلة غير مجابة</div></div>
-            <div class="stat-card"><div class="stat-value">${avgConf}%</div><div class="stat-label">متوسط الثقة</div></div>`;
-
-        // Top questions ranked by usage, top answers ranked by helpful ratings.
-        const topQDiv = document.getElementById('topQuestions');
-        const byUsage = [...knowledgeItems].sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0)).slice(0, 5);
-        topQDiv.innerHTML = byUsage.length ? byUsage.map(k => `<p style="padding:.3rem;border-bottom:1px solid var(--border);font-size:.85rem;">${escapeHtml((k.question || '').substring(0, 50))} <small style="color:var(--text-secondary)">(${k.usageCount || 0})</small></p>`).join('') : '<p style="color:var(--text-secondary);">لا توجد بيانات كافية.</p>';
-        const topADiv = document.getElementById('topAnswers');
-        const byHelpful = [...knowledgeItems].sort((a, b) => (b.helpfulCount || 0) - (a.helpfulCount || 0)).slice(0, 5);
-        topADiv.innerHTML = byHelpful.length ? byHelpful.map(k => `<p style="padding:.3rem;border-bottom:1px solid var(--border);font-size:.85rem;">${escapeHtml((k.question || '').substring(0, 50))} <small style="color:var(--text-secondary)">(👍 ${k.helpfulCount || 0})</small></p>`).join('') : '<p style="color:var(--text-secondary);">لا توجد بيانات كافية.</p>';
-        const confDiv = document.getElementById('avgConfidence');
-        if (confDiv) confDiv.textContent = `${avgConf}%`;
-        const recentDiv = document.getElementById('recentActivity');
-        recentDiv.innerHTML = '';
-        // Fetch recent audit logs
-        const auditSnap = await getDocs(query(collection(db, 'auditLogs'), orderBy('createdAt', 'desc'), limit(10)));
-        auditSnap.forEach(d => {
-            const log = d.data();
-            const p = document.createElement('p');
-            p.style.cssText = 'padding:.3rem;border-bottom:1px solid var(--border);font-size:.85rem;';
-            p.textContent = `${log.action || 'عملية'} - ${timeAgo(log.createdAt)}`;
-            recentDiv.appendChild(p);
-        });
-        if (auditSnap.empty) recentDiv.innerHTML = '<p style="color:var(--text-secondary);">لا توجد نشاطات بعد.</p>';
     } catch (e) {
-        console.error('Dashboard load error:', e);
-        statsDiv.innerHTML = `<p style="color:var(--error);">${escapeHtml(firestoreErrorMessage(e, 'خطأ في تحميل البيانات.'))}</p>`;
+        console.error(e);
+        statsDiv.innerHTML = '<p style="color:var(--error);">خطأ في التحميل.</p>';
     }
 }
 
 // ============ USERS MANAGEMENT (Owner) ============
 async function loadUsers() {
+    if (!isOwner()) {
+        document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="6">غير مصرح لك بعرض المستخدمين.</td></tr>';
+        return;
+    }
     const tbody = document.getElementById('usersTableBody');
     const empty = document.getElementById('usersEmpty');
     if (!tbody) return;
@@ -2333,15 +2383,23 @@ async function loadUsers() {
                 await logAudit('Changed role', uid);
             } catch (e) { console.error(e); toast('خطأ', 'error'); }
         };
-    } catch (e) { console.error(e); tbody.innerHTML = ''; empty.style.display = ''; }
+    } catch (e) {
+        console.error(e);
+        tbody.innerHTML = '';
+        empty.style.display = '';
+        toast('خطأ في تحميل المستخدمين', 'error');
+    }
 }
-
 
 // ============ MODERATOR MANAGEMENT (OWNER ONLY) ============
 async function loadModerators() {
+    if (!isOwner()) {
+        document.getElementById('moderatorsGrid').innerHTML = '<div class="empty-state"><p>⚠️ هذه الصفحة متاحة للمالك فقط.</p></div>';
+        return;
+    }
     const grid = document.getElementById('moderatorsGrid');
     const empty = document.getElementById('moderatorsEmpty');
-    if (!grid || userRole !== 'owner') return;
+    if (!grid) return;
 
     grid.innerHTML = '<div class="skeleton" style="height:120px;border-radius:12px;"></div>';
     try {
@@ -2508,6 +2566,10 @@ function showAddModerator() {
 
 // ============ NOTIFICATIONS ============
 async function loadNotifications() {
+    if (!isOwner()) {
+        document.getElementById('notifList').innerHTML = '<div class="empty-state"><p>⚠️ هذه الصفحة متاحة للمالك فقط.</p></div>';
+        return;
+    }
     const container = document.getElementById('notifList');
     if (!container) return;
     container.innerHTML = '<div class="skeleton" style="height:50px;margin-bottom:.5rem;"></div>';
@@ -2557,12 +2619,15 @@ async function logAudit(action, itemId, before = null, after = null) {
             createdAt: serverTimestamp()
         });
     } catch (e) {
-        // Audit logging is secondary; never block the primary operation.
         console.warn('Audit log skipped:', e);
     }
 }
 
 async function loadAuditLogs() {
+    if (!isOwner()) {
+        document.getElementById('auditTableBody').innerHTML = '<tr><td colspan="5">غير مصرح لك بعرض السجلات.</td></tr>';
+        return;
+    }
     const tbody = document.getElementById('auditTableBody');
     const empty = document.getElementById('auditEmpty');
     if (!tbody) return;
@@ -2655,6 +2720,10 @@ async function loadMyBot() {
 
 // ============ RATINGS (Owner) ============
 async function loadRatings() {
+    if (!isOwner()) {
+        document.getElementById('ratingsStats').innerHTML = '<div class="empty-state"><p>⚠️ هذه الصفحة متاحة للمالك فقط.</p></div>';
+        return;
+    }
     const statsDiv = document.getElementById('ratingsStats');
     const topSearchedDiv = document.getElementById('topSearchedList');
     const topRatedDiv = document.getElementById('topRatedList');
@@ -2673,7 +2742,6 @@ async function loadRatings() {
             <div class="stat-card"><div class="stat-value">${totalUnhelpful}</div><div class="stat-label">تقييمات غير مفيدة</div></div>
             <div class="stat-card"><div class="stat-value">${ratio}%</div><div class="stat-label">نسبة الرضا</div></div>`;
 
-        // Most searched: rank by usageCount.
         const bySearch = [...items].sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0)).slice(0, 10);
         topSearchedDiv.innerHTML = bySearch.length ? bySearch.map(k => `<div class="notif-item"><p style="font-size:.85rem;flex:1;">${escapeHtml((k.question || '').substring(0, 60))}</p><span class="tag tag-active">${k.usageCount || 0} بحث</span></div>`).join('') : '<p style="color:var(--text-secondary);">لا توجد بيانات كافية.</p>';
 
@@ -2684,6 +2752,146 @@ async function loadRatings() {
         topRatedDiv.innerHTML = topRated.length ? topRated.map(k => `<div class="notif-item"><p style="font-size:.85rem;flex:1;">${escapeHtml((k.question || '').substring(0, 60))}</p><span class="tag tag-approved">${Math.round(k.ratio * 100)}%</span></div>`).join('') : '<p style="color:var(--text-secondary);">لا توجد تقييمات بعد.</p>';
         lowRatedDiv.innerHTML = lowRated.length ? lowRated.map(k => `<div class="notif-item"><p style="font-size:.85rem;flex:1;">${escapeHtml((k.question || '').substring(0, 60))}</p><span class="tag tag-rejected">${Math.round(k.ratio * 100)}%</span></div>`).join('') : '<p style="color:var(--text-secondary);">لا توجد تقييمات بعد.</p>';
     } catch (e) { console.error(e); statsDiv.innerHTML = '<p style="color:var(--error);">خطأ في التحميل.</p>'; }
+}
+
+// ============ ADMIN CONTACT ============
+async function loadAdminContactList() {
+    const container = document.getElementById('adminContactList');
+    if (!container) return;
+    if (!isStaff()) {
+        container.innerHTML = '<p style="color:var(--text-secondary);">⚠️ هذه الصفحة متاحة للمشرفين والمالك فقط.</p>';
+        return;
+    }
+    container.innerHTML = '<div class="skeleton" style="height:50px;"></div>';
+    try {
+        const snap = await getDocs(collection(db, 'admins'));
+        container.innerHTML = '';
+        const items = [];
+        snap.forEach(d => { if (d.id !== currentUser.uid) items.push({ id: d.id, ...d.data() }); });
+        if (items.length === 0) { container.innerHTML = '<p style="color:var(--text-secondary);">لا يوجد مشرفون آخرون حاليًا.</p>'; return; }
+        for (const item of items) {
+            const profSnap = await getDoc(doc(db, 'profiles', item.id));
+            const name = profSnap.exists() ? (profSnap.data().name || item.email) : item.email;
+            const div = document.createElement('div');
+            div.className = 'notif-item';
+            div.style.cssText = 'cursor:pointer;justify-content:space-between;';
+            div.innerHTML = `<div style="display:flex;gap:.6rem;align-items:center;"><span class="notif-dot" style="background:var(--info);"></span><p style="font-size:.9rem;">${escapeHtml(name || 'مستخدم')} <span class="tag tag-active">${escapeHtml(item.role || '')}</span></p></div>`;
+            div.addEventListener('click', () => { openDmWith(item.id, name); showPage('messages'); });
+            container.appendChild(div);
+        }
+    } catch (e) {
+        console.error(e);
+        container.innerHTML = '<p style="color:var(--error);">خطأ في التحميل.</p>';
+    }
+}
+
+// ============ MESSAGING SYSTEM (user-to-user) ============
+function dmIdFor(a, b) { return [a, b].sort().join('_'); }
+
+async function ensureDmDoc(peerUid, peerName) {
+    const dmId = dmIdFor(currentUser.uid, peerUid);
+    const ref = doc(db, 'dms', dmId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+        const myProfile = await getDoc(doc(db, 'profiles', currentUser.uid));
+        const myName = myProfile.exists() ? (myProfile.data().name || currentUser.email) : currentUser.email;
+        await setDoc(ref, {
+            participants: [currentUser.uid, peerUid],
+            participantNames: { [currentUser.uid]: myName, [peerUid]: peerName || '' },
+            lastMessage: '',
+            updatedAt: serverTimestamp(),
+            createdAt: serverTimestamp()
+        });
+    }
+    return dmId;
+}
+
+async function openDmWith(peerUid, peerName) {
+    if (!currentUser || peerUid === currentUser.uid) return;
+    currentDmPeerId = peerUid;
+    const dmId = await ensureDmDoc(peerUid, peerName);
+    document.getElementById('dmHeader').textContent = peerName || 'محادثة';
+    if (dmUnsubscribe) { dmUnsubscribe(); dmUnsubscribe = null; }
+    const msgsQuery = query(collection(db, 'dms', dmId, 'messages'), orderBy('createdAt', 'asc'), limit(200));
+    dmUnsubscribe = onSnapshot(msgsQuery, (snap) => {
+        const container = document.getElementById('dmMessages');
+        if (!container) return;
+        container.innerHTML = '';
+        snap.forEach(d => {
+            const m = d.data();
+            const div = document.createElement('div');
+            div.className = `message ${m.senderId === currentUser.uid ? 'user' : 'assistant'}`;
+            div.textContent = m.text || '';
+            container.appendChild(div);
+        });
+        container.scrollTop = container.scrollHeight;
+    });
+    loadDmContactsList();
+}
+
+async function loadMessagesPage() {
+    if (!currentUser) { document.getElementById('dmMessages').innerHTML = '<div class="empty-state"><p>يجب تسجيل الدخول للتواصل.</p></div>'; return; }
+    loadDmContactsList();
+    const search = document.getElementById('msgUserSearch');
+    if (search && !search.dataset.wired) {
+        search.dataset.wired = '1';
+        search.addEventListener('input', debounce(async () => {
+            const term = search.value.trim();
+            const resultsDiv = document.getElementById('msgSearchResults');
+            if (!term) { resultsDiv.innerHTML = ''; return; }
+            try {
+                const snap = await getDocs(query(collection(db, 'profiles'), orderBy('name'), limit(100)));
+                const termLower = term.toLowerCase();
+                const matches = [];
+                snap.forEach(d => {
+                    if (d.id === currentUser.uid) return;
+                    const p = d.data();
+                    if ((p.name || '').toLowerCase().includes(termLower)) matches.push({ id: d.id, ...p });
+                });
+                resultsDiv.innerHTML = matches.slice(0, 10).map(m => `<div class="notif-item" style="cursor:pointer;" data-uid="${m.id}" data-name="${escapeHtml(m.name || '')}"><span class="notif-dot" style="background:var(--success);"></span><div><p style="font-size:.85rem;">${escapeHtml(m.name || 'مستخدم')}</p></div></div>`).join('') || '<p style="padding:.5rem;color:var(--text-secondary);font-size:.82rem;">لا نتائج.</p>';
+                resultsDiv.querySelectorAll('[data-uid]').forEach(el => {
+                    el.addEventListener('click', () => { openDmWith(el.dataset.uid, el.dataset.name); resultsDiv.innerHTML=''; search.value=''; });
+                });
+            } catch (e) { console.error(e); }
+        }, 350));
+    }
+}
+
+async function loadDmContactsList() {
+    if (!currentUser) return;
+    const container = document.getElementById('dmContactsList');
+    if (!container) return;
+    try {
+        const snap = await getDocs(query(collection(db, 'dms'), where('participants', 'array-contains', currentUser.uid), orderBy('updatedAt', 'desc'), limit(30)));
+        container.innerHTML = '';
+        if (snap.empty) { container.innerHTML = '<p style="padding:.6rem;color:var(--text-secondary);font-size:.82rem;">لا توجد محادثات بعد.</p>'; return; }
+        snap.forEach(d => {
+            const dm = d.data();
+            const peerId = (dm.participants || []).find(p => p !== currentUser.uid);
+            const peerName = (dm.participantNames && dm.participantNames[peerId]) || 'مستخدم';
+            const div = document.createElement('div');
+            div.className = 'notif-item';
+            div.style.cursor = 'pointer';
+            div.innerHTML = `<span class="notif-dot"></span><div><p style="font-size:.85rem;">${escapeHtml(peerName)}</p><small style="color:var(--text-secondary)">${escapeHtml((dm.lastMessage || '').substring(0, 40))}</small></div>`;
+            div.addEventListener('click', () => openDmWith(peerId, peerName));
+            container.appendChild(div);
+        });
+    } catch (e) { console.error(e); }
+}
+
+async function sendDmMessage() {
+    const input = document.getElementById('dmInput');
+    const text = input.value.trim();
+    if (!text || !currentUser || !currentDmPeerId) return;
+    input.value = '';
+    const dmId = dmIdFor(currentUser.uid, currentDmPeerId);
+    try {
+        await addDoc(collection(db, 'dms', dmId, 'messages'), { senderId: currentUser.uid, text, createdAt: serverTimestamp() });
+        await setDoc(doc(db, 'dms', dmId), { lastMessage: text, updatedAt: serverTimestamp() }, { merge: true });
+    } catch (e) {
+        console.error('DM send error:', e);
+        toast(firestoreErrorMessage(e, 'تعذر إرسال الرسالة.'), 'error');
+    }
 }
 
 // ============ AUTH FUNCTIONS ============
@@ -2763,14 +2971,14 @@ function setupAuthEvents() {
         if (!email) { toast('أدخل البريد', 'warning'); return; }
         const btn = document.getElementById('resetSubmit');
         showLoading(btn, 'جاري الإرسال...');
-        try { 
-            await sendPasswordResetEmail(auth, email); 
-            toast('تم إرسال رابط الاستعادة'); 
-        } catch (e) { 
-            console.error(e); 
+        try {
+            await sendPasswordResetEmail(auth, email);
+            toast('تم إرسال رابط الاستعادة');
+        } catch (e) {
+            console.error(e);
             let msg = 'خطأ في الإرسال.';
             if (e.code === 'auth/user-not-found') msg = 'المستخدم غير موجود.';
-            toast(msg, 'error'); 
+            toast(msg, 'error');
         } finally { hideLoading(btn); }
     });
 }
@@ -2786,15 +2994,12 @@ function initApp() {
     setupMessagingEvents();
     setupAuth();
 
-    // Developer contact — WhatsApp deep link, available to everyone from the sidebar.
     document.getElementById('devContactSidebar')?.addEventListener('click', () => {
         window.open('https://wa.me/201103286334', '_blank', 'noopener');
     });
 
-    // Show landing by default
     showPage('landing');
 
-    // Off-canvas sidebar: closed by default, opened by the 3-lines button.
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     const mobileToggle = document.getElementById('mobileToggle');
@@ -2818,28 +3023,23 @@ function initApp() {
         if (e.key === 'Escape') setSidebarOpen(false);
     });
 
-    // Keep the old collapse control harmless for compatibility.
     document.getElementById('sidebarCollapse')?.addEventListener('click', () => setSidebarOpen(false));
 
-    // Dark mode toggle from settings
     document.getElementById('sDarkMode')?.addEventListener('change', (e) => {
         applyDarkMode(e.target.checked);
     });
 
-    // Landing page buttons
     document.getElementById('landingChatBtn')?.addEventListener('click', () => {
         if (!currentUser) { showPage('auth'); return; }
         showPage('chat');
     });
     document.getElementById('landingLoginBtn')?.addEventListener('click', () => showPage('auth'));
 
-    // Debug toggle
     document.getElementById('debugToggle')?.addEventListener('click', () => {
         const panel = document.getElementById('debugPanel');
         if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
     });
 
-    // Logout
     document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         try { await signOut(auth); toast('تم تسجيل الخروج'); } catch (e) { toast('خطأ', 'error'); }
     });
@@ -2847,7 +3047,6 @@ function initApp() {
         try { await signOut(auth); toast('تم تسجيل الخروج'); } catch (e) { toast('خطأ', 'error'); }
     });
 
-    // Clear memory
     document.getElementById('clearMemoryBtn')?.addEventListener('click', async () => {
         if (!currentUser) return;
         if (!confirm('هل تريد مسح ذاكرتك الشخصية؟')) return;
@@ -2855,11 +3054,9 @@ function initApp() {
         toast('تم مسح الذاكرة');
     });
 
-    // Online/Offline listeners
     window.addEventListener('online', () => { isOnline = true; toast('✓ عاد الاتصال'); });
     window.addEventListener('offline', () => { isOnline = false; toast('⚠️ لا يوجد اتصال بالإنترنت', 'warning'); });
 
-    // Save chat input on offline
     const chatInput = document.getElementById('chatInput');
     chatInput?.addEventListener('input', () => {
         if (!isOnline) localStorage.setItem('draftMessage', chatInput.value);
@@ -2869,138 +3066,10 @@ function initApp() {
         localStorage.removeItem('draftMessage');
     }
 
-    console.log('✅ المساعد المعرفي الذكي - Production Ready • v2.0.0');
+    console.log('✅ المساعد المعرفي الذكي - v2.0.0 (معالج الأخطاء)');
     console.log('📚 Knowledge Engine: جاهز');
     console.log('🧠 Memory System: جاهز');
     console.log('🔐 Authentication: جاهز');
-}
-
-function setupNavigation() {
-    document.querySelectorAll('.nav-link').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const page = btn.dataset.page;
-            const moderatorPages = ['knowledge','suggestions','unanswered'];
-            const ownerPages = ['dashboard','analytics','notifications','audit','upgrades','health','users','moderators'];
-
-            if (moderatorPages.includes(page) && !['moderator','admin','owner'].includes(userRole)) {
-                toast('هذه الصفحة متاحة للمشرفين والمالك فقط', 'error'); return;
-            }
-            if (ownerPages.includes(page) && userRole !== 'owner') {
-                toast('هذه الصفحة متاحة للمالك فقط', 'error'); return;
-            }
-            showPage(page);
-        });
-    });
-}
-
-function setupChatEvents() {
-    document.getElementById('sendBtn')?.addEventListener('click', sendMessage);
-    document.getElementById('chatInput')?.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-    });
-    document.getElementById('newChatBtn')?.addEventListener('click', () => { createNewConversation(); });
-    document.getElementById('chatHistoryBtn')?.addEventListener('click', showConversationHistory);
-    document.getElementById('suggestImproveBtn')?.addEventListener('click', () => {
-        const lastAssistant = [...document.querySelectorAll('.message.assistant')].pop();
-        if (lastAssistant) showSuggestImproveModal({ content: lastAssistant.textContent });
-        else toast('لا توجد رسالة لتحسينها', 'warning');
-    });
-}
-
-function setupAdminEvents() {
-    document.getElementById('addKnowledgeBtn')?.addEventListener('click', showAddKnowledge);
-    document.getElementById('exportKnowledgeBtn')?.addEventListener('click', exportKnowledge);
-    document.getElementById('importKnowledgeBtn')?.addEventListener('click', importKnowledge);
-    document.getElementById('knowledgeTesterBtn')?.addEventListener('click', showKnowledgeTester);
-    document.getElementById('mergeKnowledgeBtn')?.addEventListener('click', showMergeKnowledge);
-    document.getElementById('addModeratorBtn')?.addEventListener('click', showAddModerator);
-    document.getElementById('knowledgeSearch')?.addEventListener('input', debounce(() => {
-        knowledgeLastVisible = null;
-        loadKnowledgeList();
-    }, 400));
-    document.getElementById('knowledgeFilter')?.addEventListener('change', () => {
-        knowledgeLastVisible = null;
-        loadKnowledgeList();
-    });
-    document.getElementById('addUpgradeBtn')?.addEventListener('click', async () => {
-        const version = document.getElementById('upVersion').value.trim();
-        const title = document.getElementById('upTitle').value.trim();
-        const desc = document.getElementById('upDesc').value.trim();
-        const status = document.getElementById('upStatus').value;
-        const type = document.getElementById('upType').value;
-        if (!version || !title) { toast('أدخل الإصدار والعنوان', 'warning'); return; }
-        try {
-            await addDoc(collection(db, 'upgrades'), {
-                version, title, description: desc, status, type,
-                createdBy: currentUser.uid, createdAt: serverTimestamp()
-            });
-            toast('تمت إضافة الترقية');
-            document.getElementById('upVersion').value = '';
-            document.getElementById('upTitle').value = '';
-            document.getElementById('upDesc').value = '';
-            loadUpgrades();
-        } catch (e) { console.error(e); toast('خطأ', 'error'); }
-    });
-}
-
-function setupSettingsEvents() {
-    document.getElementById('saveAISettings')?.addEventListener('click', async () => {
-        const threshold = parseFloat(document.getElementById('sThreshold').value) || 60;
-        const kwWeight = parseFloat(document.getElementById('sKeywordWeight').value) || 30;
-        const simWeight = parseFloat(document.getElementById('sSimilarityWeight').value) || 25;
-        const ctxWeight = parseFloat(document.getElementById('sContextWeight').value) || 15;
-        KnowledgeEngine.threshold = threshold;
-        KnowledgeEngine.keywordWeight = kwWeight;
-        KnowledgeEngine.similarityWeight = simWeight;
-        KnowledgeEngine.contextWeight = ctxWeight;
-        try {
-            await setDoc(doc(db, 'settings', 'ai'), { threshold, keywordWeight: kwWeight, similarityWeight: simWeight, contextWeight: ctxWeight, updatedAt: serverTimestamp() }, { merge: true });
-            toast('تم حفظ إعدادات الذكاء');
-        } catch (e) { console.error(e); toast('خطأ', 'error'); }
-    });
-    document.getElementById('saveSiteSettings')?.addEventListener('click', async () => {
-        const siteName = document.getElementById('sSiteName').value.trim();
-        const welcome = document.getElementById('sWelcome').value.trim();
-        const noAnswer = document.getElementById('sNoAnswer').value.trim();
-        const darkMode = document.getElementById('sSiteDarkDefault').checked;
-        try {
-            await setDoc(doc(db, 'settings', 'site'), { siteName, welcomeMessage: welcome, noAnswerMessage: noAnswer, darkMode, updatedAt: serverTimestamp() }, { merge: true });
-            toast('تم حفظ إعدادات الموقع');
-        } catch (e) { console.error(e); toast('خطأ', 'error'); }
-    });
-    document.getElementById('saveAppearanceBtn')?.addEventListener('click', async () => {
-        if (!currentUser) return;
-        const themeColor = document.getElementById('sThemeColor').value;
-        const fontSize = document.getElementById('sFontSize').value;
-        const darkMode = document.getElementById('sDarkMode').checked;
-        try {
-            await setDoc(doc(db, 'users', currentUser.uid), { themeColor, fontSize, darkMode, updatedAt: serverTimestamp() }, { merge: true });
-            currentUserData.themeColor = themeColor;
-            currentUserData.fontSize = fontSize;
-            currentUserData.darkMode = darkMode;
-            applyThemeColor(themeColor);
-            applyFontSize(fontSize);
-            applyDarkMode(darkMode);
-            toast('تم حفظ المظهر');
-        } catch (e) { console.error(e); toast('خطأ في حفظ المظهر', 'error'); }
-    });
-    document.getElementById('saveDebugMode')?.addEventListener('click', async () => {
-        const enabled = document.getElementById('sDebugMode').checked;
-        debugMode = enabled;
-        try {
-            await setDoc(doc(db, 'settings', 'debug'), { enabled, updatedAt: serverTimestamp() }, { merge: true });
-            const panel = document.getElementById('debugPanel');
-            if (panel) panel.style.display = enabled ? 'block' : 'none';
-            toast(enabled ? 'تم تفعيل وضع التصحيح' : 'تم إيقاف وضع التصحيح');
-        } catch (e) { console.error(e); toast('خطأ', 'error'); }
-    });
-    document.getElementById('saveSecuritySettings')?.addEventListener('click', async () => {
-        const allowRegister = document.getElementById('sAllowRegister').checked;
-        try {
-            await setDoc(doc(db, 'settings', 'security'), { allowRegister, updatedAt: serverTimestamp() }, { merge: true });
-            toast('تم حفظ إعدادات الأمان');
-        } catch (e) { console.error(e); toast('خطأ', 'error'); }
-    });
 }
 
 // Expose functions for inline onclick
@@ -3008,6 +3077,7 @@ window._openConv = (id) => { currentConversationId = id; closeModal(); loadConve
 window._delConv = async (id) => { await deleteConversationWithMessages(id); closeModal(); };
 window._editK = async (id) => { await showEditKnowledge(id); };
 window._delK = async (id) => {
+    if (!isStaff()) { toast('غير مصرح', 'error'); return; }
     if (!confirm('حذف هذا العنصر؟')) return;
     try { await deleteDoc(doc(db, 'knowledge', id)); toast('تم الحذف'); loadKnowledgeList(); await logAudit('Deleted knowledge', id); } catch (e) { toast('خطأ', 'error'); }
 };
@@ -3046,7 +3116,6 @@ window._changeRole = async (uid, newRole) => {
     await setModeratorRole(uid, newRole);
 };
 
-// Global diagnostics: keep real Firebase errors visible in the browser console.
 window.addEventListener('unhandledrejection', (event) => {
     const reason = event?.reason;
     if (reason?.code?.startsWith?.('permission-denied')) {
@@ -3054,7 +3123,6 @@ window.addEventListener('unhandledrejection', (event) => {
     }
 });
 
-// Start the app
 document.addEventListener('DOMContentLoaded', initApp);
 </script>
 </body>
