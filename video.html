@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="description" content="منصة أنمي وقصص مصورة وفيديوهات وأفلام">
-<title>الرئيسية | Anime Library</title>
+<title>الفيديوهات | Anime Library</title>
 <style>
 :root{
  --bg:#070711;--panel:#111122;--panel2:#17172c;--text:#f6f4ff;--muted:#a8a5bd;
@@ -87,27 +87,8 @@ footer{text-align:center;color:#77738c;padding:35px}
 <div class="overlay" id="overlay"></div>
 <aside class="sidebar" id="sidebar"></aside>
 <main class="main">
-<section class="hero">
-<h1>مكتبة الأنمي والمانجا 🍥</h1>
-<p>منصة مرتبة لعرض القصص المصورة، الفيديوهات، الريلز والأفلام. كل عمل له مجلده الخاص داخل Gojo، وكل صفحة صورة يمكن أن تحتوي على الصورة والأحداث والشرح.</p>
-<div class="actions">
-<a class="btn" href="img.html">🖼️ استكشف القصص</a>
-<a class="btn secondary" href="video.html">🎬 الفيديوهات</a>
-</div>
-</section>
-<section class="section">
-<div class="section-head"><h2>⚡ الأقسام</h2></div>
-<div class="grid">
-<a class="card" href="img.html"><div class="media">🖼️</div><div class="card-body"><h3>قصص الصور</h3><p>صفحات من 1 إلى 100 مع أحداث وشرح لكل صفحة.</p></div></a>
-<a class="card" href="video.html"><div class="media">🎬</div><div class="card-body"><h3>الفيديوهات</h3><p>فيديوهات مع عنوان ووصف وأحداث.</p></div></a>
-<a class="card" href="relz.html"><div class="media">🎞️</div><div class="card-body"><h3>الريلز</h3><p>مقاطع قصيرة مرتبة حسب العمل.</p></div></a>
-<a class="card" href="film.html"><div class="media">🍿</div><div class="card-body"><h3>الأفلام</h3><p>أفلام مع بوستر ووصف وسنة ومدة.</p></div></a>
-</div>
-</section>
-<section class="section">
-<div class="section-head"><h2>🔥 الأكثر مشاهدة</h2><span class="badge" id="dbStatus">Firebase</span></div>
-<div id="popular" class="grid"></div>
-</section>
+<section class="hero"><h1>🎬 الفيديوهات</h1><p>الفيديوهات منظمة حسب العمل داخل <b>Gojo/video</b>، وكل مجلد يحتوي على ملف بيانات وفيديوهات العمل.</p></section>
+<section class="section"><div id="videos" class="grid"></div></section>
 </main>
 <footer>Anime Library • المحتوى منظم عبر Gojo • النظام عبر Yuta</footer>
 </div>
@@ -210,37 +191,15 @@ function closeModal(){
 window.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
 export { $, $$, setupShell, escapeHtml, searchItems, imageMedia, placeholder, openDetail, closeModal };
 
-import { imageWorks } from "./Gojo/img/index.js";
 import { videoWorks } from "./Gojo/video/index.js";
-import { reelWorks } from "./Gojo/relz/index.js";
-import { filmWorks } from "./Gojo/film/index.js";
-import { getTopStats } from "./Yuta/firebase.js";
-setupShell("index.html");
-$("#closeModal").onclick=closeModal;
-window.closeAnimeModal=closeModal;
-const all=[];
-imageWorks.forEach(w=>all.push(...w.pages.map(p=>({...p,id:`${w.id}-page-${p.number}`,type:"image",title:`${w.title} — ${p.number}`,description:p.description,events:p.events,image:p.image}))));
-all.push(...videoWorks,...reelWorks,...filmWorks);
-const box=$("#popular");
-async function renderPopular(){
-  let stats=[];
-  try{stats=await getTopStats(20)}catch{}
-  const ranked=stats.map(s=>({...s,_item:all.find(x=>x.id===s.itemId)})).filter(x=>x._item).slice(0,8);
-  const list=ranked.length?ranked:all.slice(0,8).map(x=>({views:0,_item:x}));
-  box.innerHTML=list.map(x=>`<article class="card"><div class="media">${x._item.image?imageMedia(x._item.image,x._item.title):placeholder(x._item.type==="film"?"🍿":"🎬")}</div><div class="card-body"><h3>${escapeHtml(x._item.title)}</h3><div class="meta"><span class="badge">👁️ ${x.views||0}</span></div></div></article>`).join("");
-  [...box.querySelectorAll(".card")].forEach((c,i)=>c.onclick=()=>{
-    const x=list[i]._item;
-    const media=x.image?imageMedia(x.image,x.title):x.film?`<video controls src="${x.film}"></video>`:x.video?`<video controls src="${x.video}"></video>`:x.reel?`<video controls src="${x.reel}"></video>`:placeholder();
-    openDetail({type:x.type||"image",item:x,mediaHtml:media});
-  });
+setupShell("video.html"); $("#closeModal").onclick=closeModal; window.closeAnimeModal=closeModal;
+const box=$("#videos");
+function render(list){
+ box.innerHTML=list.map(v=>`<article class="card"><div class="media">${v.thumbnail?imageMedia(v.thumbnail,v.title):placeholder("🎬")}</div><div class="card-body"><h3>${escapeHtml(v.title)}</h3><p>${escapeHtml(v.description)}</p><div class="meta"><span class="badge">🎬 فيديو</span></div></div></article>`).join("");
+ [...box.querySelectorAll(".card")].forEach((c,i)=>c.onclick=()=>{const v=list[i];openDetail({type:"video",item:v,mediaHtml:`<video controls preload="metadata" src="${v.video}"></video>`})});
 }
-renderPopular();
-$("#searchInput").oninput=e=>{
- const q=e.target.value.trim();
- if(!q)return;
- const hit=all.find(x=>JSON.stringify(x).toLowerCase().includes(q.toLowerCase()));
- if(hit) $("#popular").scrollIntoView({behavior:"smooth"});
-};
+render(videoWorks);
+$("#searchInput").oninput=e=>render(searchItems(videoWorks,e.target.value));
 
 </script>
 </body>

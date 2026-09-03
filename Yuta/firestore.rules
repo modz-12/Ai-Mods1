@@ -1,0 +1,53 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function validText(value, max) {
+      return value is string && value.size() > 0 && value.size() <= max;
+    }
+
+    match /stats/{statId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.views is number
+        && request.resource.data.likes is number;
+      allow update: if signedIn()
+        && request.resource.data.views is number
+        && request.resource.data.likes is number
+        && request.resource.data.views >= 0
+        && request.resource.data.likes >= 0;
+    }
+
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && validText(request.resource.data.text, 500)
+        && validText(request.resource.data.type, 30)
+        && validText(request.resource.data.itemId, 200);
+      allow delete: if signedIn()
+        && resource.data.userId == request.auth.uid;
+      allow update: if false;
+    }
+
+    match /reactions/{reactionId} {
+      allow read: if false;
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && validText(request.resource.data.type, 30)
+        && validText(request.resource.data.itemId, 200);
+      allow delete: if signedIn()
+        && resource.data.userId == request.auth.uid;
+      allow update: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
