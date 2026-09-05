@@ -1,4 +1,6 @@
-.DS_Store
-firebase-debug.log
 node_modules/
 .env
+uploads/*
+!uploads/.gitkeep
+data/*.json
+!data/.gitkeep

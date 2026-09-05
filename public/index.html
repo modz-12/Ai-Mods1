@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>المعرض</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <h1 id="site-name">المعرض</h1>
+  </div>
+
+  <nav class="filters" role="tablist" aria-label="تصفية الميديا">
+    <button class="filter-btn active" data-type="all">الكل</button>
+    <button class="filter-btn" data-type="image">صور</button>
+    <button class="filter-btn" data-type="video">فيديوهات</button>
+  </nav>
+
+  <div class="topbar-actions">
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="دور على عنوان..." />
+    </div>
+    <button class="btn-primary" id="open-add">أضف ميديا</button>
+  </div>
+</header>
+
+<main id="gallery-wrap">
+  <div id="gallery" class="gallery"></div>
+  <p id="empty-state" class="empty-state" hidden>مفيش حاجة هنا لسه. دوس "أضف ميديا" وابدأ.</p>
+  <button id="load-more" class="btn-secondary" hidden>حمّل أكتر</button>
+</main>
+
+<!-- لوحة الإضافة -->
+<div id="add-panel" class="panel" hidden>
+  <div class="panel-inner">
+    <div class="panel-head">
+      <h2>إضافة ميديا</h2>
+      <button class="icon-btn" id="close-add" aria-label="قفل">✕</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="upload">رفع من الجهاز</button>
+      <button class="tab-btn" data-tab="link">رابط</button>
+    </div>
+
+    <div id="tab-upload" class="tab-panel active">
+      <label id="drop-zone" class="drop-zone" for="file-input">
+        <span class="drop-zone-title">اسحب الملفات هنا أو دوس للاختيار</span>
+        <span class="drop-zone-sub">صور وفيديوهات — حتى ٢٠ ملف مرة واحدة</span>
+      </label>
+      <input type="file" id="file-input" multiple accept="image/*,video/*" hidden />
+      <input type="text" id="upload-title" placeholder="عنوان (اختياري)" />
+      <div id="file-list" class="file-list"></div>
+      <button class="btn-primary full" id="do-upload">ارفع</button>
+    </div>
+
+    <div id="tab-link" class="tab-panel">
+      <input type="url" id="link-url" placeholder="https://..." />
+      <input type="text" id="link-title" placeholder="عنوان (اختياري)" />
+      <div class="type-choice">
+        <label><input type="radio" name="link-type" value="auto" checked /> تلقائي</label>
+        <label><input type="radio" name="link-type" value="image" /> صورة</label>
+        <label><input type="radio" name="link-type" value="video" /> فيديو</label>
+      </div>
+      <button class="btn-primary full" id="do-link">أضف الرابط</button>
+    </div>
+
+    <p id="add-error" class="error-text" hidden></p>
+    <p id="add-progress" class="progress-text" hidden></p>
+  </div>
+</div>
+
+<!-- عارض الميديا الكبير -->
+<div id="lightbox" class="lightbox" hidden>
+  <button class="icon-btn lightbox-close" id="lightbox-close" aria-label="قفل">✕</button>
+  <button class="icon-btn lightbox-nav prev" id="lightbox-prev" aria-label="السابق">‹</button>
+  <div id="lightbox-content" class="lightbox-content"></div>
+  <button class="icon-btn lightbox-nav next" id="lightbox-next" aria-label="التالي">›</button>
+  <div class="lightbox-footer">
+    <span id="lightbox-title"></span>
+    <button class="icon-btn danger" id="lightbox-delete" title="حذف">حذف</button>
+  </div>
+</div>
+
+<!-- مطالبة كلمة السر -->
+<div id="password-modal" class="modal" hidden>
+  <div class="modal-inner">
+    <h3>كلمة السر مطلوبة</h3>
+    <p class="modal-sub">الموقع ده محمي؛ اكتب كلمة السر عشان تضيف أو تحذف.</p>
+    <input type="password" id="password-input" placeholder="كلمة السر" />
+    <p id="password-error" class="error-text" hidden></p>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="password-cancel">إلغاء</button>
+      <button class="btn-primary" id="password-confirm">دخول</button>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>
