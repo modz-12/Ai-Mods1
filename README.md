@@ -1,109 +1,30 @@
-# المعرض — موقع نشر صور وفيديوهات
+# MODZ Firebase Gallery
 
-موقع بسيط وقوي لعرض الصور والفيديوهات، بيدعم طريقتين للإضافة:
-- **رفع مباشر** من جهازك (سحب وإفلات أو اختيار ملفات، لأكتر من ملف مرة واحدة)
-- **روابط** من مواقع تانية (يوتيوب، فيميو، أو أي رابط صورة/فيديو مباشر)
+نسخة جاهزة للنشر على Vercel ومتصلة بمشروع Firebase `modz-11`.
 
-## المميزات
+## الخدمات المستخدمة
+- Firebase Authentication لتسجيل دخول الإدارة.
+- Cloud Firestore لحفظ بيانات الوسائط.
+- Firebase Storage لحفظ الصور والفيديوهات.
+- Firebase Analytics.
+- Vercel لاستضافة الواجهة.
 
-- عرض Masonry (شبكة متداخلة) للصور والفيديوهات بكل المقاسات
-- فلترة: الكل / صور / فيديوهات + بحث بالعنوان
-- عارض كبير (Lightbox) بالتنقل بالأسهم ولوحة المفاتيح
-- ترقيم صفحات من السيرفر (مش هيبطأ لو الميديا كتّرت)
-- حماية اختيارية بكلمة سر للإضافة والحذف
-- حد أقصى لحجم الملفات ونوعه (صور/فيديوهات بس) لحماية السيرفر
-- تحديد معدل الطلبات (Rate limiting) لمنع السبام
-- تصميم متجاوب (Responsive) يشتغل كويس على الموبايل
+## قبل النشر
+1. في Firebase Console فعّل Authentication > Email/Password.
+2. أنشئ مستخدم الإدارة.
+3. يجب إعطاء المستخدم custom claim باسم `admin=true` حتى تسمح القواعد بالرفع والحذف.
+4. فعّل Firestore.
+5. فعّل Storage. ملاحظة: Cloud Storage for Firebase يتطلب حالياً خطة Blaze.
+6. انشر القواعد الموجودة داخل `firebase/`.
 
-## التشغيل محلي
+### إعطاء admin claim
+Custom Claims لا تُعطى من كود المتصفح. استخدم Firebase Admin SDK من بيئة موثوقة، ثم:
+`admin.auth().setCustomUserClaims(USER_UID, {admin:true})`
 
-```bash
-npm install
-cp .env.example .env    # وعدّل القيم اللي جواه
-npm start
-```
+بعد تسجيل الدخول من جديد سيظهر زر إضافة الملفات.
 
-هيشتغل على `http://localhost:3000`.
+## Vercel
+ارفع مجلد المشروع إلى GitHub ثم Import Project في Vercel. لا تحتاج إلى Node server أو Express؛ المشروع Static بالكامل.
 
-## متغيرات البيئة (.env)
-
-| المتغير | الوصف | افتراضي |
-|---|---|---|
-| `PORT` | البورت | `3000` |
-| `ADMIN_PASSWORD` | كلمة سر لحماية الإضافة/الحذف. سيبها فاضية = الموقع مفتوح للكل | (فاضي) |
-| `MAX_FILE_SIZE_MB` | أقصى حجم للملف الواحد بالميجابايت | `200` |
-| `SITE_NAME` | اسم الموقع في الهيدر | `المعرض` |
-
-## النشر أونلاين
-
-### الخيار ١: Render / Railway (الأسهل)
-
-1. ارفع المجلد ده على GitHub repo.
-2. من Render أو Railway: أنشئ "Web Service" جديد واربطه بالـ repo.
-3. Build command: `npm install` — Start command: `npm start`.
-4. ضيف متغيرات البيئة من لوحة التحكم (`ADMIN_PASSWORD`, `SITE_NAME`, إلخ).
-5. **مهم**: ضيف Persistent Disk/Volume وحطه على المسارات `/uploads` و `/data`، عشان الصور والبيانات ميتمسحوش مع كل نشر جديد (deploy).
-
-### الخيار ٢: VPS خاص بيك (DigitalOcean, Hetzner, إلخ) مع Docker
-
-```bash
-git clone <repo-url>
-cd media-gallery
-cp .env.example .env   # وعدّل القيم
-docker compose up -d --build
-```
-
-بعد كده حط Nginx أو Caddy قدام السيرفر كـ reverse proxy لعمل HTTPS بشهادة مجانية من Let's Encrypt.
-
-### الخيار ٣: VPS بدون Docker
-
-```bash
-git clone <repo-url>
-cd media-gallery
-npm install --omit=dev
-cp .env.example .env
-node server.js
-```
-
-استخدم `pm2` أو `systemd` عشان السيرفر يفضل شغال ويرجع لوحده لو الجهاز اتعمله ريستارت:
-
-```bash
-npm install -g pm2
-pm2 start server.js --name media-gallery
-pm2 save
-pm2 startup
-```
-
-## هيكل المشروع
-
-```
-media-gallery/
-├── server.js          # السيرفر و الـ API
-├── store.js           # تخزين البيانات (ملف JSON بسيط، بدون قاعدة بيانات منفصلة)
-├── linkUtils.js        # تحليل روابط يوتيوب/فيميو والروابط المباشرة
-├── public/             # واجهة الموقع (HTML/CSS/JS)
-├── uploads/             # الملفات المرفوعة (لازم تتحفظ - Persistent Volume)
-├── data/media.json      # بيانات كل عنصر ميديا (لازم تتحفظ - Persistent Volume)
-└── .env                 # إعداداتك (متتشاركش الملف ده مع حد)
-```
-
-## تحسينات ممكنة مستقبلاً
-
-- توليد صور مصغّرة (thumbnails) تلقائي للفيديوهات المرفوعة عن طريق `ffmpeg`
-- نقل التخزين لخدمة سحابية (S3, Cloudflare R2) بدل تخزين الملفات على السيرفر نفسه
-- ألبومات/تصنيفات، ومستخدمين متعددين بصلاحيات مختلفة
-- الانتقال من ملف JSON لقاعدة بيانات حقيقية (Postgres/SQLite) لو الميديا زادت جداً (آلاف العناصر)
-
-## الأمان
-
-- لو نشرت الموقع أونلاين، **لازم** تحط `ADMIN_PASSWORD` قوي في `.env`، وإلا أي حد هيقدر يرفع أو يحذف.
-- الملف `.env` متترفعش على GitHub (متضاف في `.gitignore` بالفعل).
-
-
-## النسخة الجاهزة
-الملف المضغوط يحتوي على الواجهة الأمامية `public/` و`linkUtils.js` وملف البيانات الفارغ.
-كلمة السر المحلية الحالية في `.env` هي:
-
-`change-me-please`
-
-غيّرها قبل نشر الموقع للعامة، ولا ترفع `.env` إلى GitHub.
+## مهم
+ملف Firebase config الخاص بتطبيق الويب ليس سراً بحد ذاته. الحماية الحقيقية تكون بواسطة Authentication وFirestore/Storage Security Rules.

@@ -1,133 +1,85 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#090b12">
-  <meta name="description" content="معرض صور وفيديوهات سريع ومتجاوب">
-  <title>المعرض</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#08080d">
+  <meta name="description" content="معرض الوسائط - صور وفيديوهات">
+  <title>MODZ Gallery</title>
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <div class="bg-orb orb-a"></div><div class="bg-orb orb-b"></div>
-
+  <div id="toast"></div>
   <header class="topbar">
-    <div class="brand">
-      <div class="brand-icon">✦</div>
-      <div><h1 id="siteName">المعرض</h1><span>صور وفيديوهات</span></div>
+    <div class="brand"><span>✦</span><div><b>MODZ</b><small>MEDIA GALLERY</small></div></div>
+    <div class="actions">
+      <button id="themeBtn" class="iconBtn" title="الوضع">☾</button>
+      <button id="loginBtn" class="btn">دخول الإدارة</button>
+      <button id="addBtn" class="btn primary hidden">+ إضافة</button>
+      <button id="logoutBtn" class="btn danger hidden">خروج</button>
     </div>
-    <button id="themeBtn" class="icon-btn" title="تبديل المظهر">☾</button>
   </header>
 
-  <main class="container">
+  <main>
     <section class="hero">
       <div>
-        <span class="eyebrow">MEDIA GALLERY</span>
-        <h2>كل لحظاتك في مكان واحد</h2>
-        <p>ارفع الصور والفيديوهات مباشرة أو أضف روابط YouTube وVimeo والروابط المباشرة.</p>
+        <span class="eyebrow">FIREBASE • VERCEL</span>
+        <h1>معرض الوسائط</h1>
+        <p>ارفع الصور والفيديوهات واحفظها بشكل دائم عبر Firebase Storage وFirestore.</p>
       </div>
-      <button id="openAddBtn" class="primary-btn">＋ إضافة ميديا</button>
+      <div class="stats"><b id="count">0</b><span>ملف</span></div>
     </section>
 
     <section class="toolbar">
-      <div class="search-wrap">
-        <span>⌕</span>
-        <input id="searchInput" type="search" placeholder="ابحث بالعنوان...">
-      </div>
-      <div class="filters" role="tablist">
-        <button class="filter active" data-type="all">الكل</button>
-        <button class="filter" data-type="image">صور</button>
-        <button class="filter" data-type="video">فيديو</button>
-      </div>
+      <input id="search" placeholder="ابحث في العنوان والوصف...">
+      <select id="filter">
+        <option value="all">الكل</option><option value="image">صور</option><option value="video">فيديو</option>
+      </select>
     </section>
 
-    <section class="stats">
-      <span id="resultCount">0 عنصر</span>
-      <span id="statusText">جاري التحميل...</span>
-    </section>
-
-    <section id="gallery" class="gallery" aria-live="polite"></section>
-
-    <div id="emptyState" class="empty hidden">
-      <div class="empty-icon">▧</div>
-      <h3>مفيش ميديا لسه</h3>
-      <p>ابدأ بإضافة أول صورة أو فيديو.</p>
-      <button class="primary-btn" id="emptyAddBtn">إضافة أول عنصر</button>
-    </div>
-
-    <div class="load-more-wrap">
-      <button id="loadMoreBtn" class="secondary-btn hidden">تحميل المزيد</button>
-    </div>
+    <section id="gallery" class="gallery"></section>
+    <div id="empty" class="empty hidden">لا توجد وسائط حتى الآن.</div>
   </main>
 
-  <div id="passwordModal" class="modal hidden">
-    <div class="modal-card small-card">
-      <button class="close" data-close="passwordModal">×</button>
-      <div class="modal-icon">🔐</div>
-      <h3>دخول الإدارة</h3>
-      <p>اكتب كلمة السر لإضافة أو حذف الميديا.</p>
-      <input id="passwordInput" class="field" type="password" autocomplete="current-password" placeholder="كلمة السر">
-      <div id="passwordError" class="error hidden"></div>
-      <button id="passwordSubmit" class="primary-btn wide">تأكيد</button>
+  <div id="authModal" class="modal hidden">
+    <div class="modalCard">
+      <button class="close" data-close="authModal">×</button>
+      <h2>دخول الإدارة</h2>
+      <p>استخدم حساب Firebase Authentication المصرح له كمسؤول.</p>
+      <input id="email" type="email" placeholder="البريد الإلكتروني">
+      <input id="password" type="password" placeholder="كلمة المرور">
+      <button id="doLogin" class="btn primary full">دخول</button>
+      <small id="authError" class="error"></small>
     </div>
   </div>
 
   <div id="addModal" class="modal hidden">
-    <div class="modal-card">
+    <div class="modalCard large">
       <button class="close" data-close="addModal">×</button>
-      <div class="modal-head">
-        <div><span class="eyebrow">ADMIN</span><h3>إضافة ميديا</h3></div>
-      </div>
-      <div class="tabs">
-        <button class="add-tab active" data-mode="upload">رفع ملفات</button>
-        <button class="add-tab" data-mode="link">إضافة رابط</button>
-      </div>
+      <h2>إضافة وسائط</h2>
+      <div class="tabs"><button class="tab active" data-tab="upload">رفع ملف</button><button class="tab" data-tab="link">رابط</button></div>
 
       <div id="uploadPane">
-        <label class="dropzone" id="dropzone">
-          <input id="fileInput" type="file" accept="image/jpeg,image/png,image/gif,image/webp,image/avif,image/svg+xml,video/mp4,video/webm,video/ogg,video/quicktime" multiple hidden>
-          <div class="upload-icon">⇧</div>
-          <strong>اسحب الملفات هنا</strong>
-          <span>أو اضغط للاختيار — حتى 20 ملف</span>
-        </label>
-        <input id="uploadTitle" class="field" placeholder="عنوان اختياري">
-        <div id="fileList" class="file-list"></div>
-        <div id="uploadProgress" class="progress hidden"><i></i></div>
-        <button id="uploadBtn" class="primary-btn wide">رفع الملفات</button>
+        <input id="fileInput" type="file" accept="image/*,video/*">
+        <input id="titleInput" placeholder="العنوان">
+        <textarea id="descInput" placeholder="الوصف (اختياري)"></textarea>
+        <button id="uploadBtn" class="btn primary full">رفع وحفظ</button>
+        <div id="progressWrap" class="progress hidden"><i id="progress"></i></div>
       </div>
 
       <div id="linkPane" class="hidden">
-        <label class="label">الرابط</label>
-        <input id="linkUrl" class="field" type="url" placeholder="https://...">
-        <label class="label">العنوان</label>
-        <input id="linkTitle" class="field" placeholder="عنوان الميديا">
-        <label class="label">النوع</label>
-        <select id="linkType" class="field">
-          <option value="auto">تلقائي</option>
-          <option value="image">صورة</option>
-          <option value="video">فيديو</option>
-        </select>
-        <div id="linkError" class="error hidden"></div>
-        <button id="linkBtn" class="primary-btn wide">إضافة الرابط</button>
+        <input id="urlInput" type="url" placeholder="رابط مباشر للصورة أو الفيديو">
+        <input id="linkTitle" placeholder="العنوان">
+        <textarea id="linkDesc" placeholder="الوصف (اختياري)"></textarea>
+        <button id="linkBtn" class="btn primary full">حفظ الرابط</button>
       </div>
     </div>
   </div>
 
-  <div id="lightbox" class="lightbox hidden">
-    <button id="lbClose" class="lb-close">×</button>
-    <button id="lbPrev" class="lb-nav prev">‹</button>
-    <div class="lb-content">
-      <div id="lbMedia"></div>
-      <div id="lbTitle"></div>
-      <div class="lb-actions"><button id="lbDelete" class="danger-btn">حذف</button></div>
-    </div>
-    <button id="lbNext" class="lb-nav next">›</button>
+  <div id="lightbox" class="modal hidden">
+    <div class="viewer"><button class="close" data-close="lightbox">×</button><div id="viewerContent"></div><h3 id="viewerTitle"></h3><p id="viewerDesc"></p></div>
   </div>
 
-  <div id="toast" class="toast"></div>
-  <script src="/app.js" defer></script>
+  <script type="module" src="./app.js"></script>
 </body>
 </html>
