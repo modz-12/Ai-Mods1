@@ -1,0 +1,121 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ================== دوال مساعدة ==================
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // بيقرا دور المستخدم من مستند users/{uid}
+    function userRole() {
+      return isSignedIn()
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        : null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && userRole() == 'admin';
+    }
+
+    // ================== المستخدمين ==================
+    // users/{userId}: بيانات البروفايل + الدور (user / admin)
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+
+      // التسجيل: المستخدم بيعمل مستنده هو بس، ولازم يبقى دوره "user" مش "admin"
+      allow create: if isOwner(userId)
+        && request.resource.data.role == 'user';
+
+      // تعديل البروفايل: صاحبه بس، وميقدرش يغيّر دوره هو نفسه
+      allow update: if isAdmin()
+        || (isOwner(userId) && request.resource.data.role == resource.data.role);
+
+      allow delete: if isAdmin();
+    }
+
+    // ================== عناوين الأنمي (مسلسلات) ==================
+    // titles/{titleId}: بيانات العنوان (اسم، وصف، غلاف، تصنيفات، حالة نشر)
+
+    match /titles/{titleId} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+
+      // حلقات المسلسل كـ subcollection
+      match /episodes/{episodeId} {
+        allow read: if get(/databases/$(database)/documents/titles/$(titleId)).data.published == true
+          || isAdmin();
+        allow create, update, delete: if isAdmin();
+      }
+    }
+
+    // ================== ريلز مستقلة (مش تابعة لمسلسل) ==================
+    // reels/{reelId}
+
+    match /reels/{reelId} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ================== مجموعات الصور ==================
+    // albums/{albumId}: قد تكون مرتبطة بعنوان أنمي (titleId) أو مستقلة
+
+    match /albums/{albumId} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+
+      match /photos/{photoId} {
+        allow read: if get(/databases/$(database)/documents/albums/$(albumId)).data.published == true
+          || isAdmin();
+        allow create, update, delete: if isAdmin();
+      }
+    }
+
+    // ================== التعليقات ==================
+    // تعليقات تحت أي نوع محتوى (titles, reels, albums) كـ subcollection موحّدة الاسم
+
+    match /{contentPath=**}/comments/{commentId} {
+      allow read: if true;
+
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 1000;
+
+      // تعديل التعليق: صاحبه بس
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      // الحذف: صاحب التعليق أو الأدمن (موديريشن)
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    // ================== المفضلة الخاصة بكل مستخدم ==================
+    // favorites/{userId}/items/{itemId}
+
+    match /favorites/{userId}/items/{itemId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // ================== البلاغات ==================
+    // reports/{reportId}: أي مستخدم يقدر يبلّغ، والأدمن بس يقرا/يدير البلاغات
+
+    match /reports/{reportId} {
+      allow create: if isSignedIn()
+        && request.resource.data.reportedBy == request.auth.uid;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ================== كل حاجة تانية غير معرّفة: ممنوعة افتراضيًا ==================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // بيقرا دور المستخدم من Firestore (users/{uid}.role)
+    function isAdmin() {
+      return isSignedIn() &&
+        firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // حدود حجم الملفات
+    function underImageLimit() {
+      return request.resource.size < 15 * 1024 * 1024; // 15MB
+    }
+
+    function underVideoLimit() {
+      return request.resource.size < 500 * 1024 * 1024; // 500MB
+    }
+
+    // أغلفة المسلسلات والألبومات: صور فقط
+    match /titles-covers/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin() && request.resource.contentType.matches('image/.*') && underImageLimit();
+    }
+
+    match /albums-covers/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin() && request.resource.contentType.matches('image/.*') && underImageLimit();
+    }
+
+    // صور الألبومات
+    match /albums-photos/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin() && request.resource.contentType.matches('image/.*') && underImageLimit();
+    }
+
+    // فيديوهات الحلقات والريلز
+    match /episodes/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin() && request.resource.contentType.matches('video/.*') && underVideoLimit();
+    }
+
+    match /reels/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin() && request.resource.contentType.matches('video/.*') && underVideoLimit();
+    }
+
+    // أي مسار تاني غير معرّف: ممنوع افتراضيًا
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
