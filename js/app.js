@@ -1,244 +1,380 @@
-import "./firebase.js";
+import {
+  auth, db, onAuthStateChanged, createUserWithEmailAndPassword,
+  signInWithEmailAndPassword, sendPasswordResetEmail, signOut,
+  doc, getDoc, setDoc, serverTimestamp
+} from "./firebase.js";
 
-const cropDefs = {
-  wheat:{name:"قمح",icon:"🌾",seedPrice:5,sellPrice:12,growMs:30000,xp:5},
-  corn:{name:"ذرة",icon:"🌽",seedPrice:8,sellPrice:20,growMs:45000,xp:8},
-  tomato:{name:"طماطم",icon:"🍅",seedPrice:12,sellPrice:32,growMs:60000,xp:12},
-  carrot:{name:"جزر",icon:"🥕",seedPrice:15,sellPrice:40,growMs:75000,xp:15}
+const $ = id => document.getElementById(id);
+const q = sel => document.querySelector(sel);
+const qa = sel => [...document.querySelectorAll(sel)];
+
+const CROP_DEFS = {
+  wheat:{name:"قمح",icon:"🌾",seed:"wheatSeed",seedPrice:8,sell:22,grow:2,xp:8,food:"bread",water:true},
+  corn:{name:"ذرة",icon:"🌽",seed:"cornSeed",seedPrice:12,sell:34,grow:3,xp:12,water:true},
+  tomato:{name:"طماطم",icon:"🍅",seed:"tomatoSeed",seedPrice:18,sell:48,grow:4,xp:16,water:true},
+  carrot:{name:"جزر",icon:"🥕",seed:"carrotSeed",seedPrice:10,sell:28,grow:2,xp:10,water:true},
+  potato:{name:"بطاطس",icon:"🥔",seed:"potatoSeed",seedPrice:15,sell:40,grow:3,xp:13,water:true}
 };
-const itemDefs = {
-  bread:{name:"خبز",icon:"🍞",price:15,hunger:20},
-  apple:{name:"تفاح",icon:"🍎",price:10,hunger:12},
-  water:{name:"ماء",icon:"💧",price:5,thirst:30}
+
+const ITEM_DEFS = {
+  wheatSeed:{name:"بذور القمح",icon:"🌾",type:"seed",crop:"wheat"},
+  cornSeed:{name:"بذور الذرة",icon:"🌽",type:"seed",crop:"corn"},
+  tomatoSeed:{name:"بذور الطماطم",icon:"🍅",type:"seed",crop:"tomato"},
+  carrotSeed:{name:"بذور الجزر",icon:"🥕",type:"seed",crop:"carrot"},
+  potatoSeed:{name:"بذور البطاطس",icon:"🥔",type:"seed",crop:"potato"},
+  bread:{name:"خبز",icon:"🍞",type:"food",price:16,hunger:28,energy:8},
+  apple:{name:"تفاحة",icon:"🍎",type:"food",price:12,hunger:20,energy:4},
+  water:{name:"ماء",icon:"💧",type:"drink",price:5,thirst:35,energy:3},
+  juice:{name:"عصير",icon:"🧃",type:"drink",price:11,thirst:55,energy:6},
+  wheat:{name:"قمح",icon:"🌾",type:"produce"},
+  corn:{name:"ذرة",icon:"🌽",type:"produce"},
+  tomato:{name:"طماطم",icon:"🍅",type:"produce"},
+  carrot:{name:"جزر",icon:"🥕",type:"produce"},
+  potato:{name:"بطاطس",icon:"🥔",type:"produce"}
 };
-const animalDefs = {
-  cow:{name:"بقرة",icon:"🐄",price:350,feed:"hay",locked:true,description:"نوع حيوان جاهز للنظام المستقبلي."},
-  buffalo:{name:"جاموس",icon:"🐃",price:600,feed:"hay",locked:true,description:"سيتم تفعيل تربيته مع توسعة الحظيرة."},
-  chicken:{name:"دجاجة",icon:"🐔",price:100,feed:"grain",locked:true,description:"نظام الحيوانات قابل للتوسعة."}
-};
 
-function defaultState(){
-  return {
-    version:1,money:250,xp:0,level:1,energy:100,hunger:100,thirst:100,
-    inventory:{wheat:0,corn:0,tomato:0,carrot:0,bread:2,apple:2,water:3},
-    plots:Array.from({length:24},(_,i)=>({id:i,status:"empty",crop:null,plantedAt:0,readyAt:0})),
-    animals:[],missions:{plant:0,harvest:0,sell:0},lastTick:Date.now()
-  };
-}
-window.FarmGame={defaultState};
+const SHOP = [
+  {item:"wheatSeed",price:8,unit:"بذور"},
+  {item:"cornSeed",price:12,unit:"بذور"},
+  {item:"tomatoSeed",price:18,unit:"بذور"},
+  {item:"carrotSeed",price:10,unit:"بذور"},
+  {item:"potatoSeed",price:15,unit:"بذور"},
+  {item:"bread",price:16,unit:"طعام"},
+  {item:"apple",price:12,unit:"طعام"},
+  {item:"water",price:5,unit:"شراب"},
+  {item:"juice",price:11,unit:"شراب"}
+];
 
-let state=defaultState(), uid=null, user=null, activeScreen="farm", saveTimer=null;
-const $=id=>document.getElementById(id);
+const ANIMALS = [
+  {id:"chicken",name:"دجاجة",icon:"🐔",cost:80,unlock:2,desc:"تنتج البيض بعد تطوير الحظيرة."},
+  {id:"cow",name:"بقرة",icon:"🐄",cost:350,unlock:4,desc:"مصدر للحليب ويمكن توسيع إنتاجها."},
+  {id:"buffalo",name:"جاموس",icon:"🐃",cost:700,unlock:7,desc:"حيوان قوي لإنتاج الحليب عالي القيمة."},
+  {id:"sheep",name:"خروف",icon:"🐑",cost:500,unlock:5,desc:"إضافة مستقبلية للصوف والمنتجات الحيوانية."}
+];
 
-function toast(msg,type="normal"){
-  const el=$("toast"); el.textContent=msg; el.className=`toast show ${type}`;
-  clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove("show"),2600);
+const TIPS = [
+  "ازرع القمح أولًا؛ رخيص وسريع.",
+  "الماء والطعام يرفعان قدرتك على العمل.",
+  "النوم يعيد الطاقة ويبدأ يومًا جديدًا.",
+  "لا تبع كل شيء؛ احتفظ ببعض الطعام والشراب.",
+  "كلما ارتفع مستواك ستفتح أنظمة جديدة.",
+  "الحيوانات مصممة لتضاف لاحقًا بدون تغيير بنية اللعبة."
+];
+
+const defaultState = () => ({
+  version:2, day:1, money:150, xp:0, level:1, energy:100, hunger:100, thirst:100, health:100,
+  weather:"مشمس", selectedSeed:"wheatSeed",
+  inventory:{wheatSeed:6,cornSeed:2,tomatoSeed:0,carrotSeed:2,potatoSeed:0,bread:2,apple:1,water:3,juice:0,wheat:0,corn:0,tomato:0,carrot:0,potato:0},
+  plots:Array.from({length:24},()=>({crop:null,plantedAt:0,watered:false,ready:false})),
+  animals:[], missions:{plant:0,harvest:0,sell:0,days:0},
+  createdAt:null, updatedAt:null
+});
+
+let state = defaultState();
+let currentUser = null;
+let saveTimer = null;
+let saveBusy = false;
+let pendingSave = false;
+
+function clone(x){ return JSON.parse(JSON.stringify(x)); }
+function clamp(n,min,max){ return Math.max(min,Math.min(max,n)); }
+function toast(msg,type="ok"){
+  const el=document.createElement("div"); el.className=`toast ${type}`; el.textContent=msg;
+  $("toastRoot").appendChild(el); setTimeout(()=>el.remove(),3200);
 }
-function normalize(data){
-  const d=defaultState();
-  state={...d,...(data||{})};
-  state.inventory={...d.inventory,...(data?.inventory||{})};
-  state.plots=Array.isArray(data?.plots)&&data.plots.length?data.plots:d.plots;
-  state.animals=Array.isArray(data?.animals)?data.animals:[];
-  state.missions={...d.missions,...(data?.missions||{})};
-  return state;
+function setAuthMessage(msg,error=true){ $("authMessage").textContent=msg; $("authMessage").style.color=error?"var(--red)":"var(--green)"; }
+function levelForXp(xp){ return Math.max(1,Math.floor(Math.sqrt(xp/25))+1); }
+function levelXp(lvl){ return Math.pow(Math.max(0,lvl-1),2)*25; }
+function xpProgress(){ const base=levelXp(state.level), next=levelXp(state.level+1); return clamp((state.xp-base)/(next-base)*100,0,100); }
+function inventoryCount(id){ return Number(state.inventory[id]||0); }
+function addItem(id,n){ state.inventory[id]=Math.max(0,inventoryCount(id)+n); }
+function spendMoney(n){ if(state.money<n){toast("رصيدك غير كافٍ","error");return false;} state.money-=n; return true; }
+function gainXp(n){
+  const old=state.level; state.xp+=n; state.level=levelForXp(state.xp);
+  if(state.level>old) toast(`🎉 ارتقيت إلى المستوى ${state.level}!`);
 }
-function renderAll(){
-  renderHeader(); renderFarm(); renderShop(); renderMarket(); renderHouse(); renderAnimals(); renderInventory(); renderMissions();
+function markDirty(){ renderAll(); scheduleSave(); }
+function scheduleSave(){
+  $("saveIndicator").textContent="جاري الحفظ...";
+  clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveRemote(false),900);
 }
-function renderHeader(){
-  $("money").textContent=Math.floor(state.money);
-  $("energy").textContent=Math.floor(state.energy);
-  $("hunger").textContent=Math.floor(state.hunger);
-  $("thirst").textContent=Math.floor(state.thirst);
-  $("xp").textContent=Math.floor(state.xp);
-  $("userEmail").textContent=user?.email||"";
+async function saveRemote(manual=true){
+  if(!currentUser){ return; }
+  if(saveBusy){ pendingSave=true; return; }
+  saveBusy=true;
+  try{
+    const clean=clone(state); clean.updatedAt=serverTimestamp();
+    if(!clean.createdAt) clean.createdAt=serverTimestamp();
+    await setDoc(doc(db,"players",currentUser.uid,"game","state"),clean,{merge:true});
+    $("saveIndicator").textContent="محفوظ";
+    if(manual) toast("تم حفظ المزرعة بنجاح");
+  }catch(err){
+    console.error(err); $("saveIndicator").textContent="فشل الحفظ"; toast("تعذر حفظ التقدم. تحقق من Firestore والقواعد.","error");
+  }finally{
+    saveBusy=false;
+    if(pendingSave){pendingSave=false;setTimeout(()=>saveRemote(false),150);}
+  }
 }
+async function loadRemote(user){
+  const ref=doc(db,"players",user.uid,"game","state");
+  const snap=await getDoc(ref);
+  if(snap.exists()){
+    const remote=snap.data();
+    state={...defaultState(),...remote};
+    state.inventory={...defaultState().inventory,...(remote.inventory||{})};
+    state.plots=(remote.plots||defaultState().plots).map(p=>({...{crop:null,plantedAt:0,watered:false,ready:false},...p}));
+    state.missions={...defaultState().missions,...(remote.missions||{})};
+    state.level=levelForXp(Number(state.xp)||0);
+  }else{
+    state=defaultState();
+    await setDoc(ref,{...clone(state),createdAt:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true});
+  }
+}
+function enterGame(){
+  $("authScreen").classList.add("hidden"); $("gameApp").classList.remove("hidden");
+  $("playerEmail").textContent=currentUser?.email||"لاعب";
+  renderAll();
+}
+function showAuth(){ $("gameApp").classList.add("hidden"); $("authScreen").classList.remove("hidden"); }
+
 function renderFarm(){
-  $("farmBoard").innerHTML=state.plots.map((p,i)=>{
-    let icon="🟫", cls="plot empty", label="أرض فارغة";
-    if(p.status==="growing"){icon=cropDefs[p.crop].icon;cls="plot growing";label="ينمو";}
-    if(p.status==="ready"){icon=cropDefs[p.crop].icon;cls="plot ready";label="جاهز للحصاد";}
-    return `<button class="${cls}" data-plot="${i}" title="${label}">${icon}<small>${p.status==="empty"?"ازرع":p.status==="ready"?"احصد":timeLeft(p.readyAt)}</small></button>`;
-  }).join("");
-  document.querySelectorAll("[data-plot]").forEach(b=>b.onclick=()=>plotAction(+b.dataset.plot));
-}
-function timeLeft(t){
-  const s=Math.max(0,Math.ceil((t-Date.now())/1000));
-  return s<60?`${s}ث`:`${Math.ceil(s/60)}د`;
+  $("farmDay").textContent=state.day; $("farmLevel").textContent=`المستوى ${state.level}`;
+  $("weatherValue").textContent=state.weather; $("healthValue").textContent=Math.round(state.health);
+  $("farmGrid").innerHTML="";
+  state.plots.forEach((p,i)=>{
+    const el=document.createElement("div");
+    const crop=p.crop?CROP_DEFS[p.crop]:null;
+    const progress=crop&&p.plantedAt?clamp((state.day-p.plantedAt+1)/crop.grow*100,0,100):0;
+    const ready=!!(crop&&(p.ready||progress>=100));
+    if(ready&&!p.ready){p.ready=true;}
+    el.className=`plot ${p.crop?"":"empty"} ${p.watered?"watered":""} ${ready?"ready":""}`;
+    let body="🟫", foot="أرض فارغة", action="ازرع";
+    if(crop){body=crop.icon;foot=ready?"جاهز للحصاد":`النمو ${Math.round(progress)}%`;action=ready?"احصد":p.watered?"ينمو...":"اسقِ";}
+    el.innerHTML=`<div class="plot-head"><span>قطعة ${i+1}</span><span>${p.watered?"💧":""}</span></div>
+      <div class="plot-body">${body}</div><div class="growth"><i style="width:${progress}%"></i></div>
+      <div class="plot-foot">${foot}</div><button class="plot-action">${action}</button>`;
+    el.querySelector("button").onclick=()=>plotAction(i);
+    $("farmGrid").appendChild(el);
+  });
 }
 function plotAction(i){
   const p=state.plots[i];
-  if(p.status==="ready"){ harvest(i); return; }
-  if(p.status==="growing"){toast("المحصول لم ينضج بعد 🌱");return;}
-  const options=Object.entries(cropDefs).map(([k,v])=>`${v.icon} ${v.name}: $${v.seedPrice}`).join("  ");
-  const key=prompt(`اختر نوع المحصول بكتابة: wheat أو corn أو tomato أو carrot\n\n${options}`);
-  if(key&&cropDefs[key]) plant(i,key); else if(key) toast("نوع غير صحيح","error");
+  if(!p.crop){
+    const seed=state.selectedSeed;
+    const cropKey=Object.keys(CROP_DEFS).find(k=>CROP_DEFS[k].seed===seed);
+    if(!cropKey){toast("اختر بذورًا أولًا","error");return;}
+    if(inventoryCount(seed)<=0){toast("لا تملك هذه البذور","error");return;}
+    if(state.energy<3){toast("طاقتك منخفضة. نم أو تناول طعامًا.","error");return;}
+    addItem(seed,-1); state.energy-=3; p.crop=cropKey;p.plantedAt=state.day;p.watered=false;p.ready=false;
+    state.missions.plant++; gainXp(2); toast(`🌱 زرعت ${CROP_DEFS[cropKey].name}`); markDirty(); return;
+  }
+  const crop=CROP_DEFS[p.crop];
+  const progress=clamp((state.day-p.plantedAt+1)/crop.grow*100,0,100);
+  if(p.ready||progress>=100){
+    addItem(p.crop,1); p.crop=null;p.plantedAt=0;p.watered=false;p.ready=false;
+    state.energy=clamp(state.energy-2,0,100); state.missions.harvest++; gainXp(crop.xp);
+    toast(`🧺 حصدت ${crop.name}`); markDirty(); return;
+  }
+  if(!p.watered){
+    if(state.energy<1){toast("لا توجد طاقة للري","error");return;}
+    p.watered=true; state.energy--; gainXp(1); toast("💧 تم ري المحصول"); markDirty();
+  }else toast("المحصول ينمو. تقدم الأيام بالنوم.", "info");
 }
-function plant(i,key){
-  const c=cropDefs[key];
-  if(state.money<c.seedPrice){toast("لا تملك نقودًا كافية","error");return;}
-  if(state.energy<5){toast("تحتاج إلى الراحة أولًا","error");return;}
-  state.money-=c.seedPrice; state.energy=Math.max(0,state.energy-5);
-  state.plots[i]={...state.plots[i],status:"growing",crop:key,plantedAt:Date.now(),readyAt:Date.now()+c.growMs};
-  state.missions.plant++; gainXP(2); scheduleSave(); renderAll(); toast(`تمت زراعة ${c.name} 🌱`,"success");
+function waterAll(){
+  let count=0;
+  state.plots.forEach(p=>{if(p.crop&&!p.watered&&!p.ready){p.watered=true;count++;}});
+  if(count){state.energy=clamp(state.energy-count,0,100);gainXp(count);toast(`💧 تم ري ${count} قطعة`);markDirty();}
+  else toast("لا توجد محاصيل تحتاج إلى ري","info");
 }
-function harvest(i){
-  const p=state.plots[i], c=cropDefs[p.crop];
-  state.inventory[p.crop]=(state.inventory[p.crop]||0)+1;
-  state.energy=Math.max(0,state.energy-2); state.missions.harvest++;
-  gainXP(c.xp); state.plots[i]={...state.plots[i],status:"empty",crop:null,plantedAt:0,readyAt:0};
-  scheduleSave(); renderAll(); toast(`حصدت ${c.name} ${c.icon}`,"success");
+function harvestAll(){
+  let count=0;
+  state.plots.forEach(p=>{
+    if(p.crop){
+      const crop=CROP_DEFS[p.crop], progress=clamp((state.day-p.plantedAt+1)/crop.grow*100,0,100);
+      if(p.ready||progress>=100){addItem(p.crop,1);p.crop=null;p.ready=false;p.watered=false;p.plantedAt=0;state.missions.harvest++;gainXp(crop.xp);count++;}
+    }
+  });
+  if(count){toast(`🧺 جمعت ${count} محصول`);markDirty();}else toast("لا يوجد محصول جاهز","info");
 }
+
 function renderShop(){
-  const seeds=Object.entries(cropDefs).map(([k,c])=>card(c.icon,c.name,`البذرة • نمو ${c.growMs/1000} ثانية`,`$${c.seedPrice}`,()=>buySeed(k))).join("");
-  const food=Object.entries(itemDefs).map(([k,c])=>card(c.icon,c.name,"طعام / شراب",`$${c.price}`,()=>buyItem(k))).join("");
-  $("shopGrid").innerHTML=seeds+food;
+  $("shopGrid").innerHTML="";
+  SHOP.forEach(x=>{
+    const item=ITEM_DEFS[x.item];
+    const card=document.createElement("article");card.className="item-card";
+    card.innerHTML=`<div class="item-icon">${item.icon}</div><h3>${item.name}</h3><p>${x.unit} — لديك <b>${inventoryCount(x.item)}</b></p><div class="price-row"><span class="price">🪙 ${x.price}</span><button class="primary">شراء</button></div>`;
+    card.querySelector("button").onclick=()=>buyItem(x.item,x.price);
+    $("shopGrid").appendChild(card);
+  });
 }
-function card(icon,title,desc,price,action){
-  return `<article class="item-card"><div class="item-icon">${icon}</div><h3>${title}</h3><p>${desc}</p><strong>${price}</strong><button class="primary-btn small">شراء</button></article>`;
-}
-function buySeed(k){
-  const c=cropDefs[k]; if(state.money<c.seedPrice)return toast("الرصيد غير كافٍ","error");
-  state.money-=c.seedPrice; state.inventory[`${k}_seed`]=(state.inventory[`${k}_seed`]||0)+1; scheduleSave();renderAll();toast(`اشتريت بذرة ${c.name}`);
-}
-function buyItem(k){
-  const c=itemDefs[k]; if(state.money<c.price)return toast("الرصيد غير كافٍ","error");
-  state.money-=c.price; state.inventory[k]=(state.inventory[k]||0)+1;scheduleSave();renderAll();toast(`اشتريت ${c.name}`);
+function buyItem(id,price){
+  if(!spendMoney(price))return;
+  addItem(id,1); toast(`تم شراء ${ITEM_DEFS[id].name}`); markDirty();
 }
 function renderMarket(){
-  $("marketGrid").innerHTML=Object.entries(cropDefs).map(([k,c])=>{
-    const n=state.inventory[k]||0;
-    return `<article class="item-card"><div class="item-icon">${c.icon}</div><h3>${c.name}</h3><p>المخزون: ${n}</p><strong>$${c.sellPrice} / وحدة</strong><button class="primary-btn small" data-sell="${k}">بيع وحدة</button></article>`;
-  }).join("");
-  document.querySelectorAll("[data-sell]").forEach(b=>b.onclick=()=>sellOne(b.dataset.sell));
+  const produce=Object.keys(CROP_DEFS);
+  $("marketGrid").innerHTML="";
+  produce.forEach(id=>{
+    const crop=CROP_DEFS[id], qty=inventoryCount(id);
+    const card=document.createElement("article");card.className="item-card";
+    card.innerHTML=`<div class="item-icon">${crop.icon}</div><h3>${crop.name}</h3><p>سعر البيع الحالي: <b>${crop.sell}</b> عملة. الكمية: <b>${qty}</b></p><div class="price-row"><span class="price">🪙 +${crop.sell}</span><button class="primary" ${qty?"":"disabled"}>بيع 1</button></div>`;
+    card.querySelector("button").onclick=()=>sellItem(id);
+    $("marketGrid").appendChild(card);
+  });
 }
-function sellOne(k){
-  if(!(state.inventory[k]>0))return toast("لا يوجد محصول في المخزون","error");
-  const c=cropDefs[k];state.inventory[k]--;state.money+=c.sellPrice;state.missions.sell++;gainXP(3);scheduleSave();renderAll();toast(`تم بيع ${c.name} مقابل $${c.sellPrice}`,"success");
+function sellItem(id){
+  if(inventoryCount(id)<=0)return;
+  const crop=CROP_DEFS[id];addItem(id,-1);state.money+=crop.sell;state.missions.sell++;gainXp(3);toast(`🪙 بعت ${crop.name} بـ ${crop.sell}`);markDirty();
 }
-function sellAll(){
-  let total=0;
-  for(const [k,c] of Object.entries(cropDefs)){const n=state.inventory[k]||0;total+=n*c.sellPrice;state.inventory[k]=0;state.missions.sell+=n;state.xp+=n*3;}
-  if(!total)return toast("لا يوجد محصول للبيع");
-  state.money+=total;scheduleSave();renderAll();toast(`تم بيع المحاصيل مقابل $${total}`,"success");
-}
-function renderHouse(){
-  $("statsPanel").innerHTML=[
-    ["❤️","الصحة",Math.min(100,state.health??100)],
-    ["🍖","الجوع",state.hunger],["💧","العطش",state.thirst],["⚡","الطاقة",state.energy]
-  ].map(x=>`<div class="stat-row"><span>${x[0]} ${x[1]}</span><b>${Math.floor(x[2])}%</b><i><em style="width:${Math.max(0,x[2])}%"></em></i></div>`).join("");
-}
-function eat(){
-  if(!(state.inventory.bread>0||state.inventory.apple>0))return toast("لا يوجد طعام","error");
-  const k=state.inventory.bread>0?"bread":"apple",c=itemDefs[k];state.inventory[k]--;state.hunger=Math.min(100,state.hunger+(c.hunger||0));state.energy=Math.min(100,state.energy+5);scheduleSave();renderAll();toast("تناولت الطعام 🍎");
+function eatBest(){
+  const foods=["bread","apple"];
+  const id=foods.find(x=>inventoryCount(x)>0);
+  if(!id){toast("لا يوجد طعام. اشترِ من المتجر.","error");return;}
+  const item=ITEM_DEFS[id];addItem(id,-1);state.hunger=clamp(state.hunger+item.hunger,0,100);state.energy=clamp(state.energy+item.energy,0,100);toast(`🍞 تناولت ${item.name}`);markDirty();
 }
 function drink(){
-  if(!(state.inventory.water>0))return toast("لا يوجد ماء","error");
-  state.inventory.water--;state.thirst=Math.min(100,state.thirst+30);scheduleSave();renderAll();toast("شربت الماء 💧");
+  const id=inventoryCount("juice")>0?"juice":inventoryCount("water")>0?"water":null;
+  if(!id){toast("لا يوجد شراب.","error");return;}
+  const item=ITEM_DEFS[id];addItem(id,-1);state.thirst=clamp(state.thirst+item.thirst,0,100);state.energy=clamp(state.energy+item.energy,0,100);toast(`💧 استخدمت ${item.name}`);markDirty();
 }
 function sleep(){
-  state.energy=100;state.hunger=Math.max(0,state.hunger-10);state.thirst=Math.max(0,state.thirst-12);scheduleSave();renderAll();toast("استرحت واستعدت طاقتك 😴","success");
+  state.day++;
+  state.energy=100;state.hunger=clamp(state.hunger-12,0,100);state.thirst=clamp(state.thirst-15,0,100);
+  if(state.hunger<20||state.thirst<20)state.health=clamp(state.health-8,0,100);else state.health=clamp(state.health+5,0,100);
+  state.missions.days++;
+  const weather=["مشمس","غائم","نسيم","مشمس"][Math.floor(Math.random()*4)];state.weather=weather;
+  state.plots.forEach(p=>{if(p.crop&&p.watered)p.watered=false;});
+  gainXp(5);toast(`🌅 صباح اليوم ${state.day}`);markDirty();
+}
+function renderHouse(){
+  $("energyBar").style.width=state.energy+"%";$("hungerBar").style.width=state.hunger+"%";$("thirstBar").style.width=state.thirst+"%";$("healthBar").style.width=state.health+"%";
 }
 function renderAnimals(){
-  $("animalsGrid").innerHTML=Object.entries(animalDefs).map(([k,a])=>`
-  <article class="item-card animal-card"><div class="item-icon">${a.icon}</div><h3>${a.name}</h3><p>${a.description}</p><strong>${a.locked?"🔒 قريبًا":"$"+a.price}</strong><button class="secondary-btn small" disabled>${a.locked?"مغلق حاليًا":"شراء"}</button></article>`).join("");
+  $("animalGrid").innerHTML="";
+  ANIMALS.forEach(a=>{
+    const unlocked=state.level>=a.unlock;
+    const card=document.createElement("article");card.className="animal-card";
+    card.innerHTML=`<div class="animal-icon">${a.icon}</div><h3>${a.name}</h3><p>${a.desc}</p><span class="tag">فتح عند المستوى ${a.unlock}</span>${unlocked?"":'<div class="lock">🔒</div>'}`;
+    if(unlocked){const b=document.createElement("button");b.className="secondary";b.style.width="100%";b.style.marginTop="10px";b.textContent=`شراء بـ ${a.cost} 🪙`;b.onclick=()=>buyAnimal(a);card.appendChild(b);}
+    $("animalGrid").appendChild(card);
+  });
+}
+function buyAnimal(a){
+  if(state.animals.includes(a.id)){toast("لديك هذا الحيوان بالفعل","info");return;}
+  if(!spendMoney(a.cost))return;
+  state.animals.push(a.id);gainXp(10);toast(`🐾 تمت إضافة ${a.name}`);markDirty();
 }
 function renderInventory(){
-  const all={...cropDefs,...itemDefs};
-  $("inventoryGrid").innerHTML=Object.entries(all).map(([k,x])=>`<div class="inventory-item"><span>${x.icon}</span><b>${x.name}</b><strong>${state.inventory[k]||0}</strong></div>`).join("");
+  const ids=Object.keys(ITEM_DEFS).filter(id=>inventoryCount(id)>0).sort((a,b)=>inventoryCount(b)-inventoryCount(a));
+  $("inventoryGrid").innerHTML="";
+  if(!ids.length){$("inventoryGrid").innerHTML='<div class="empty-state">الحقيبة فارغة.</div>';return;}
+  ids.forEach(id=>{
+    const item=ITEM_DEFS[id], el=document.createElement("div");el.className="inventory-item";
+    el.innerHTML=`<div class="ico">${item.icon}</div><b>${item.name}</b><small>x${inventoryCount(id)}</small>`;
+    $("inventoryGrid").appendChild(el);
+  });
 }
-function gainXP(n){state.xp+=n;const newLevel=Math.floor(state.xp/100)+1;if(newLevel>state.level){state.level=newLevel;toast(`وصلت للمستوى ${newLevel}! ⭐`,"success")}}
 function renderMissions(){
-  const missions=[
-    ["plant","🌱","ازرع 3 خانات",3,30],["harvest","🌾","احصد 3 محاصيل",3,45],["sell","💰","بع 3 محاصيل",3,60]
+  const defs=[
+    {id:"plant",icon:"🌱",name:"زارع صغير",desc:"ازرع 5 قطع أرض.",goal:5,reward:35,xp:12},
+    {id:"harvest",icon:"🧺",name:"حصاد أول",desc:"احصد 5 محاصيل.",goal:5,reward:50,xp:18},
+    {id:"sell",icon:"🪙",name:"تاجر المزرعة",desc:"بع 5 منتجات.",goal:5,reward:60,xp:20},
+    {id:"days",icon:"🌅",name:"أسبوع في المزرعة",desc:"نم وانتقل 7 أيام.",goal:7,reward:100,xp:30}
   ];
-  $("missionsGrid").innerHTML=missions.map(([k,ic,name,target,reward])=>{
-    const value=Math.min(target,state.missions[k]||0),done=value>=target;
-    return `<article class="mission"><span>${ic}</span><div><h3>${name}</h3><p>${value}/${target} • مكافأة ${reward} XP</p><i><em style="width:${value/target*100}%"></em></i></div>${done?"✅":"⏳"}</article>`;
-  }).join("");
+  $("missionGrid").innerHTML="";
+  defs.forEach(m=>{
+    const cur=Math.min(m.goal,Number(state.missions[m.id]||0)),done=cur>=m.goal;
+    const el=document.createElement("div");el.className="mission";
+    el.innerHTML=`<div class="mission-icon">${m.icon}</div><div><h3>${m.name}</h3><p>${m.desc} — ${cur}/${m.goal}</p><div class="mission-progress"><i style="width:${cur/m.goal*100}%"></i></div></div><button class="${done?"secondary":"primary"}" ${done?"disabled":""}>${done?"تمت":"استلام"}</button>`;
+    if(done && !state["claimed_"+m.id]){
+      el.querySelector("button").disabled=false;el.querySelector("button").textContent=`استلام +${m.reward}`;
+      el.querySelector("button").onclick=()=>{state["claimed_"+m.id]=true;state.money+=m.reward;gainXp(m.xp);toast(`🎁 حصلت على ${m.reward} عملة`);markDirty();};
+    }
+    $("missionGrid").appendChild(el);
+  });
 }
-function scheduleSave(){
-  $("saveDot").className="dirty";$("saveText").textContent="جاري الحفظ...";
-  clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveRemote(),700);
+function renderTop(){
+  $("moneyValue").textContent=Math.floor(state.money);
+  $("energyValue").textContent=Math.round(state.energy);
+  $("hungerValue").textContent=Math.round(state.hunger);
+  $("thirstValue").textContent=Math.round(state.thirst);
+  $("xpValue").textContent=Math.floor(state.xp);
+  $("levelValue").textContent=state.level;
+  $("dayLabel").textContent=`اليوم ${state.day}`;
+  $("tipText").textContent=TIPS[(state.day-1)%TIPS.length];
 }
-async function saveRemote(){
-  if(!uid)return;
-  try{await window.FirebaseGame.saveGame(uid,state);$("saveDot").className="";$("saveText").textContent="محفوظ الآن";}
-  catch(e){$("saveText").textContent="تعذر الحفظ";toast("تعذر حفظ التقدم. تحقق من Firestore Rules.","error");}
+function renderAll(){
+  renderTop();renderFarm();renderShop();renderMarket();renderHouse();renderAnimals();renderInventory();renderMissions();
 }
 function openScreen(name){
-  activeScreen=name;document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
-  $("screen-"+name).classList.add("active");document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x.dataset.screen===name));
+  qa(".screen").forEach(x=>x.classList.remove("active"));
+  const target=$(`screen-${name}`);if(target)target.classList.add("active");
+  qa(".nav-btn").forEach(x=>x.classList.toggle("active",x.dataset.screen===name));
+  $("sidebar").classList.remove("open");
 }
-function tick(){
-  const now=Date.now(),elapsed=Math.max(0,Math.min(now-(state.lastTick||now),3600000));state.lastTick=now;
-  const mins=elapsed/60000;
-  if(mins>0){state.hunger=Math.max(0,state.hunger-mins*1.2);state.thirst=Math.max(0,state.thirst-mins*1.8);state.energy=Math.max(0,state.energy-mins*.8);if(state.hunger===0||state.thirst===0)state.health=Math.max(0,(state.health??100)-mins*.8);}
-  state.plots.forEach(p=>{if(p.status==="growing"&&Date.now()>=p.readyAt)p.status="ready";});
-  renderHeader();renderFarm();renderHouse();
-}
-async function enterGame(firebaseUser){
-  user=firebaseUser;uid=firebaseUser.uid;
-  $("authView").classList.add("hidden");$("gameView").classList.remove("hidden");
-  let data=await window.FirebaseGame.loadGame(uid);
-  state=normalize(data||await window.FirebaseGame.createGame(uid,firebaseUser.email));
-  tick();renderAll();await saveRemote();
-}
-function setAuthMode(mode){
-  document.querySelectorAll(".auth-tab").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));
-  $("confirmWrap").classList.toggle("hidden",mode!=="register");$("authSubmit").textContent=mode==="register"?"إنشاء المزرعة":"دخول إلى المزرعة";$("authForm").dataset.mode=mode;$("authMessage").textContent="";
-}
-document.querySelectorAll(".auth-tab").forEach(b=>b.onclick=()=>setAuthMode(b.dataset.mode));
-$("authForm").onsubmit=async e=>{
-  e.preventDefault();const email=$("email").value.trim(),pass=$("password").value,mode=e.currentTarget.dataset.mode||"login";
-  if(mode==="register"&&pass!==$("confirmPassword").value)return $("authMessage").textContent="كلمتا المرور غير متطابقتين.";
-  $("authSubmit").disabled=true;
-  try{mode==="register"?await window.FirebaseGame.register(email,pass):await window.FirebaseGame.login(email,pass);}
-  catch(err){$("authMessage").textContent=humanAuthError(err);}
-  finally{$("authSubmit").disabled=false;}
+
+qa(".nav-btn").forEach(btn=>btn.addEventListener("click",()=>openScreen(btn.dataset.screen)));
+$("mobileMenuBtn").onclick=()=>$("sidebar").classList.toggle("open");
+$("waterAllBtn").onclick=waterAll;
+$("clearReadyBtn").onclick=harvestAll;
+$("sleepBtn").onclick=sleep;
+$("eatBtn").onclick=eatBest;
+$("drinkBtn").onclick=drink;
+$("manualSaveBtn").onclick=()=>saveRemote(true);
+$("houseSaveBtn").onclick=()=>saveRemote(true);
+$("sortInventoryBtn").onclick=()=>renderInventory();
+
+qa("[data-auth-tab]").forEach(btn=>btn.onclick=()=>{
+  qa("[data-auth-tab]").forEach(x=>x.classList.remove("active"));btn.classList.add("active");
+  $("loginForm").classList.toggle("hidden",btn.dataset.authTab!=="login");
+  $("registerForm").classList.toggle("hidden",btn.dataset.authTab!=="register");
+  setAuthMessage("");
+});
+
+$("loginForm").onsubmit=async e=>{
+  e.preventDefault();setAuthMessage("جاري تسجيل الدخول...",false);
+  try{await signInWithEmailAndPassword(auth,$("loginEmail").value.trim(),$("loginPassword").value);setAuthMessage("تم الدخول",false);}
+  catch(err){console.error(err);setAuthMessage(authError(err));}
 };
-$("forgotBtn").onclick=async()=>{const email=$("email").value.trim();if(!email)return $("authMessage").textContent="اكتب بريدك الإلكتروني أولًا.";try{await window.FirebaseGame.resetPassword(email);$("authMessage").textContent="تم إرسال رابط إعادة تعيين كلمة المرور."}catch(e){$("authMessage").textContent=humanAuthError(e)}};
-$("logoutBtn").onclick=()=>window.FirebaseGame.logout();
-$("saveNow").onclick=()=>saveRemote();$("saveHouse").onclick=()=>saveRemote();$("sellAll").onclick=sellAll;$("eatBtn").onclick=eat;$("drinkBtn").onclick=drink;$("sleepBtn").onclick=sleep;
-document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>openScreen(b.dataset.screen));
-function humanAuthError(e){
- const map={"auth/email-already-in-use":"البريد مستخدم بالفعل.","auth/invalid-credential":"البريد أو كلمة المرور غير صحيحة.","auth/weak-password":"كلمة المرور ضعيفة.","auth/invalid-email":"البريد الإلكتروني غير صالح.","auth/too-many-requests":"محاولات كثيرة، حاول لاحقًا."};
- return map[e.code]||"حدث خطأ أثناء المصادقة.";
+$("registerForm").onsubmit=async e=>{
+  e.preventDefault();
+  if($("registerPassword").value!==$("registerConfirm").value){setAuthMessage("كلمتا المرور غير متطابقتين");return;}
+  setAuthMessage("جاري إنشاء الحساب...",false);
+  try{await createUserWithEmailAndPassword(auth,$("registerEmail").value.trim(),$("registerPassword").value);setAuthMessage("تم إنشاء الحساب",false);}
+  catch(err){console.error(err);setAuthMessage(authError(err));}
+};
+$("resetPasswordBtn").onclick=async()=>{
+  const email=$("loginEmail").value.trim();if(!email){setAuthMessage("اكتب بريدك أولًا");return;}
+  try{await sendPasswordResetEmail(auth,email);setAuthMessage("تم إرسال رابط إعادة التعيين إلى بريدك.",false);}
+  catch(err){setAuthMessage(authError(err));}
+};
+$("logoutBtn").onclick=async()=>{await saveRemote(true);await signOut(auth);};
+
+function authError(err){
+  const map={
+    "auth/invalid-credential":"البريد أو كلمة المرور غير صحيحة.",
+    "auth/email-already-in-use":"هذا البريد مستخدم بالفعل.",
+    "auth/invalid-email":"البريد الإلكتروني غير صالح.",
+    "auth/weak-password":"كلمة المرور ضعيفة. استخدم 6 أحرف على الأقل.",
+    "auth/too-many-requests":"محاولات كثيرة. انتظر قليلًا ثم أعد المحاولة.",
+    "auth/network-request-failed":"تحقق من اتصال الإنترنت."
+  };return map[err?.code]||"تعذر تنفيذ العملية. افتح Console لمعرفة التفاصيل.";
 }
-window.FirebaseGame.onAuthStateChanged(async u=>{
-  if(u){await enterGame(u);}else{$("gameView").classList.add("hidden");$("authView").classList.remove("hidden");}
-});
 
-let bootDone=false;
-function finishBoot(){
-  if(bootDone)return;
-  bootDone=true;
-  $("bootProgress").style.width="100%";
-  $("bootPercent").textContent="100%";
-  $("bootStatus").textContent="جاهز";
-  $("bootText").textContent="اكتمل تجهيز اللعبة";
-  setTimeout(()=>{$("bootScreen").classList.add("hidden");},450);
-}
-let p=0;
-const bootInterval=setInterval(()=>{
-  p=Math.min(100,p+8);
-  $("bootProgress").style.width=p+"%";
-  $("bootPercent").textContent=p+"%";
-  $("bootStatus").textContent=p<32?"تحميل المحرك":p<64?"تجهيز المزرعة":p<88?"تجهيز تسجيل الدخول":"جاهز";
-  if(p>=100){clearInterval(bootInterval);finishBoot();}
-},120);
-
-window.addEventListener("error",e=>{
-  console.error("Farm World error:",e.error||e.message);
-  finishBoot();
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="hidden" && currentUser) saveRemote(false);
 });
-window.addEventListener("unhandledrejection",e=>{
-  console.error("Farm World promise error:",e.reason);
-  finishBoot();
-});
-setTimeout(finishBoot,5000);
+window.addEventListener("pagehide",()=>{if(currentUser)saveRemote(false);});
+setInterval(()=>{if(currentUser)saveRemote(false);},60000);
 
-setInterval(tick,1000);
-setInterval(()=>{if(uid)saveRemote()},60000);
-window.addEventListener("beforeunload",()=>{if(uid)saveRemote()});
+onAuthStateChanged(auth,async user=>{
+  currentUser=user;
+  if(!user){showAuth();return;}
+  try{
+    $("authScreen").classList.add("hidden");
+    await loadRemote(user);
+    enterGame();
+  }catch(err){
+    console.error(err);showAuth();setAuthMessage("تم تسجيل الدخول، لكن تعذر تحميل الحفظ. تأكد من Firestore وقواعده.");
+  }
+});

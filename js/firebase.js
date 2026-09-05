@@ -6,7 +6,7 @@ import {
   setPersistence, browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp
+  getFirestore, doc, getDoc, setDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -19,38 +19,22 @@ const firebaseConfig = {
   measurementId: "G-G0GBZT4RKF"
 };
 
-const app = initializeApp(firebaseConfig);
-let analytics = null;
-try { if (await isSupported()) analytics = getAnalytics(app); } catch (_) {}
+export const firebaseApp = initializeApp(firebaseConfig);
+export const auth = getAuth(firebaseApp);
+export const db = getFirestore(firebaseApp);
 
-const auth = getAuth(app);
-await setPersistence(auth, browserLocalPersistence);
-const db = getFirestore(app);
+try {
+  if (await isSupported()) getAnalytics(firebaseApp);
+} catch (_) {}
 
-const gameRef = uid => doc(db, "players", uid, "game", "state");
+try {
+  await setPersistence(auth, browserLocalPersistence);
+} catch (err) {
+  console.warn("Auth persistence unavailable:", err);
+}
 
-async function loadGame(uid) {
-  const snap = await getDoc(gameRef(uid));
-  return snap.exists() ? snap.data() : null;
-}
-async function createGame(uid, email) {
-  const state = window.FarmGame.defaultState();
-  state.email = email || "";
-  await setDoc(gameRef(uid), {...state, createdAt: serverTimestamp(), updatedAt: serverTimestamp()});
-  return state;
-}
-async function saveGame(uid, state) {
-  await setDoc(gameRef(uid), {...state, updatedAt: serverTimestamp()}, {merge:true});
-}
-async function register(email, password) {
-  return createUserWithEmailAndPassword(auth, email, password);
-}
-async function login(email, password) {
-  return signInWithEmailAndPassword(auth, email, password);
-}
-async function resetPassword(email) {
-  return sendPasswordResetEmail(auth, email);
-}
-async function logout() { return signOut(auth); }
-
-window.FirebaseGame = { auth, db, onAuthStateChanged, loadGame, createGame, saveGame, register, login, resetPassword, logout };
+export {
+  onAuthStateChanged, createUserWithEmailAndPassword,
+  signInWithEmailAndPassword, sendPasswordResetEmail, signOut,
+  doc, getDoc, setDoc, serverTimestamp
+};

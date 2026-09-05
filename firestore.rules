@@ -1,6 +1,8 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
+
     function signedIn() {
       return request.auth != null;
     }
@@ -9,11 +11,60 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == userId;
     }
 
-    match /players/{userId}/game/{document=**} {
+    // بيانات اللاعب الخاصة.
+    match /players/{userId} {
       allow read, create, update: if isOwner(userId);
       allow delete: if false;
+
+      // الحفظ الرئيسي للعبة:
+      // players/{uid}/game/state
+      match /game/{documentId} {
+        allow read, create, update: if isOwner(userId);
+        allow delete: if false;
+      }
+
+      // مسارات مستقبلية جاهزة للتوسعة.
+      match /inventory/{itemId} {
+        allow read, create, update: if isOwner(userId);
+        allow delete: if false;
+      }
+
+      match /stats/{statId} {
+        allow read, create, update: if isOwner(userId);
+        allow delete: if false;
+      }
+
+      match /missions/{missionId} {
+        allow read, create, update: if isOwner(userId);
+        allow delete: if false;
+      }
+
+      match /animals/{animalId} {
+        allow read, create, update: if isOwner(userId);
+        allow delete: if false;
+      }
     }
 
+    // بيانات عامة يمكن استخدامها مستقبلًا للأسعار/المحتوى.
+    // لا يمكن للعميل تعديلها.
+    match /gameData/{documentId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // لوحة المتصدرين مستقبلًا.
+    // العميل يقرأ فقط ولا يستطيع رفع ترتيبه بنفسه.
+    match /leaderboard/{userId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /announcements/{announcementId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // أي مسار غير معرف هنا مغلق.
     match /{document=**} {
       allow read, write: if false;
     }
