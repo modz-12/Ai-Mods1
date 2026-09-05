@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="theme-color" content="#10151a">
+<meta name="description" content="Farm World - لعبة مزرعة ويب قابلة للتوسع مع حفظ التقدم عبر Firebase">
+<title>Farm World | عالم المزرعة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/core.css">
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+<div id="bootScreen" class="boot-screen">
+  <div class="boot-backdrop"></div>
+  <div class="boot-card">
+    <div class="logo-orb">🌱</div>
+    <h1>FARM WORLD</h1>
+    <p id="bootText">جاري تجهيز عالم المزرعة...</p>
+    <div class="progress-shell"><div id="bootProgress" class="progress-fill"></div></div>
+    <div class="progress-meta"><b id="bootPercent">0%</b><span id="bootStatus">تهيئة اللعبة</span></div>
+  </div>
+</div>
+
+<div id="authView" class="auth-view hidden">
+  <div class="auth-bg"></div>
+  <div class="auth-panel">
+    <div class="brand">
+      <span>🌾</span><div><strong>FARM WORLD</strong><small>ابدأ مزرعتك من الصفر</small></div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-mode="login">تسجيل الدخول</button>
+      <button class="auth-tab" data-mode="register">حساب جديد</button>
+    </div>
+    <form id="authForm">
+      <label>البريد الإلكتروني<input id="email" type="email" required autocomplete="email" placeholder="name@example.com"></label>
+      <label>كلمة المرور<input id="password" type="password" required minlength="6" autocomplete="current-password" placeholder="••••••••"></label>
+      <label id="confirmWrap" class="hidden">تأكيد كلمة المرور<input id="confirmPassword" type="password" minlength="6" placeholder="••••••••"></label>
+      <button id="authSubmit" class="primary-btn" type="submit">دخول إلى المزرعة</button>
+      <button id="forgotBtn" class="text-btn" type="button">نسيت كلمة المرور؟</button>
+    </form>
+    <div id="authMessage" class="auth-message"></div>
+    <div class="security-note">🔐 تقدمك مرتبط بحسابك ويُحفظ في Firestore.</div>
+  </div>
+</div>
+
+<div id="gameView" class="game hidden">
+<header class="topbar">
+  <div class="brand compact"><span>🌱</span><strong>FARM WORLD</strong></div>
+  <div class="resources">
+    <div class="resource money">💰 <b id="money">250</b></div>
+    <div class="resource">⚡ <b id="energy">100</b></div>
+    <div class="resource">🍖 <b id="hunger">100</b></div>
+    <div class="resource">💧 <b id="thirst">100</b></div>
+    <div class="resource">⭐ <b id="xp">0</b></div>
+  </div>
+  <div class="user-box"><span id="userEmail"></span><button id="logoutBtn" title="تسجيل الخروج">خروج</button></div>
+</header>
+
+<main class="layout">
+<aside class="sidebar">
+  <button class="nav active" data-screen="farm">🌾 <span>المزرعة</span></button>
+  <button class="nav" data-screen="shop">🛒 <span>المتجر</span></button>
+  <button class="nav" data-screen="market">🏪 <span>السوق</span></button>
+  <button class="nav" data-screen="house">🏠 <span>البيت</span></button>
+  <button class="nav" data-screen="animals">🐄 <span>الحيوانات</span></button>
+  <button class="nav" data-screen="inventory">🎒 <span>المخزون</span></button>
+  <button class="nav" data-screen="missions">🎯 <span>المهام</span></button>
+  <div class="side-spacer"></div>
+  <div class="save-indicator"><i id="saveDot"></i><span id="saveText">محفوظ</span></div>
+</aside>
+
+<section class="content">
+  <div class="screen active" id="screen-farm">
+    <div class="page-head"><div><span class="eyebrow">أرضك</span><h2>المزرعة</h2><p>ازرع، اسقِ، احصد وطوّر عالمك.</p></div><button id="saveNow" class="secondary-btn">💾 حفظ الآن</button></div>
+    <div class="farm-board" id="farmBoard"></div>
+    <div class="legend"><span>🟫 أرض فارغة</span><span>🌱 مزروعة</span><span>🌾 جاهزة للحصاد</span></div>
+  </div>
+
+  <div class="screen" id="screen-shop">
+    <div class="page-head"><div><span class="eyebrow">شراء</span><h2>المتجر</h2><p>اشترِ البذور والطعام.</p></div></div>
+    <div id="shopGrid" class="card-grid"></div>
+  </div>
+
+  <div class="screen" id="screen-market">
+    <div class="page-head"><div><span class="eyebrow">بيع</span><h2>سوق القرية</h2><p>حوّل محصولك إلى نقود.</p></div><button id="sellAll" class="primary-btn small">💰 بيع كل المحاصيل</button></div>
+    <div id="marketGrid" class="card-grid"></div>
+  </div>
+
+  <div class="screen" id="screen-house">
+    <div class="page-head"><div><span class="eyebrow">راحة</span><h2>البيت</h2><p>اهتم بشخصيتك واحفظ تقدمك.</p></div></div>
+    <div class="house-scene">
+      <div class="bed">🛏️<span>سرير</span><button id="sleepBtn">😴 راحة ونوم</button></div>
+      <div class="house-items"><button id="eatBtn">🍎 تناول الطعام</button><button id="drinkBtn">🥤 اشرب</button><button id="saveHouse">💾 حفظ اللعبة</button></div>
+    </div>
+    <div class="stats-panel" id="statsPanel"></div>
+  </div>
+
+  <div class="screen" id="screen-animals">
+    <div class="page-head"><div><span class="eyebrow">التربية</span><h2>حظيرة الحيوانات</h2><p>النظام مصمم لإضافة بقرة وجاموس ودجاج وغيرها لاحقًا.</p></div></div>
+    <div id="animalsGrid" class="card-grid"></div>
+  </div>
+
+  <div class="screen" id="screen-inventory">
+    <div class="page-head"><div><span class="eyebrow">حقيبتك</span><h2>المخزون</h2><p>كل ما تملكه في مكان واحد.</p></div></div>
+    <div id="inventoryGrid" class="inventory-grid"></div>
+  </div>
+
+  <div class="screen" id="screen-missions">
+    <div class="page-head"><div><span class="eyebrow">تقدم</span><h2>المهام</h2><p>أنجز المهام لتحصل على XP ومكافآت.</p></div></div>
+    <div id="missionsGrid" class="mission-grid"></div>
+  </div>
+</section>
+</main>
+<div id="toast" class="toast"></div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

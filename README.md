@@ -1,30 +1,23 @@
-# MODZ Firebase Gallery
+# Farm World
+لعبة مزرعة Web قابلة للتوسع.
 
-نسخة جاهزة للنشر على Vercel ومتصلة بمشروع Firebase `modz-11`.
+## التشغيل
+1. افتح Firebase Console.
+2. فعّل Authentication > Sign-in method > Email/Password.
+3. أنشئ Firestore Database.
+4. ضع محتوى `firestore.rules` في تبويب Rules وانشره.
+5. ارفع الملفات على استضافة تدعم ES Modules (Vercel / Firebase Hosting / GitHub Pages).
+6. افتح `index.html`.
 
-## الخدمات المستخدمة
-- Firebase Authentication لتسجيل دخول الإدارة.
-- Cloud Firestore لحفظ بيانات الوسائط.
-- Firebase Storage لحفظ الصور والفيديوهات.
-- Firebase Analytics.
-- Vercel لاستضافة الواجهة.
+## الحفظ
+كل لاعب لديه:
+`players/{uid}/game/state`
 
-## قبل النشر
-1. في Firebase Console فعّل Authentication > Email/Password.
-2. أنشئ مستخدم الإدارة.
-3. يجب إعطاء المستخدم custom claim باسم `admin=true` حتى تسمح القواعد بالرفع والحذف.
-4. فعّل Firestore.
-5. فعّل Storage. ملاحظة: Cloud Storage for Firebase يتطلب حالياً خطة Blaze.
-6. انشر القواعد الموجودة داخل `firebase/`.
+القواعد تمنع اللاعب من قراءة أو تعديل تقدم لاعب آخر.
 
-### إعطاء admin claim
-Custom Claims لا تُعطى من كود المتصفح. استخدم Firebase Admin SDK من بيئة موثوقة، ثم:
-`admin.auth().setCustomUserClaims(USER_UID, {admin:true})`
+## الصورة
+خلفية شاشة التحميل والمصادقة تستخدم:
+https://files.catbox.moe/vex2qr.jpg
 
-بعد تسجيل الدخول من جديد سيظهر زر إضافة الملفات.
-
-## Vercel
-ارفع مجلد المشروع إلى GitHub ثم Import Project في Vercel. لا تحتاج إلى Node server أو Express؛ المشروع Static بالكامل.
-
-## مهم
-ملف Firebase config الخاص بتطبيق الويب ليس سراً بحد ذاته. الحماية الحقيقية تكون بواسطة Authentication وFirestore/Storage Security Rules.
+## التوسع
+نظام المحاصيل والحيوانات مبني على تعريفات مستقلة، لذلك يمكن إضافة Cow/Buffalo/Chicken وغيرها لاحقًا بدون إعادة تصميم المحرك.
