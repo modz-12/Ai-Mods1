@@ -210,11 +210,35 @@ window.FirebaseGame.onAuthStateChanged(async u=>{
   if(u){await enterGame(u);}else{$("gameView").classList.add("hidden");$("authView").classList.remove("hidden");}
 });
 
+let bootDone=false;
+function finishBoot(){
+  if(bootDone)return;
+  bootDone=true;
+  $("bootProgress").style.width="100%";
+  $("bootPercent").textContent="100%";
+  $("bootStatus").textContent="جاهز";
+  $("bootText").textContent="اكتمل تجهيز اللعبة";
+  setTimeout(()=>{$("bootScreen").classList.add("hidden");},450);
+}
 let p=0;
 const bootInterval=setInterval(()=>{
-  p=Math.min(100,p+Math.floor(Math.random()*12)+5);$("bootProgress").style.width=p+"%";$("bootPercent").textContent=p+"%";
-  $("bootStatus").textContent=p<35?"تحميل المحرك":p<65?"تجهيز المزرعة":p<90?"توصيل الحفظ السحابي":"جاهز";
-  if(p>=100){clearInterval(bootInterval);setTimeout(()=>$("bootScreen").classList.add("hidden"),350);}
+  p=Math.min(100,p+8);
+  $("bootProgress").style.width=p+"%";
+  $("bootPercent").textContent=p+"%";
+  $("bootStatus").textContent=p<32?"تحميل المحرك":p<64?"تجهيز المزرعة":p<88?"تجهيز تسجيل الدخول":"جاهز";
+  if(p>=100){clearInterval(bootInterval);finishBoot();}
 },120);
-setInterval(tick,1000);setInterval(()=>{if(uid)saveRemote()},60000);
+
+window.addEventListener("error",e=>{
+  console.error("Farm World error:",e.error||e.message);
+  finishBoot();
+});
+window.addEventListener("unhandledrejection",e=>{
+  console.error("Farm World promise error:",e.reason);
+  finishBoot();
+});
+setTimeout(finishBoot,5000);
+
+setInterval(tick,1000);
+setInterval(()=>{if(uid)saveRemote()},60000);
 window.addEventListener("beforeunload",()=>{if(uid)saveRemote()});
