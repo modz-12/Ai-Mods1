@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#09090b">
+  <meta name="description" content="Design System & Component Library Hub">
+  <title>Modz Library Hub — Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/utilities.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/animations.css">
+</head>
+<body>
+  <div id="boot" class="boot-screen" aria-label="جار التحميل">
+    <div class="boot-mark">M</div>
+    <div class="boot-title">Modz Library Hub</div>
+    <div class="boot-bar"><span id="bootProgress"></span></div>
+    <small id="bootStatus">تهيئة المكتبة...</small>
+  </div>
+
+  <div class="app-shell" id="app" hidden>
+    <header class="topbar">
+      <button class="icon-btn mobile-only" id="menuBtn" aria-label="فتح القائمة">☰</button>
+      <a class="brand" href="#" data-action="home">
+        <span class="brand-icon">M</span>
+        <span>
+          <strong>MODZ LIB</strong>
+          <small>Design System Hub</small>
+        </span>
+      </a>
+      <div class="top-search">
+        <span>⌕</span>
+        <input id="searchInput" type="search" placeholder="ابحث عن عنصر، كلاس، ملف..." autocomplete="off">
+        <kbd>Ctrl K</kbd>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="themeBtn" title="تبديل المظهر">◐</button>
+        <button class="icon-btn" id="refreshBtn" title="إعادة تحميل الفهرس">↻</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="side-section">
+          <div class="side-label">WORKSPACE</div>
+          <button class="nav-item active" data-view="overview"><span>⌂</span> نظرة عامة</button>
+          <button class="nav-item" data-view="library"><span>▦</span> المكتبة</button>
+          <button class="nav-item" data-view="components"><span>◇</span> المكونات</button>
+        </div>
+
+        <div class="side-section">
+          <div class="side-label">LIBRARIES</div>
+          <button class="nav-item" data-type="css"><span class="type-dot css-dot">C</span> CSS <b id="cssCount">0</b></button>
+          <button class="nav-item" data-type="js"><span class="type-dot js-dot">J</span> JavaScript <b id="jsCount">0</b></button>
+          <button class="nav-item" data-type="html"><span class="type-dot html-dot">H</span> HTML <b id="htmlCount">0</b></button>
+        </div>
+
+        <div class="side-section">
+          <div class="side-label">SYSTEM</div>
+          <button class="nav-item" data-view="docs"><span>▤</span> التوثيق</button>
+          <button class="nav-item" data-view="settings"><span>⚙</span> الإعدادات</button>
+        </div>
+
+        <div class="sidebar-footer">
+          <div class="status"><i></i> النظام يعمل</div>
+          <div class="version">Library Hub v1.0.0</div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="page" id="overviewView">
+          <section class="hero">
+            <div>
+              <div class="eyebrow">DESIGN SYSTEM · COMPONENT LIBRARY</div>
+              <h1>مكتبتك البرمجية.<br><em>تتوسع بدون حدود.</em></h1>
+              <p>نواة ذكية لفهرسة ملفات CSS وJavaScript وHTML، مع بحث سريع، معاينة مباشرة، ونسخ بضغطة واحدة.</p>
+              <div class="hero-actions">
+                <button class="primary-btn" data-view="library">استكشف المكتبة <span>←</span></button>
+                <button class="ghost-btn" data-view="docs">اقرأ التوثيق</button>
+              </div>
+            </div>
+            <div class="hero-orb">
+              <div class="orb-ring r1"></div><div class="orb-ring r2"></div><div class="orb-ring r3"></div>
+              <div class="orb-core">{ }</div>
+            </div>
+          </section>
+
+          <section class="stats-grid">
+            <article class="stat-card"><span class="stat-icon">▦</span><div><small>إجمالي العناصر</small><strong id="totalCount">0</strong></div><span class="trend">LIVE</span></article>
+            <article class="stat-card"><span class="stat-icon css-icon">C</span><div><small>CSS Assets</small><strong id="statCss">0</strong></div></article>
+            <article class="stat-card"><span class="stat-icon js-icon">J</span><div><small>JS Assets</small><strong id="statJs">0</strong></div></article>
+            <article class="stat-card"><span class="stat-icon html-icon">H</span><div><small>HTML Components</small><strong id="statHtml">0</strong></div></article>
+          </section>
+
+          <section class="section-head">
+            <div><div class="eyebrow">QUICK ACCESS</div><h2>العناصر المضافة حديثًا</h2></div>
+            <button class="text-btn" data-view="library">عرض الكل ←</button>
+          </section>
+          <div class="asset-grid" id="recentGrid"></div>
+        </div>
+
+        <div class="page" id="libraryView" hidden>
+          <div class="page-title">
+            <div><div class="eyebrow">LIBRARY</div><h1>مكتبة العناصر</h1><p id="librarySubtitle">كل الملفات المفهرسة في مكان واحد.</p></div>
+            <div class="view-toggle"><button class="active" data-layout="grid">▦</button><button data-layout="list">☷</button></div>
+          </div>
+          <div class="filterbar">
+            <div class="tabs">
+              <button class="tab active" data-filter="all">الكل <span id="allTabCount">0</span></button>
+              <button class="tab" data-filter="css">CSS <span id="cssTabCount">0</span></button>
+              <button class="tab" data-filter="js">JS <span id="jsTabCount">0</span></button>
+              <button class="tab" data-filter="html">HTML <span id="htmlTabCount">0</span></button>
+            </div>
+            <select id="sortSelect"><option value="name">الاسم</option><option value="newest">الأحدث</option><option value="size">الحجم</option></select>
+          </div>
+          <div class="library-meta"><span id="resultCount">0 عنصر</span><span id="pageInfo"></span></div>
+          <div class="asset-grid" id="libraryGrid"></div>
+          <div class="pagination" id="pagination"></div>
+        </div>
+
+        <div class="page" id="componentsView" hidden>
+          <div class="page-title"><div><div class="eyebrow">COMPONENTS</div><h1>مختبر المكونات</h1><p>معاينة العناصر المركبة قبل استخدامها في مشروعك.</p></div></div>
+          <div class="component-lab" id="componentLab"></div>
+        </div>
+
+        <div class="page" id="docsView" hidden>
+          <div class="page-title"><div><div class="eyebrow">DOCUMENTATION</div><h1>التوثيق</h1><p>كيف تضيف وتفهرس آلاف الملفات بدون تعديل الواجهة.</p></div></div>
+          <div class="docs-grid">
+            <article class="doc-card"><span>01</span><h3>أضف الملف</h3><p>ضع ملف CSS داخل <code>/css</code> أو JS داخل <code>/js</code> أو قالب HTML داخل <code>/components</code>.</p></article>
+            <article class="doc-card"><span>02</span><h3>ولّد الـ Manifest</h3><p>شغّل <code>npm run manifest</code> لإنشاء <code>library.manifest.json</code> تلقائيًا.</p></article>
+            <article class="doc-card"><span>03</span><h3>انشر</h3><p>ارفع المشروع. المتصفح يقرأ الفهرس، ويجلب المحتوى عند الحاجة فقط.</p></article>
+            <article class="doc-card wide"><span>04</span><h3>التوسع إلى 100,000 عنصر</h3><p>النواة تستخدم Pagination وLazy Fetch وDocument Fragment، لذلك لا يتم إنشاء 100 ألف بطاقة DOM دفعة واحدة. لاحقًا يمكن استبدال الـ Manifest بقاعدة بيانات أو API بدون تغيير طبقة العرض.</p></article>
+          </div>
+          <div class="code-note"><strong>المعادلة المعمارية</strong><code>Files → Manifest → Registry → Search → Lazy Content → Preview / Copy</code></div>
+        </div>
+
+        <div class="page" id="settingsView" hidden>
+          <div class="page-title"><div><div class="eyebrow">SYSTEM</div><h1>الإعدادات</h1><p>إعدادات النواة المحلية.</p></div></div>
+          <div class="settings-card">
+            <label>عدد العناصر في الصفحة <select id="pageSizeSelect"><option>12</option><option selected>24</option><option>48</option><option>96</option></select></label>
+            <label>إظهار المعاينة <input type="checkbox" id="previewToggle" checked></label>
+            <button class="danger-btn" id="clearCacheBtn">مسح الذاكرة المؤقتة</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="assetModal" hidden>
+    <section class="modal" role="dialog" aria-modal="true">
+      <header class="modal-head"><div><span id="modalType" class="badge">CSS</span><h2 id="modalTitle">العنصر</h2></div><button class="icon-btn" id="closeModal">×</button></header>
+      <div class="modal-body">
+        <div class="preview-panel"><div class="panel-label">LIVE PREVIEW</div><div id="modalPreview" class="live-preview"></div></div>
+        <div class="source-panel"><div class="source-head"><span class="panel-label">SOURCE</span><button class="copy-btn" id="modalCopy">نسخ الكود</button></div><pre><code id="modalCode"></code></pre></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"><span>✓</span><span id="toastText">تم النسخ</span></div>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
