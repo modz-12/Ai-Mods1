@@ -1,0 +1,20 @@
+/* MODZ CSS - shadow system */
+.mz-shadow-xs { box-shadow: var(--mz-shadow-xs); }
+.mz-shadow-sm { box-shadow: var(--mz-shadow-sm); }
+.mz-shadow-md { box-shadow: var(--mz-shadow-md); }
+.mz-shadow-lg { box-shadow: var(--mz-shadow-lg); }
+.mz-shadow-xl { box-shadow: var(--mz-shadow-xl); }
+.mz-shadow-2xl { box-shadow: var(--mz-shadow-2xl); }
+.mz-shadow-inner { box-shadow: var(--mz-shadow-inner); }
+.mz-shadow-soft { box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+.mz-shadow-hard { box-shadow: 6px 6px 0 rgba(0,0,0,.9); }
+.mz-shadow-dark { box-shadow: 0 10px 30px rgba(0,0,0,.6); }
+.mz-shadow-none { box-shadow: none; }
+.mz-shadow-purple { box-shadow: 0 10px 24px -6px var(--mz-purple-500); }
+.mz-shadow-blue { box-shadow: 0 10px 24px -6px var(--mz-blue-500); }
+.mz-shadow-cyan { box-shadow: 0 10px 24px -6px var(--mz-cyan-500); }
+.mz-shadow-red { box-shadow: 0 10px 24px -6px var(--mz-red-500); }
+.mz-shadow-green { box-shadow: 0 10px 24px -6px var(--mz-green-500); }
+.mz-shadow-orange { box-shadow: 0 10px 24px -6px var(--mz-orange-500); }
+.mz-shadow-pink { box-shadow: 0 10px 24px -6px var(--mz-pink-500); }
+.mz-shadow-yellow { box-shadow: 0 10px 24px -6px var(--mz-yellow-500); }

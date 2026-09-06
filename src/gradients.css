@@ -1,0 +1,26 @@
+/* MODZ CSS - gradients: linear / radial / conic */
+.mz-gradient { background: linear-gradient(135deg, var(--mz-purple-400), var(--mz-cyan-500)); }
+.mz-gradient-purple { background: linear-gradient(135deg, var(--mz-purple-400), var(--mz-purple-700)); }
+.mz-gradient-blue { background: linear-gradient(135deg, var(--mz-blue-400), var(--mz-blue-700)); }
+.mz-gradient-cyan { background: linear-gradient(135deg, var(--mz-cyan-400), var(--mz-cyan-700)); }
+.mz-gradient-red { background: linear-gradient(135deg, var(--mz-red-400), var(--mz-red-700)); }
+.mz-gradient-green { background: linear-gradient(135deg, var(--mz-green-400), var(--mz-green-700)); }
+.mz-gradient-orange { background: linear-gradient(135deg, var(--mz-orange-400), var(--mz-orange-700)); }
+.mz-gradient-pink { background: linear-gradient(135deg, var(--mz-pink-400), var(--mz-pink-700)); }
+.mz-gradient-rainbow { background: linear-gradient(90deg,#ef4444,#f59e0b,#eab308,#22c55e,#06b6d4,#7c3aed,#ec4899); }
+.mz-gradient-to-top { background-image: linear-gradient(to top, var(--mz-purple-400), var(--mz-cyan-500)); }
+.mz-gradient-to-bottom { background-image: linear-gradient(to bottom, var(--mz-purple-400), var(--mz-cyan-500)); }
+.mz-gradient-to-left { background-image: linear-gradient(to left, var(--mz-purple-400), var(--mz-cyan-500)); }
+.mz-gradient-to-right { background-image: linear-gradient(to right, var(--mz-purple-400), var(--mz-cyan-500)); }
+.mz-gradient-to-top-left { background-image: linear-gradient(to top left, var(--mz-purple-400), var(--mz-cyan-500)); }
+.mz-gradient-to-top-right { background-image: linear-gradient(to top right, var(--mz-purple-400), var(--mz-cyan-500)); }
+.mz-gradient-to-bottom-left { background-image: linear-gradient(to bottom left, var(--mz-purple-400), var(--mz-cyan-500)); }
+.mz-gradient-to-bottom-right { background-image: linear-gradient(to bottom right, var(--mz-purple-400), var(--mz-cyan-500)); }
+.mz-conic { background: conic-gradient(var(--mz-purple-400), var(--mz-cyan-500), var(--mz-purple-400)); }
+.mz-conic-rainbow { background: conic-gradient(#ef4444,#f59e0b,#eab308,#22c55e,#06b6d4,#7c3aed,#ec4899,#ef4444); }
+.mz-radial { background: radial-gradient(circle, var(--mz-purple-400), var(--mz-cyan-700)); }
+.mz-radial-purple { background: radial-gradient(circle, var(--mz-purple-300), var(--mz-purple-700)); }
+.mz-radial-blue { background: radial-gradient(circle, var(--mz-blue-300), var(--mz-blue-700)); }
+.mz-radial-cyan { background: radial-gradient(circle, var(--mz-cyan-300), var(--mz-cyan-700)); }
+.mz-radial-green { background: radial-gradient(circle, var(--mz-green-300), var(--mz-green-700)); }
+.mz-radial-red { background: radial-gradient(circle, var(--mz-red-300), var(--mz-red-700)); }

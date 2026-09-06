@@ -1,0 +1,96 @@
+/* MODZ CSS - responsive variants (min-width media queries) */
+@media (min-width: 640px) {
+  .mz-sm-hidden { display: none; }
+  .mz-sm-block { display: block; }
+  .mz-sm-flex { display: flex; }
+  .mz-sm-grid { display: grid; }
+  .mz-sm-inline-block { display: inline-block; }
+  .mz-sm-text-center { text-align: center; }
+  .mz-sm-text-left { text-align: left; }
+  .mz-sm-text-right { text-align: right; }
+  .mz-sm-grid-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  .mz-sm-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mz-sm-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .mz-sm-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .mz-sm-grid-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .mz-sm-flex-row { flex-direction: row; }
+  .mz-sm-flex-column { flex-direction: column; }
+  .mz-sm-w-full { width: 100%; }
+  .mz-sm-w-auto { width: auto; }
+}
+@media (min-width: 768px) {
+  .mz-md-hidden { display: none; }
+  .mz-md-block { display: block; }
+  .mz-md-flex { display: flex; }
+  .mz-md-grid { display: grid; }
+  .mz-md-inline-block { display: inline-block; }
+  .mz-md-text-center { text-align: center; }
+  .mz-md-text-left { text-align: left; }
+  .mz-md-text-right { text-align: right; }
+  .mz-md-grid-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  .mz-md-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mz-md-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .mz-md-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .mz-md-grid-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .mz-md-flex-row { flex-direction: row; }
+  .mz-md-flex-column { flex-direction: column; }
+  .mz-md-w-full { width: 100%; }
+  .mz-md-w-auto { width: auto; }
+}
+@media (min-width: 1024px) {
+  .mz-lg-hidden { display: none; }
+  .mz-lg-block { display: block; }
+  .mz-lg-flex { display: flex; }
+  .mz-lg-grid { display: grid; }
+  .mz-lg-inline-block { display: inline-block; }
+  .mz-lg-text-center { text-align: center; }
+  .mz-lg-text-left { text-align: left; }
+  .mz-lg-text-right { text-align: right; }
+  .mz-lg-grid-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  .mz-lg-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mz-lg-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .mz-lg-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .mz-lg-grid-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .mz-lg-flex-row { flex-direction: row; }
+  .mz-lg-flex-column { flex-direction: column; }
+  .mz-lg-w-full { width: 100%; }
+  .mz-lg-w-auto { width: auto; }
+}
+@media (min-width: 1280px) {
+  .mz-xl-hidden { display: none; }
+  .mz-xl-block { display: block; }
+  .mz-xl-flex { display: flex; }
+  .mz-xl-grid { display: grid; }
+  .mz-xl-inline-block { display: inline-block; }
+  .mz-xl-text-center { text-align: center; }
+  .mz-xl-text-left { text-align: left; }
+  .mz-xl-text-right { text-align: right; }
+  .mz-xl-grid-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  .mz-xl-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mz-xl-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .mz-xl-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .mz-xl-grid-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .mz-xl-flex-row { flex-direction: row; }
+  .mz-xl-flex-column { flex-direction: column; }
+  .mz-xl-w-full { width: 100%; }
+  .mz-xl-w-auto { width: auto; }
+}
+@media (min-width: 1536px) {
+  .mz-2xl-hidden { display: none; }
+  .mz-2xl-block { display: block; }
+  .mz-2xl-flex { display: flex; }
+  .mz-2xl-grid { display: grid; }
+  .mz-2xl-inline-block { display: inline-block; }
+  .mz-2xl-text-center { text-align: center; }
+  .mz-2xl-text-left { text-align: left; }
+  .mz-2xl-text-right { text-align: right; }
+  .mz-2xl-grid-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  .mz-2xl-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mz-2xl-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .mz-2xl-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .mz-2xl-grid-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .mz-2xl-flex-row { flex-direction: row; }
+  .mz-2xl-flex-column { flex-direction: column; }
+  .mz-2xl-w-full { width: 100%; }
+  .mz-2xl-w-auto { width: auto; }
+}

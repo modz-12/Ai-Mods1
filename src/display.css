@@ -1,0 +1,10 @@
+/* MODZ CSS - display */
+.mz-block { display: block; }
+.mz-inline { display: inline; }
+.mz-inline-block { display: inline-block; }
+.mz-hidden { display: none; }
+.mz-table { display: table; }
+.mz-table-row { display: table-row; }
+.mz-table-cell { display: table-cell; }
+.mz-contents { display: contents; }
+.mz-flow-root { display: flow-root; }

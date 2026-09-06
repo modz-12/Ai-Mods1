@@ -1,0 +1,58 @@
+/* MODZ CSS - transforms */
+.mz-rotate-0 { transform: rotate(0deg); }
+.mz-rotate-1 { transform: rotate(1deg); }
+.mz-rotate-2 { transform: rotate(2deg); }
+.mz-rotate-3 { transform: rotate(3deg); }
+.mz-rotate-6 { transform: rotate(6deg); }
+.mz-rotate-12 { transform: rotate(12deg); }
+.mz-rotate-45 { transform: rotate(45deg); }
+.mz-rotate-90 { transform: rotate(90deg); }
+.mz-rotate-135 { transform: rotate(135deg); }
+.mz-rotate-180 { transform: rotate(180deg); }
+.mz-rotate-270 { transform: rotate(270deg); }
+.mz-rotate-neg-45 { transform: rotate(-45deg); }
+.mz-rotate-neg-90 { transform: rotate(-90deg); }
+.mz-scale-0 { transform: scale(0); }
+.mz-scale-x-0 { transform: scaleX(0); }
+.mz-scale-y-0 { transform: scaleY(0); }
+.mz-scale-xs { transform: scale(.75); }
+.mz-scale-x-xs { transform: scaleX(.75); }
+.mz-scale-y-xs { transform: scaleY(.75); }
+.mz-scale-sm { transform: scale(.9); }
+.mz-scale-x-sm { transform: scaleX(.9); }
+.mz-scale-y-sm { transform: scaleY(.9); }
+.mz-scale-md { transform: scale(1); }
+.mz-scale-x-md { transform: scaleX(1); }
+.mz-scale-y-md { transform: scaleY(1); }
+.mz-scale-lg { transform: scale(1.1); }
+.mz-scale-x-lg { transform: scaleX(1.1); }
+.mz-scale-y-lg { transform: scaleY(1.1); }
+.mz-scale-xl { transform: scale(1.25); }
+.mz-scale-x-xl { transform: scaleX(1.25); }
+.mz-scale-y-xl { transform: scaleY(1.25); }
+.mz-scale-2xl { transform: scale(1.5); }
+.mz-scale-x-2xl { transform: scaleX(1.5); }
+.mz-scale-y-2xl { transform: scaleY(1.5); }
+.mz-scale-150 { transform: scale(1.5); }
+.mz-scale-x-150 { transform: scaleX(1.5); }
+.mz-scale-y-150 { transform: scaleY(1.5); }
+.mz-translate-up { transform: translate(0 -.5rem); }
+.mz-translate-down { transform: translate(0 .5rem); }
+.mz-translate-left { transform: translate(-.5rem 0); }
+.mz-translate-right { transform: translate(.5rem 0); }
+.mz-translate-up-lg { transform: translate(0 -2rem); }
+.mz-translate-down-lg { transform: translate(0 2rem); }
+.mz-translate-left-lg { transform: translate(-2rem 0); }
+.mz-translate-right-lg { transform: translate(2rem 0); }
+.mz-skew-x { transform: skewX(-12deg); }
+.mz-skew-y { transform: skewY(-12deg); }
+.mz-skew-x-lg { transform: skewX(-20deg); }
+.mz-skew-y-lg { transform: skewY(-20deg); }
+.mz-flip-x { transform: scaleX(-1); }
+.mz-flip-y { transform: scaleY(-1); }
+.mz-transform-none { transform: none; }
+.mz-origin-center { transform-origin: center; }
+.mz-origin-top { transform-origin: top; }
+.mz-origin-bottom { transform-origin: bottom; }
+.mz-origin-left { transform-origin: left; }
+.mz-origin-right { transform-origin: right; }

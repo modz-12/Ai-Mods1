@@ -1,0 +1,52 @@
+/* MODZ CSS - 3D shapes/panels built with perspective + transform-style */
+.mz-perspective { perspective: 800px; }
+.mz-preserve-3d { transform-style: preserve-3d; }
+.mz-cube {
+  position: relative;
+  width: 3em; height: 3em;
+  transform-style: preserve-3d;
+  transform: rotateX(-20deg) rotateY(30deg);
+  display: inline-block;
+}
+.mz-cube::before, .mz-cube::after {
+  content: ""; position: absolute; inset: 0;
+  background: var(--mz-purple-500); opacity: .85;
+}
+.mz-cube::before { transform: translateZ(1.5em); }
+.mz-cube::after { transform: rotateY(90deg) translateZ(1.5em); }
+.mz-cube-sm { transform: rotateX(-20deg) rotateY(30deg) scale(0.6); }
+.mz-cube-md { transform: rotateX(-20deg) rotateY(30deg) scale(1); }
+.mz-cube-lg { transform: rotateX(-20deg) rotateY(30deg) scale(1.6); }
+.mz-cube-xl { transform: rotateX(-20deg) rotateY(30deg) scale(2.2); }
+.mz-cube-glow { filter: drop-shadow(0 0 12px var(--mz-purple-400)); }
+.mz-prism { clip-path: polygon(50% 0%, 100% 100%, 0% 100%); transform: rotateX(15deg); width:2.4em; height:2.4em; background: var(--mz-blue-500); display:inline-block; }
+.mz-prism-sm { transform: scale(0.6); }
+.mz-prism-lg { transform: scale(1.6); }
+.mz-cylinder { border-radius: 50% / 12%; background: var(--mz-cyan-500); width:2.4em; height:3em; display:inline-block; box-shadow: 0 1.4em 0 -0.2em rgba(0,0,0,.25); }
+.mz-cylinder-sm { transform: scale(0.6); }
+.mz-cylinder-lg { transform: scale(1.6); }
+.mz-cone { clip-path: polygon(50% 0%, 100% 100%, 0% 100%); border-radius: 0 0 50% 50%; background: var(--mz-orange-500); width:2em; height:2.6em; display:inline-block; }
+.mz-cone-sm { transform: scale(0.6); }
+.mz-cone-lg { transform: scale(1.6); }
+.mz-sphere { border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff8, transparent 60%), var(--mz-green-500); width:2.6em; height:2.6em; display:inline-block; }
+.mz-sphere-sm { transform: scale(0.6); }
+.mz-sphere-lg { transform: scale(1.6); }
+.mz-pyramid { clip-path: polygon(50% 0%, 100% 100%, 0% 100%); background: linear-gradient(135deg, var(--mz-amber-400), var(--mz-amber-700)); width:2.4em; height:2.4em; display:inline-block; }
+.mz-pyramid-sm { transform: scale(0.6); }
+.mz-pyramid-lg { transform: scale(1.6); }
+.mz-3d-card { transform-style: preserve-3d; transition: transform var(--mz-duration-normal) var(--mz-ease); border-radius: var(--mz-radius-lg); box-shadow: var(--mz-shadow-lg); padding: 1.25em; background: #fff; }
+.mz-3d-card-sm { transform: scale(0.6); }
+.mz-3d-card-lg { transform: scale(1.6); }
+.mz-3d-box { transform: perspective(600px) rotateX(8deg) rotateY(-8deg); box-shadow: var(--mz-shadow-xl); border-radius: var(--mz-radius-md); }
+.mz-3d-box-sm { transform: scale(0.6); }
+.mz-3d-box-lg { transform: scale(1.6); }
+.mz-3d-ring { border-radius: 50%; border: 0.5em solid var(--mz-purple-500); border-right-color: transparent; transform: rotateX(55deg); width:3em; height:3em; display:inline-block; }
+.mz-3d-ring-sm { transform: scale(0.6); }
+.mz-3d-ring-lg { transform: scale(1.6); }
+.mz-3d-button { transform-style: preserve-3d; box-shadow: 0 6px 0 var(--mz-purple-800); transition: transform var(--mz-duration-fast) var(--mz-ease), box-shadow var(--mz-duration-fast) var(--mz-ease); border-radius: var(--mz-radius-md); padding: .6em 1.2em; background: var(--mz-purple-500); color:#fff; border:0; }
+.mz-3d-button-sm { transform: scale(0.6); }
+.mz-3d-button-lg { transform: scale(1.6); }
+.mz-3d-panel { transform: perspective(1000px) rotateY(-6deg); box-shadow: var(--mz-shadow-2xl); border-radius: var(--mz-radius-lg); }
+.mz-3d-panel-sm { transform: scale(0.6); }
+.mz-3d-panel-lg { transform: scale(1.6); }
+.mz-3d-button:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--mz-purple-800); }

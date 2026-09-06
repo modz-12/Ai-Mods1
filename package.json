@@ -1,7 +1,13 @@
 {
-  "name":"modz-design-system-hub",
-  "version":"1.0.0",
-  "private":true,
-  "type":"module",
-  "scripts":{"manifest":"node generate-manifest.js","dev":"npx serve .","start":"npx serve ."}
+  "name": "modz-css",
+  "version": "1.0.0",
+  "description": "MODZ CSS — a pure CSS, zero-JavaScript, zero-dependency utility & effects library with 2000+ real classes, prefixed with mz-.",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "python3 build.py && python3 build_docs_data.py && cp dist/modz.css public/modz.css && cp dist/modz.min.css public/modz.min.css",
+    "count": "grep -o '\\.mz-[a-zA-Z0-9_-]*' dist/modz.css | sort -u | wc -l"
+  },
+  "dependencies": {},
+  "devDependencies": {}
 }

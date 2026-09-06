@@ -1,0 +1,13 @@
+/* MODZ CSS - light/dark theming, CSS only (data-attribute or prefers-color-scheme) */
+.mz-light { --mz-bg: #ffffff; --mz-fg: #0f172a; background-color: var(--mz-bg); color: var(--mz-fg); }
+.mz-dark { --mz-bg: #0b0b12; --mz-fg: #f1f5f9; background-color: var(--mz-bg); color: var(--mz-fg); }
+@media (prefers-color-scheme: dark) {
+  .mz-auto-theme { --mz-bg: #0b0b12; --mz-fg: #f1f5f9; background-color: var(--mz-bg); color: var(--mz-fg); }
+}
+@media (prefers-color-scheme: light) {
+  .mz-auto-theme { --mz-bg: #ffffff; --mz-fg: #0f172a; background-color: var(--mz-bg); color: var(--mz-fg); }
+}
+.mz-theme-purple { --mz-accent: var(--mz-purple-500); }
+.mz-theme-blue { --mz-accent: var(--mz-blue-500); }
+.mz-theme-cyan { --mz-accent: var(--mz-cyan-500); }
+.mz-theme-green { --mz-accent: var(--mz-green-500); }

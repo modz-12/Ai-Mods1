@@ -1,0 +1,35 @@
+/* MODZ CSS - CSS filter utilities */
+.mz-blur-none { filter: blur(0px); }
+.mz-blur-xs { filter: blur(1px); }
+.mz-blur-sm { filter: blur(2px); }
+.mz-blur-md { filter: blur(4px); }
+.mz-blur-lg { filter: blur(8px); }
+.mz-blur-xl { filter: blur(16px); }
+.mz-blur-2xl { filter: blur(24px); }
+.mz-bright-0 { filter: brightness(0); }
+.mz-bright-low { filter: brightness(.5); }
+.mz-bright { filter: brightness(1); }
+.mz-bright-high { filter: brightness(1.5); }
+.mz-bright-max { filter: brightness(2); }
+.mz-contrast-0 { filter: contrast(0); }
+.mz-contrast-low { filter: contrast(.5); }
+.mz-contrast { filter: contrast(1); }
+.mz-contrast-high { filter: contrast(1.5); }
+.mz-contrast-max { filter: contrast(2); }
+.mz-grayscale-0 { filter: grayscale(0%); }
+.mz-sepia-0 { filter: sepia(0%); }
+.mz-grayscale-50 { filter: grayscale(50%); }
+.mz-sepia-50 { filter: sepia(50%); }
+.mz-grayscale { filter: grayscale(100%); }
+.mz-sepia { filter: sepia(100%); }
+.mz-saturate-0 { filter: saturate(0); }
+.mz-saturate-low { filter: saturate(.5); }
+.mz-saturate { filter: saturate(1); }
+.mz-saturate-high { filter: saturate(2); }
+.mz-invert-0 { filter: invert(0%); }
+.mz-invert { filter: invert(100%); }
+.mz-hue-rotate-90 { filter: hue-rotate(90deg); }
+.mz-hue-rotate-180 { filter: hue-rotate(180deg); }
+.mz-backdrop-blur-sm { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.mz-backdrop-blur-md { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.mz-backdrop-blur-lg { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }

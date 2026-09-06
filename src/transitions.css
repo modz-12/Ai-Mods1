@@ -1,0 +1,18 @@
+/* MODZ CSS - transitions */
+.mz-transition { transition-property: all; transition-timing-function: var(--mz-ease); transition-duration: var(--mz-duration-normal); }
+.mz-duration-instant { transition-duration: 60ms; animation-duration: 60ms; }
+.mz-duration-fast { transition-duration: 150ms; animation-duration: 150ms; }
+.mz-duration-normal { transition-duration: 300ms; animation-duration: 300ms; }
+.mz-duration-slow { transition-duration: 500ms; animation-duration: 500ms; }
+.mz-duration-slower { transition-duration: 800ms; animation-duration: 800ms; }
+.mz-transition-transform { transition-property: transform; transition-timing-function: var(--mz-ease); transition-duration: var(--mz-duration-normal); }
+.mz-transition-opacity { transition-property: opacity; transition-timing-function: var(--mz-ease); transition-duration: var(--mz-duration-normal); }
+.mz-transition-colors { transition-property: color, background-color, border-color; transition-timing-function: var(--mz-ease); transition-duration: var(--mz-duration-normal); }
+.mz-transition-shadow { transition-property: box-shadow; transition-timing-function: var(--mz-ease); transition-duration: var(--mz-duration-normal); }
+.mz-transition-filter { transition-property: filter; transition-timing-function: var(--mz-ease); transition-duration: var(--mz-duration-normal); }
+.mz-ease-linear { transition-timing-function: linear; }
+.mz-ease-ease { transition-timing-function: ease; }
+.mz-ease-ease-in { transition-timing-function: ease-in; }
+.mz-ease-ease-out { transition-timing-function: ease-out; }
+.mz-ease-ease-in-out { transition-timing-function: ease-in-out; }
+.mz-transition-none { transition-property: none; }

@@ -1,0 +1,30 @@
+/* MODZ CSS - border styles */
+.mz-border-solid { border-style: solid; }
+.mz-border-dashed { border-style: dashed; }
+.mz-border-dotted { border-style: dotted; }
+.mz-border-double { border-style: double; }
+.mz-border-groove { border-style: groove; }
+.mz-border-ridge { border-style: ridge; }
+.mz-border-inset { border-style: inset; }
+.mz-border-outset { border-style: outset; }
+.mz-border-none { border-style: none; }
+.mz-border-thin { border-width: 1px; border-style: solid; }
+.mz-border-md { border-width: 2px; border-style: solid; }
+.mz-border-thick { border-width: 4px; border-style: solid; }
+.mz-border-xl { border-width: 6px; border-style: solid; }
+.mz-border-top { border-top: 1px solid currentColor; }
+.mz-border-top-only { border: 0; border-top: 2px solid currentColor; }
+.mz-border-bottom { border-bottom: 1px solid currentColor; }
+.mz-border-bottom-only { border: 0; border-bottom: 2px solid currentColor; }
+.mz-border-left { border-left: 1px solid currentColor; }
+.mz-border-left-only { border: 0; border-left: 2px solid currentColor; }
+.mz-border-right { border-right: 1px solid currentColor; }
+.mz-border-right-only { border: 0; border-right: 2px solid currentColor; }
+.mz-border-gradient { border: 3px solid transparent; border-radius: var(--mz-radius-lg); background: linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg, var(--mz-purple-500), var(--mz-cyan-500)) border-box; }
+@keyframes mz-border-spin { to { --mz-angle: 360deg; } }
+.mz-border-animated { border: 3px solid transparent; border-radius: var(--mz-radius-lg); background: linear-gradient(#fff,#fff) padding-box, conic-gradient(from var(--mz-angle,0deg), var(--mz-purple-500), var(--mz-cyan-500), var(--mz-purple-500)) border-box; animation: mz-border-spin 3s linear infinite; }
+.mz-border-neon { border: 2px solid var(--mz-cyan-400); box-shadow: 0 0 8px var(--mz-cyan-400), inset 0 0 8px var(--mz-cyan-400); }
+.mz-border-glow { border: 2px solid var(--mz-purple-400); box-shadow: 0 0 12px var(--mz-purple-400); }
+.mz-border-rainbow { border: 3px solid transparent; border-radius: var(--mz-radius-lg); background: linear-gradient(#fff,#fff) padding-box, linear-gradient(90deg,#ef4444,#f59e0b,#eab308,#22c55e,#06b6d4,#7c3aed) border-box; }
+.mz-border-corner { position: relative; border: 0; } .mz-border-corner::before { content:''; position:absolute; inset:0; border: 2px solid currentColor; border-radius: inherit; clip-path: polygon(0 0, 30% 0, 30% 8%, 8% 8%, 8% 30%, 0 30%, 0 0, 0 100%, 8% 100%, 8% 70%, 30% 70%, 30% 100%, 0 100%, 100% 100%, 100% 70%, 70% 70%, 70% 100%, 100% 100%, 100% 0, 70% 0, 70% 8%, 92% 8%, 92% 30%, 100% 30%); }
+.mz-border-partial { border-image: linear-gradient(90deg, currentColor 60%, transparent 60%) 1; border-style: solid; border-width: 2px; }

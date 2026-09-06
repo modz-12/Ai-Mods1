@@ -1,0 +1,13 @@
+/* MODZ CSS - overflow */
+.mz-overflow-auto { overflow: auto; }
+.mz-overflow-x-auto { overflow-x: auto; }
+.mz-overflow-y-auto { overflow-y: auto; }
+.mz-overflow-hidden { overflow: hidden; }
+.mz-overflow-x-hidden { overflow-x: hidden; }
+.mz-overflow-y-hidden { overflow-y: hidden; }
+.mz-overflow-visible { overflow: visible; }
+.mz-overflow-x-visible { overflow-x: visible; }
+.mz-overflow-y-visible { overflow-y: visible; }
+.mz-overflow-scroll { overflow: scroll; }
+.mz-overflow-x-scroll { overflow-x: scroll; }
+.mz-overflow-y-scroll { overflow-y: scroll; }

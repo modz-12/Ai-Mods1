@@ -1,1 +1,0 @@
-export function helloModz(name="Developer"){return `Hello ${name} — Modz Library Hub`;}

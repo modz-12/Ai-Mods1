@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MODZ CSS — مكتبة CSS نقية بدون JavaScript</title>
+<meta name="description" content="MODZ CSS: مكتبة Utility CSS مستقلة بالكامل، أكثر من 2000 class حقيقي، بدون JavaScript وبدون Dependencies، جاهزة للاستدعاء بسطر واحد.">
+<link rel="stylesheet" href="./modz.css">
+<link rel="stylesheet" href="./docs.css">
+</head>
+<body>
+<a class="doc-skip-link" href="#doc-main">تخطَّ إلى المحتوى</a>
+
+<header class="doc-hero">
+  <div>
+    <p class="doc-eyebrow">mz- · v1.0.0 · CSS فقط، بدون JavaScript</p>
+    <h1>مكتبة MODZ CSS لأي مشروع، بسطر واحد</h1>
+    <p class="doc-lede">
+      أكثر من <strong id="doc-total-count">2000</strong> class حقيقي وفعّال: أشكال، تأثيرات
+      إضاءة وزجاجية، تدرجات، حركات، وأدوات layout كاملة — كلها CSS خالص لا يعتمد على
+      أي JavaScript أو framework أو ملفات خارجية.
+    </p>
+    <div class="doc-hero-actions">
+      <a class="doc-btn doc-btn-primary" href="#doc-main">تصفّح الـ Classes</a>
+      <a class="doc-btn doc-btn-ghost" href="./modz.min.css">تحميل modz.min.css</a>
+    </div>
+  </div>
+
+  <div class="doc-hero-stage">
+    <div class="mz-glass mz-radius-2xl mz-shadow-xl" style="padding:2rem 1.75rem; max-width:320px; text-align:center;">
+      <p class="mz-text-gradient mz-text-4xl mz-font-black" style="margin:0 0 .5rem;">MODZ</p>
+      <p class="mz-text-neon mz-text-sm" style="margin:0 0 1.25rem;">CSS ONLY · NO JS</p>
+      <div style="display:flex; gap:1rem; justify-content:center; align-items:center; margin-bottom:1.25rem;">
+        <div class="mz-circle mz-glow-purple mz-animate-float mz-animate-infinite" style="font-size:2.4rem;"></div>
+        <div class="mz-hexagon mz-bg-cyan-500 mz-glow-cyan mz-animate-float mz-animate-infinite" style="font-size:2.2rem; animation-delay:.4s;"></div>
+        <div class="mz-star mz-bg-pink-500 mz-glow-pink mz-animate-float mz-animate-infinite" style="font-size:2.1rem; animation-delay:.8s;"></div>
+      </div>
+      <button class="mz-3d-button mz-glow-purple" type="button" style="width:100%;">Use MODZ</button>
+    </div>
+    <div class="doc-code-chip">&lt;link rel="stylesheet" href="https://modz-styles.vercel.app/modz.css"&gt;</div>
+  </div>
+</header>
+
+<main class="doc-app">
+  <aside class="doc-sidebar" aria-label="أقسام المكتبة">
+    <input class="doc-search" id="doc-search" type="search" placeholder="ابحث عن class… (مثال: glow, circle, gap)">
+    <ul class="doc-cat-list" id="doc-cat-list"></ul>
+  </aside>
+
+  <section class="doc-main" id="doc-main">
+    <h2 id="doc-main-heading">كل الأقسام</h2>
+    <p class="doc-main-sub" id="doc-main-sub"></p>
+    <div id="doc-list"></div>
+    <button class="doc-btn doc-btn-ghost doc-loadmore" id="doc-loadmore" type="button" style="display:none;"></button>
+  </section>
+</main>
+
+<footer class="doc-footer">
+  <p>
+    MODZ CSS v1.0.0 — مكتبة CSS مستقلة بالكامل، بدون JavaScript وبدون Dependencies.
+    الرابط الثابت: <code>https://modz-styles.vercel.app/modz.css</code> ·
+    نسخة مصغّرة: <code>https://modz-styles.vercel.app/modz.min.css</code>.
+    راجع ملف <code>README.md</code> في المشروع لطريقة الاستخدام الكاملة وكل الأمثلة.
+  </p>
+</footer>
+
+<script src="./docs.js"></script>
+</body>
+</html>

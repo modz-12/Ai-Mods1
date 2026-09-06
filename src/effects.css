@@ -1,0 +1,21 @@
+/* MODZ CSS - special advanced CSS-only effects */
+.mz-neon { color:#fff; text-shadow: 0 0 5px #fff, 0 0 15px var(--mz-cyan-400), 0 0 30px var(--mz-cyan-500), 0 0 60px var(--mz-cyan-600); }
+.mz-aurora-text { background: linear-gradient(120deg, var(--mz-purple-400), var(--mz-cyan-400), var(--mz-emerald-400)); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: mz-gradient-move 4s ease infinite; }
+.mz-liquid { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; animation: mz-blob-morph 8s ease-in-out infinite; }
+.mz-shimmer { background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.5) 50%, rgba(255,255,255,0) 100%); background-size: 200% 100%; animation: mz-shimmer 1.6s linear infinite; }
+.mz-skeleton { background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%); background-size: 400% 100%; animation: mz-shimmer 1.4s ease infinite; border-radius: var(--mz-radius-md); color: transparent; }
+.mz-scanline { position: relative; overflow: hidden; }
+.mz-cyberpunk { background: #0d0221; color: #0ff; text-shadow: 2px 0 #f0f, -2px 0 #0ff; border: 1px solid #f0f; box-shadow: 0 0 10px #f0f, inset 0 0 10px #0ff; }
+.mz-holographic { background: linear-gradient(120deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1, #84fab0, #8fd3f4); background-size: 300% 300%; animation: mz-gradient-move 6s ease infinite; }
+.mz-chrome { background: linear-gradient(180deg, #eee 0%, #999 45%, #ccc 55%, #444 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.mz-metallic { background: linear-gradient(135deg, #d7d7d7, #8f8f8f 45%, #fafafa 55%, #6b6b6b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.mz-frosted { background: rgba(255,255,255,.25); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.3); }
+.mz-retro { background: #2b1055; color: #ffde59; font-weight: 700; text-shadow: 3px 3px 0 #ff5f6d; border: 3px solid #ffde59; }
+.mz-terminal { background: #0a0a0a; color: #33ff33; font-family: 'Courier New', monospace; border: 1px solid #33ff33; padding: 1em; }
+.mz-matrix { background: #000; color: #0f0; font-family: monospace; text-shadow: 0 0 6px #0f0; }
+.mz-light-sweep { position: relative; overflow: hidden; }
+@keyframes mz-blob-morph { 0%,100% { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; } 50% { border-radius: 63% 37% 30% 70% / 50% 45% 55% 50%; } }
+.mz-scanline::after { content:''; position:absolute; inset:0; background: linear-gradient(transparent, rgba(255,255,255,.15), transparent); animation: mz-scanline 3s linear infinite; }
+.mz-light-sweep::after { content:''; position:absolute; top:0; left:-60%; width:40%; height:100%; background: linear-gradient(120deg, transparent, rgba(255,255,255,.5), transparent); animation: mz-sweep 2.4s ease infinite; }
+@keyframes mz-sweep { 0% { left:-60%; } 100% { left:130%; } }
+.mz-bg-stars { background-image: radial-gradient(1px 1px at 20px 30px, #fff, transparent), radial-gradient(1px 1px at 60px 90px, #fff, transparent), radial-gradient(1.5px 1.5px at 130px 40px, #fff, transparent), radial-gradient(1px 1px at 90px 150px, #fff, transparent); background-size: 200px 200px; background-color: #05050f; }

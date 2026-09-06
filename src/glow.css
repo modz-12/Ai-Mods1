@@ -1,0 +1,53 @@
+/* MODZ CSS - glow / neon lighting effects */
+.mz-glow { box-shadow: 0 0 12px 2px var(--mz-purple-400); }
+.mz-glow-soft { box-shadow: 0 0 8px 0 rgba(124,58,237,.35); }
+.mz-glow-strong { box-shadow: 0 0 24px 6px var(--mz-purple-400); }
+.mz-glow-neon { box-shadow: 0 0 6px var(--mz-purple-400), 0 0 18px var(--mz-purple-500), 0 0 36px var(--mz-purple-600); }
+.mz-glow-inner { box-shadow: inset 0 0 14px 2px var(--mz-purple-400); }
+.mz-glow-outer { box-shadow: 0 0 20px 4px var(--mz-purple-400); }
+.mz-glow-top { box-shadow: 0 -8px 16px -4px var(--mz-purple-400); }
+.mz-glow-bottom { box-shadow: 0 8px 16px -4px var(--mz-purple-400); }
+.mz-glow-left { box-shadow: -8px 0 16px -4px var(--mz-purple-400); }
+.mz-glow-right { box-shadow: 8px 0 16px -4px var(--mz-purple-400); }
+.mz-glow-border { box-shadow: 0 0 0 2px var(--mz-purple-400), 0 0 10px 2px var(--mz-purple-400); }
+.mz-glow-text { text-shadow: 0 0 8px var(--mz-purple-400); }
+.mz-glow-box { box-shadow: 0 0 24px 4px var(--mz-purple-400); }
+.mz-glow-shadow { box-shadow: 0 4px 24px 4px var(--mz-purple-400); }
+.mz-glow-double { box-shadow: 0 0 10px var(--mz-purple-400), 0 0 30px var(--mz-purple-600); }
+.mz-glow-multi { box-shadow: 0 0 8px var(--mz-purple-400), 0 0 16px var(--mz-blue-400), 0 0 28px var(--mz-cyan-400); }
+.mz-glow-purple { box-shadow: 0 0 14px 3px var(--mz-purple-400, #7c3aed); }
+.mz-text-glow-purple { text-shadow: 0 0 8px var(--mz-purple-400, #7c3aed); }
+.mz-border-glow-purple { box-shadow: 0 0 0 2px var(--mz-purple-400, #7c3aed), 0 0 10px 2px var(--mz-purple-400, #7c3aed); }
+.mz-box-glow-purple { box-shadow: 0 0 22px 4px var(--mz-purple-400, #7c3aed); }
+.mz-glow-blue { box-shadow: 0 0 14px 3px var(--mz-blue-400, #3b82f6); }
+.mz-text-glow-blue { text-shadow: 0 0 8px var(--mz-blue-400, #3b82f6); }
+.mz-border-glow-blue { box-shadow: 0 0 0 2px var(--mz-blue-400, #3b82f6), 0 0 10px 2px var(--mz-blue-400, #3b82f6); }
+.mz-box-glow-blue { box-shadow: 0 0 22px 4px var(--mz-blue-400, #3b82f6); }
+.mz-glow-cyan { box-shadow: 0 0 14px 3px var(--mz-cyan-400, #06b6d4); }
+.mz-text-glow-cyan { text-shadow: 0 0 8px var(--mz-cyan-400, #06b6d4); }
+.mz-border-glow-cyan { box-shadow: 0 0 0 2px var(--mz-cyan-400, #06b6d4), 0 0 10px 2px var(--mz-cyan-400, #06b6d4); }
+.mz-box-glow-cyan { box-shadow: 0 0 22px 4px var(--mz-cyan-400, #06b6d4); }
+.mz-glow-green { box-shadow: 0 0 14px 3px var(--mz-green-400, #22c55e); }
+.mz-text-glow-green { text-shadow: 0 0 8px var(--mz-green-400, #22c55e); }
+.mz-border-glow-green { box-shadow: 0 0 0 2px var(--mz-green-400, #22c55e), 0 0 10px 2px var(--mz-green-400, #22c55e); }
+.mz-box-glow-green { box-shadow: 0 0 22px 4px var(--mz-green-400, #22c55e); }
+.mz-glow-red { box-shadow: 0 0 14px 3px var(--mz-red-400, #ef4444); }
+.mz-text-glow-red { text-shadow: 0 0 8px var(--mz-red-400, #ef4444); }
+.mz-border-glow-red { box-shadow: 0 0 0 2px var(--mz-red-400, #ef4444), 0 0 10px 2px var(--mz-red-400, #ef4444); }
+.mz-box-glow-red { box-shadow: 0 0 22px 4px var(--mz-red-400, #ef4444); }
+.mz-glow-orange { box-shadow: 0 0 14px 3px var(--mz-orange-400, #f97316); }
+.mz-text-glow-orange { text-shadow: 0 0 8px var(--mz-orange-400, #f97316); }
+.mz-border-glow-orange { box-shadow: 0 0 0 2px var(--mz-orange-400, #f97316), 0 0 10px 2px var(--mz-orange-400, #f97316); }
+.mz-box-glow-orange { box-shadow: 0 0 22px 4px var(--mz-orange-400, #f97316); }
+.mz-glow-pink { box-shadow: 0 0 14px 3px var(--mz-pink-400, #ec4899); }
+.mz-text-glow-pink { text-shadow: 0 0 8px var(--mz-pink-400, #ec4899); }
+.mz-border-glow-pink { box-shadow: 0 0 0 2px var(--mz-pink-400, #ec4899), 0 0 10px 2px var(--mz-pink-400, #ec4899); }
+.mz-box-glow-pink { box-shadow: 0 0 22px 4px var(--mz-pink-400, #ec4899); }
+.mz-glow-yellow { box-shadow: 0 0 14px 3px var(--mz-yellow-400, #eab308); }
+.mz-text-glow-yellow { text-shadow: 0 0 8px var(--mz-yellow-400, #eab308); }
+.mz-border-glow-yellow { box-shadow: 0 0 0 2px var(--mz-yellow-400, #eab308), 0 0 10px 2px var(--mz-yellow-400, #eab308); }
+.mz-box-glow-yellow { box-shadow: 0 0 22px 4px var(--mz-yellow-400, #eab308); }
+.mz-glow-white { box-shadow: 0 0 14px 3px var(--mz-white-400, #fff); }
+.mz-text-glow-white { text-shadow: 0 0 8px var(--mz-white-400, #fff); }
+.mz-border-glow-white { box-shadow: 0 0 0 2px var(--mz-white-400, #fff), 0 0 10px 2px var(--mz-white-400, #fff); }
+.mz-box-glow-white { box-shadow: 0 0 22px 4px var(--mz-white-400, #fff); }
