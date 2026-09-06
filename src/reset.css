@@ -1,7 +1,0 @@
-/* MODZ CSS - minimal, non-destructive reset scoped so it never fights the host project */
-.mz-reset, .mz-reset * {
-  box-sizing: border-box;
-}
-[class^="mz-"], [class*=" mz-"] {
-  box-sizing: border-box;
-}

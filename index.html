@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌾 محاكي المزرعة</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        :root {
+            --bg: #0f1923;
+            --card: #1a2a3a;
+            --card2: #223546;
+            --green: #4caf50;
+            --green2: #2d6a4f;
+            --orange: #ff9800;
+            --red: #e74c3c;
+            --text: #e8e8e8;
+            --text2: #9ab0c0;
+            --shadow: 0 4px 20px rgba(0, 0, 0, .4);
+            --radius: 16px;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        /* Login */
+        #loginScreen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f1923 0%, #1a2a3a 50%, #0d1f0d 100%);
+        }
+        .login-box {
+            background: var(--card);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, .1);
+        }
+        .login-box h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .login-box .subtitle {
+            color: var(--text2);
+            margin-bottom: 30px;
+            font-size: .9em;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .15);
+            background: rgba(0, 0, 0, .3);
+            color: var(--text);
+            font-size: 1em;
+            outline: none;
+            transition: .3s;
+        }
+        .login-box input:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, .2);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #4caf50, #2d6a4f);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: .3s;
+            font-weight: 700;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, .3);
+        }
+        .login-error {
+            color: var(--red);
+            margin-top: 10px;
+            font-size: .85em;
+        }
+        /* Game Layout */
+        #gameScreen {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .top-bar {
+            background: linear-gradient(90deg, var(--card), var(--card2));
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, .3);
+            z-index: 100;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 60px;
+            gap: 10px;
+        }
+        .top-bar .logo {
+            font-size: 1.2em;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        .top-bar .info {
+            display: flex;
+            gap: 10px;
+            margin-right: auto;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .top-bar .info span {
+            background: rgba(0, 0, 0, .3);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: .85em;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .hamburger {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5em;
+            cursor: pointer;
+            display: none;
+        }
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            background: var(--card);
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 0;
+            padding: 15px 10px;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, .3);
+            z-index: 99;
+            transition: transform .3s;
+            overflow-y: auto;
+        }
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 14px 12px;
+            background: transparent;
+            border: none;
+            color: var(--text2);
+            font-size: .95em;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: .3s;
+            text-align: right;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .nav-btn:hover {
+            background: rgba(76, 175, 80, .15);
+            color: var(--text);
+        }
+        .nav-btn.active {
+            background: linear-gradient(135deg, #4caf50, #2d6a4f);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, .3);
+        }
+        /* Main Content */
+        .main-content {
+            margin-right: 220px;
+            margin-top: 60px;
+            padding: 20px;
+            min-height: calc(100vh - 60px);
+        }
+        .page {
+            display: none;
+            animation: fadeIn .3s;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* Cards */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, .05);
+        }
+        .card h3 {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+            background: var(--card2);
+            border-radius: 12px;
+        }
+        .stat-box .value {
+            font-size: 1.6em;
+            font-weight: 800;
+            margin-top: 5px;
+        }
+        .stat-box .label {
+            font-size: .8em;
+            color: var(--text2);
+        }
+        /* Bars */
+        .bar-container {
+            margin: 10px 0;
+            height: 22px;
+            background: rgba(0, 0, 0, .4);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 12px;
+            transition: width .5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .7em;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, .5);
+        }
+        .bar-energy {
+            background: linear-gradient(90deg, #ff9800, #ffc107);
+        }
+        .bar-hunger {
+            background: linear-gradient(90deg, #e74c3c, #ff6b6b);
+        }
+        .bar-thirst {
+            background: linear-gradient(90deg, #2196f3, #00bcd4);
+        }
+        .bar-health {
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+        }
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: .9em;
+            font-weight: 600;
+            transition: .3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-green {
+            background: linear-gradient(135deg, #4caf50, #2d6a4f);
+            color: #fff;
+        }
+        .btn-orange {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: #fff;
+        }
+        .btn-red {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+        }
+        .btn-blue {
+            background: linear-gradient(135deg, #2196f3, #0d47a1);
+            color: #fff;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .2);
+        }
+        .btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        /* Farm Plots */
+        .plots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+        }
+        .plot {
+            background: var(--card2);
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+            transition: .3s;
+            position: relative;
+        }
+        .plot:hover {
+            border-color: rgba(76, 175, 80, .4);
+        }
+        .plot .crop-emoji {
+            font-size: 3em;
+            margin-bottom: 5px;
+        }
+        .plot .crop-name {
+            font-size: .85em;
+            margin: 5px 0;
+        }
+        .plot .timer {
+            font-size: .75em;
+            color: var(--text2);
+            background: rgba(0, 0, 0, .3);
+            padding: 4px 10px;
+            border-radius: 10px;
+            margin: 5px 0;
+            font-family: monospace;
+        }
+        .plot .ready {
+            background: var(--green);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: .8em;
+        }
+        /* Animals */
+        .animals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        .animal-card {
+            background: var(--card2);
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, .05);
+            transition: .3s;
+        }
+        .animal-card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .2);
+        }
+        .animal-emoji {
+            font-size: 3em;
+        }
+        /* Shop */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+        }
+        .shop-item {
+            background: var(--card2);
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+            transition: .3s;
+        }
+        .shop-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, .2);
+        }
+        .shop-item .price {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--orange);
+            margin: 8px 0;
+        }
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card);
+            color: var(--text);
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, .4);
+            z-index: 9999;
+            font-size: .9em;
+            font-weight: 600;
+            animation: toastIn .3s, toastOut .3s 2.7s forwards;
+            border: 1px solid rgba(255, 255, 255, .1);
+            text-align: center;
+            max-width: 90%;
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+        /* Offline Banner */
+        .offline-banner {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background: #e74c3c;
+            color: #fff;
+            padding: 8px;
+            text-align: center;
+            font-size: .85em;
+            z-index: 999;
+            display: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .3);
+        }
+        /* Inventory */
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+        }
+        .inv-item {
+            background: var(--card2);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            transition: .3s;
+        }
+        .inv-item .emoji {
+            font-size: 2em;
+        }
+        .inv-item .qty {
+            font-size: 1.2em;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+        /* Responsive */
+        @media(max-width:768px) {
+            .sidebar {
+                transform: translateX(100%);
+                width: 250px;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-right: 0;
+                padding: 15px;
+            }
+            .hamburger {
+                display: block;
+            }
+            .top-bar .logo {
+                font-size: .9em;
+            }
+            .top-bar .info span {
+                font-size: .75em;
+                padding: 4px 8px;
+            }
+            .plots-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .animals-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .shop-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media(max-width:400px) {
+            .top-bar .info span {
+                display: none;
+            }
+            .top-bar .info span:first-child {
+                display: inline;
+            }
+            .plots-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        /* Settings */
+        .settings-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .settings-btns .btn {
+            flex: 1;
+            min-width: 140px;
+            justify-content: center;
+        }
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, .7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: .3s;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-box {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .4);
+        }
+        /* Stats Page */
+        .stats-list {
+            list-style: none;
+        }
+        .stats-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, .05);
+            display: flex;
+            justify-content: space-between;
+        }
+        .stats-list li:last-child {
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div class="login-box">
+            <h2>🌾 محاكي المزرعة</h2>
+            <p class="subtitle">Modz Farm Simulator</p>
+            <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" autocomplete="username">
+            <input type="password" id="loginPassword" placeholder="كلمة المرور" autocomplete="current-password">
+            <button class="login-btn" onclick="handleLogin()">🔐 تسجيل الدخول</button>
+            <p class="login-error" id="loginError"></p>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen">
+        <!-- Offline Banner -->
+        <div class="offline-banner" id="offlineBanner">⚠️ انقطع اتصال الإنترنت — الحفظ المحلي ما زال يعمل</div>
+
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <button class="hamburger" onclick="toggleSidebar()">☰</button>
+            <div class="logo">🌾 محاكي المزرعة</div>
+            <div class="info">
+                <span>💰 <span id="topMoney">5,000</span></span>
+                <span>📅 يوم <span id="topDay">1</span></span>
+                <span id="onlineStatus">🟢 متصل</span>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <button class="nav-btn active" data-page="home" onclick="navigateTo('home')">🏠 المنزل</button>
+            <button class="nav-btn" data-page="farm" onclick="navigateTo('farm')">🌱 المزرعة</button>
+            <button class="nav-btn" data-page="animals" onclick="navigateTo('animals')">🐄 الحيوانات</button>
+            <button class="nav-btn" data-page="shop" onclick="navigateTo('shop')">🛒 المتجر</button>
+            <button class="nav-btn" data-page="sell" onclick="navigateTo('sell')">🏪 البيع</button>
+            <button class="nav-btn" data-page="inventory" onclick="navigateTo('inventory')">🎒 المخزون</button>
+            <button class="nav-btn" data-page="stats" onclick="navigateTo('stats')">📊 الإحصائيات</button>
+            <button class="nav-btn" data-page="settings" onclick="navigateTo('settings')">⚙️ الإعدادات</button>
+            <button class="nav-btn" onclick="logout()" style="color:#e74c3c">🚪 تسجيل الخروج</button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Home Page -->
+            <div id="homePage" class="page active">
+                <div class="card">
+                    <h3>🏠 المنزل</h3>
+                    <div class="stats-grid">
+                        <div class="stat-box"><div class="value">💰 <span id="homeMoney">5,000</span></div><div class="label">المال</div></div>
+                        <div class="stat-box"><div class="value">📅 <span id="homeDay">1</span></div><div class="label">اليوم</div></div>
+                        <div class="stat-box"><div class="value">🏠 <span id="homeLevel">1</span></div><div class="label">مستوى المنزل</div></div>
+                    </div>
+                    <h4 style="margin-top:20px">الحالة</h4>
+                    <div class="bar-container"><div class="bar-fill bar-energy" id="energyBar">⚡ 100</div></div>
+                    <div class="bar-container"><div class="bar-fill bar-hunger" id="hungerBar">🍲 100</div></div>
+                    <div class="bar-container"><div class="bar-fill bar-thirst" id="thirstBar">💧 100</div></div>
+                    <div class="bar-container"><div class="bar-fill bar-health" id="healthBar">❤️ 100</div></div>
+                </div>
+                <div class="card">
+                    <h3>🛏️ الأنشطة</h3>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap">
+                        <button class="btn btn-blue" onclick="sleep()">🛏️ النوم</button>
+                        <button class="btn btn-green" onclick="eatFood()">🍲 أكل</button>
+                        <button class="btn btn-orange" onclick="drinkWater()">💧 شرب</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>🏗️ تطوير المنزل</h3>
+                    <p id="homeUpgradeInfo" style="color:var(--text2);margin-bottom:10px">مستوى المنزل 1 — يمنح استعادة طاقة 50%</p>
+                    <button class="btn btn-green" onclick="upgradeHome()">🔨 ترقية المنزل</button>
+                </div>
+            </div>
+
+            <!-- Farm Page -->
+            <div id="farmPage" class="page">
+                <div class="card">
+                    <h3>🌱 قطع الأرض</h3>
+                    <div class="plots-grid" id="plotsGrid"></div>
+                </div>
+                <div class="card">
+                    <h3>🏗️ تطوير المزرعة</h3>
+                    <p id="farmUpgradeInfo" style="color:var(--text2);margin-bottom:10px">مستوى المزرعة 1 — 4 قطع أرض</p>
+                    <button class="btn btn-green" onclick="upgradeFarm()">🔨 ترقية المزرعة</button>
+                </div>
+            </div>
+
+            <!-- Animals Page -->
+            <div id="animalsPage" class="page">
+                <div class="card">
+                    <h3>🐄 الحيوانات</h3>
+                    <div class="animals-grid" id="animalsGrid"></div>
+                </div>
+                <div class="card">
+                    <h3>🐾 شراء حيوان</h3>
+                    <div class="shop-grid" id="buyAnimalsGrid"></div>
+                </div>
+            </div>
+
+            <!-- Shop Page -->
+            <div id="shopPage" class="page">
+                <div class="card">
+                    <h3>🌱 بذور</h3>
+                    <div class="shop-grid" id="shopSeedsGrid"></div>
+                </div>
+                <div class="card">
+                    <h3>🌿 أعلاف وموارد</h3>
+                    <div class="shop-grid" id="shopResourcesGrid"></div>
+                </div>
+            </div>
+
+            <!-- Sell Page -->
+            <div id="sellPage" class="page">
+                <div class="card">
+                    <h3>🏪 بيع المنتجات</h3>
+                    <div id="sellList"></div>
+                </div>
+            </div>
+
+            <!-- Inventory Page -->
+            <div id="inventoryPage" class="page">
+                <div class="card">
+                    <h3>🎒 المخزون</h3>
+                    <div class="inventory-grid" id="inventoryGrid"></div>
+                </div>
+            </div>
+
+            <!-- Statistics Page -->
+            <div id="statsPage" class="page">
+                <div class="card">
+                    <h3>📊 الإحصائيات</h3>
+                    <ul class="stats-list" id="statsList"></ul>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settingsPage" class="page">
+                <div class="card">
+                    <h3>⚙️ الإعدادات</h3>
+                    <div class="settings-btns">
+                        <button class="btn btn-green" onclick="saveGame()">💾 حفظ اللعبة</button>
+                        <button class="btn btn-blue" onclick="exportSave()">📦 تصدير الحفظ</button>
+                        <button class="btn btn-orange" onclick="document.getElementById('importFile').click()">📥 استيراد الحفظ</button>
+                        <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+                    </div>
+                    <p style="color:var(--text2);margin-top:10px;font-size:.85em">يتم الحفظ تلقائيًا كل 30 ثانية</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ====== CONSTANTS ======
+        const CROPS = {
+            wheat: { name: 'قمح', emoji: '🌾', seedPrice: 10, sellPrice: 25, growTime: 45, xp: 5 },
+            corn: { name: 'ذرة', emoji: '🌽', seedPrice: 20, sellPrice: 45, growTime: 70, xp: 8 },
+            tomato: { name: 'طماطم', emoji: '🍅', seedPrice: 15, sellPrice: 32, growTime: 60, xp: 6 },
+            carrot: { name: 'جزر', emoji: '🥕', seedPrice: 12, sellPrice: 28, growTime: 55, xp: 6 },
+            potato: { name: 'بطاطس', emoji: '🥔', seedPrice: 18, sellPrice: 36, growTime: 80, xp: 7 }
+        };
+        const ANIMALS = {
+            chicken: { name: 'دجاج', emoji: '🐔', price: 80, produce: 'egg', produceTime: 50, xp: 10 },
+            sheep: { name: 'خروف', emoji: '🐑', price: 150, produce: 'wool', produceTime: 80, xp: 15 },
+            goat: { name: 'ماعز', emoji: '🐐', price: 120, produce: 'milk', produceTime: 70, xp: 12 },
+            cow: { name: 'بقرة', emoji: '🐄', price: 250, produce: 'milk', produceTime: 100, xp: 20 }
+        };
+        const PRODUCTS = {
+            egg: { name: 'بيض', emoji: '🥚', sellPrice: 8 },
+            wool: { name: 'صوف', emoji: '🧶', sellPrice: 20 },
+            milk: { name: 'حليب', emoji: '🥛', sellPrice: 15 }
+        };
+        const VALID_ACCOUNTS = {
+            'modz@gmail.com': 'modz wep',
+            'thmanalshry22@gmail.com': 'apk133'
+        };
+        const PLOT_LEVELS = { 1: 4, 2: 6, 3: 8, 4: 10, 5: 12 };
+        const ANIMAL_LIMITS = { 1: 2, 2: 4, 3: 6, 4: 8, 5: 10 };
+        const FARM_UPGRADE_COST = { 1: 500, 2: 1000, 3: 2000, 4: 4000 };
+        const HOME_UPGRADE_COST = { 1: 800, 2: 1500 };
+
+        // ====== STATE ======
+        let state = null;
+        let currentUser = null;
+        let autoSaveInterval = null;
+
+        function createInitialState(email) {
+            return {
+                accountEmail: email,
+                player: {
+                    money: 5000,
+                    xp: 0,
+                    level: 1,
+                    energy: 100,
+                    hunger: 100,
+                    thirst: 100,
+                    health: 100,
+                    day: 1,
+                    homeLevel: 1,
+                    farmLevel: 1
+                },
+                plots: [],
+                animals: [],
+                inventory: {
+                    wheat: 0,
+                    corn: 0,
+                    tomato: 0,
+                    carrot: 0,
+                    potato: 0,
+                    egg: 0,
+                    wool: 0,
+                    milk: 0,
+                    seed_wheat: 5,
+                    seed_corn: 3,
+                    seed_tomato: 0,
+                    seed_carrot: 0,
+                    seed_potato: 0,
+                    feed: 3,
+                    water: 5,
+                    food: 5,
+                    fertilizer: 0,
+                    tool: 1
+                },
+                stats: {
+                    totalEarned: 0,
+                    totalSpent: 0,
+                    cropsHarvested: 0,
+                    animalsBought: 0,
+                    animalsSold: 0,
+                    productsCollected: 0,
+                    seedsBought: 0
+                },
+                lastUpdateTime: Date.now(),
+                lastSaveTime: Date.now()
+            };
+        }
+
+        // ====== LOGIN ======
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            if (!email || !password) {
+                errorEl.textContent = '❌ أدخل البريد وكلمة المرور';
+                return;
+            }
+            if (VALID_ACCOUNTS[email] && VALID_ACCOUNTS[email] === password) {
+                currentUser = email;
+                errorEl.textContent = '';
+                // Load save
+                loadSave().then(saveData => {
+                    if (saveData && saveData.accountEmail === email) {
+                        state = saveData;
+                    } else {
+                        state = createInitialState(email);
+                    }
+                    // Ensure all fields exist
+                    state = sanitizeState(state);
+                    enterGame();
+                    saveGame();
+                }).catch(() => {
+                    state = createInitialState(email);
+                    enterGame();
+                    saveGame();
+                });
+            } else {
+                errorEl.textContent = '❌ البريد أو كلمة المرور غير صحيحة';
+            }
+        }
+
+        function logout() {
+            saveGame();
+            currentUser = null;
+            state = null;
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginEmail').value = '';
+            clearInterval(autoSaveInterval);
+        }
+
+        // ====== SANITIZE ======
+        function sanitizeState(s) {
+            if (!s || !s.player) return createInitialState(currentUser);
+            const defaults = createInitialState(currentUser);
+            // Merge player
+            s.player = { ...defaults.player, ...s.player };
+            // Merge inventory
+            s.inventory = { ...defaults.inventory, ...s.inventory };
+            // Merge stats
+            s.stats = { ...defaults.stats, ...s.stats };
+            // Ensure plots array
+            const maxPlots = PLOT_LEVELS[s.player.farmLevel] || 4;
+            if (!Array.isArray(s.plots)) s.plots = [];
+            while (s.plots.length < maxPlots) {
+                s.plots.push({ id: s.plots.length + 1, crop: null, plantedAt: null, readyAt: null, status: 'empty' });
+            }
+            // Ensure animals array
+            if (!Array.isArray(s.animals)) s.animals = [];
+            // Ensure lastUpdateTime
+            if (!s.lastUpdateTime) s.lastUpdateTime = Date.now();
+            return s;
+        }
+
+        // ====== ENTER GAME ======
+        function enterGame() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'flex';
+            // Start auto-save
+            if (autoSaveInterval) clearInterval(autoSaveInterval);
+            autoSaveInterval = setInterval(saveGame, 30000);
+            // Setup online/offline
+            setupOnlineDetection();
+            // Render
+            navigateTo('home');
+            renderAll();
+            // Show welcome toast
+            showToast('🌾 أهلاً بك في مزرعتك!');
+        }
+
+        // ====== SAVE/LOAD ======
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open('FarmSimulator', 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('gameState')) {
+                        db.createObjectStore('gameState', { keyPath: 'id' });
+                    }
+                };
+                req.onsuccess = (e) => resolve(e.target.result);
+                req.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function saveToIndexedDB(state) {
+            try {
+                const db = await openDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction('gameState', 'readwrite');
+                    const store = tx.objectStore('gameState');
+                    store.put({ id: 'main', state: state });
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = (e) => reject(e.target.error);
+                });
+            } catch (e) {
+                console.error('IndexedDB error:', e);
+            }
+        }
+
+        async function loadFromIndexedDB() {
+            try {
+                const db = await openDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction('gameState', 'readonly');
+                    const store = tx.objectStore('gameState');
+                    const req = store.get('main');
+                    req.onsuccess = () => resolve(req.result ? req.result.state : null);
+                    req.onerror = (e) => reject(e.target.error);
+                });
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function saveToLocalStorage(state) {
+            try {
+                localStorage.setItem('farm_sim_backup', JSON.stringify(state));
+            } catch (e) {
+                console.error('localStorage error:', e);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const data = localStorage.getItem('farm_sim_backup');
+                return data ? JSON.parse(data) : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function loadSave() {
+            // Try IndexedDB first
+            const dbData = await loadFromIndexedDB();
+            if (dbData) return dbData;
+            // Try localStorage backup
+            const lsData = loadFromLocalStorage();
+            if (lsData) return lsData;
+            return null;
+        }
+
+        async function saveGame() {
+            if (!state || !currentUser) return;
+            state.lastSaveTime = Date.now();
+            await saveToIndexedDB(state);
+            saveToLocalStorage(state);
+            showToast('💾 تم حفظ اللعبة');
+        }
+
+        // ====== EXPORT/IMPORT ======
+        function exportSave() {
+            if (!state) return;
+            const saveData = JSON.stringify(state, null, 2);
+            const blob = new Blob([saveData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'farm_simulator_save.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('📦 تم تصدير الحفظ');
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data && data.player && data.player.money !== undefined) {
+                        if (data.accountEmail === currentUser) {
+                            state = sanitizeState(data);
+                            saveGame();
+                            renderAll();
+                            showToast('✅ تم استيراد الحفظ بنجاح');
+                        } else {
+                            showToast('❌ هذا الحفظ لا يخص حسابك');
+                        }
+                    } else {
+                        showToast('❌ ملف الحفظ غير صالح');
+                    }
+                } catch (err) {
+                    showToast('❌ ملف الحفظ تالف');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // ====== ONLINE DETECTION ======
+        function setupOnlineDetection() {
+            const onlineStatus = document.getElementById('onlineStatus');
+            const offlineBanner = document.getElementById('offlineBanner');
+            window.addEventListener('online', () => {
+                onlineStatus.textContent = '🟢 متصل';
+                offlineBanner.style.display = 'none';
+                showToast('✅ تم استعادة الاتصال');
+            });
+            window.addEventListener('offline', () => {
+                onlineStatus.textContent = '🔴 غير متصل';
+                offlineBanner.style.display = 'block';
+                showToast('⚠️ انقطع اتصال الإنترنت');
+            });
+            // Initial
+            if (navigator.onLine) {
+                onlineStatus.textContent = '🟢 متصل';
+                offlineBanner.style.display = 'none';
+            } else {
+                onlineStatus.textContent = '🔴 غير متصل';
+                offlineBanner.style.display = 'block';
+            }
+        }
+
+        // ====== TOAST ======
+        function showToast(msg) {
+            const existing = document.querySelectorAll('.toast');
+            existing.forEach(t => t.remove());
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ====== NAVIGATION ======
+        let currentPage = 'home';
+
+        function navigateTo(page) {
+            currentPage = page;
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(page + 'Page').classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.nav-btn[data-page="${page}"]`).classList.add('active');
+            // Close sidebar on mobile
+            document.getElementById('sidebar').classList.remove('open');
+            renderAll();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // ====== RENDER ======
+        function renderAll() {
+            if (!state) return;
+            renderTopBar();
+            renderHome();
+            renderFarm();
+            renderAnimals();
+            renderShop();
+            renderSell();
+            renderInventory();
+            renderStats();
+            renderSettings();
+        }
+
+        // ====== RENDER TOP BAR ======
+        function renderTopBar() {
+            document.getElementById('topMoney').textContent = formatMoney(state.player.money);
+            document.getElementById('topDay').textContent = state.player.day;
+        }
+
+        // ====== RENDER HOME ======
+        function renderHome() {
+            const p = state.player;
+            document.getElementById('homeMoney').textContent = formatMoney(p.money);
+            document.getElementById('homeDay').textContent = p.day;
+            document.getElementById('homeLevel').textContent = p.homeLevel;
+            // Bars
+            document.getElementById('energyBar').style.width = p.energy + '%';
+            document.getElementById('energyBar').textContent = '⚡ ' + Math.floor(p.energy);
+            document.getElementById('hungerBar').style.width = p.hunger + '%';
+            document.getElementById('hungerBar').textContent = '🍲 ' + Math.floor(p.hunger);
+            document.getElementById('thirstBar').style.width = p.thirst + '%';
+            document.getElementById('thirstBar').textContent = '💧 ' + Math.floor(p.thirst);
+            document.getElementById('healthBar').style.width = p.health + '%';
+            document.getElementById('healthBar').textContent = '❤️ ' + Math.floor(p.health);
+            // Home upgrade info
+            const nextCost = HOME_UPGRADE_COST[p.homeLevel];
+            if (nextCost) {
+                document.getElementById('homeUpgradeInfo').textContent = `مستوى المنزل ${p.homeLevel} — الترقية التالية: ${nextCost} جنيه`;
+            } else {
+                document.getElementById('homeUpgradeInfo').textContent = 'المنزل في أقصى مستوى';
+            }
+        }
+
+        // ====== RENDER FARM ======
+        function renderFarm() {
+            const grid = document.getElementById('plotsGrid');
+            grid.innerHTML = '';
+            const maxPlots = PLOT_LEVELS[state.player.farmLevel] || 4;
+            // Ensure plots array
+            while (state.plots.length < maxPlots) {
+                state.plots.push({ id: state.plots.length + 1, crop: null, plantedAt: null, readyAt: null, status: 'empty' });
+            }
+            // Remove extra plots if farm level decreased (shouldn't happen but just in case)
+            state.plots = state.plots.slice(0, maxPlots);
+            // Check crops
+            for (let i = 0; i < state.plots.length; i++) {
+                const plot = state.plots[i];
+                if (plot.status === 'growing' && plot.readyAt && Date.now() >= plot.readyAt) {
+                    plot.status = 'ready';
+                }
+            }
+            // Render
+            state.plots.forEach((plot, idx) => {
+                const div = document.createElement('div');
+                div.className = 'plot';
+                if (plot.status === 'empty') {
+                    div.innerHTML = `<div style="font-size:2em;color:var(--text2)">🟫</div>
+                        <div style="font-size:.8em;color:var(--text2)">أرض فارغة</div>
+                        <button class="btn btn-green" style="margin-top:8px;font-size:.8em;padding:6px 12px" onclick="showPlantModal(${idx})">🌱 زراعة</button>`;
+                } else if (plot.status === 'growing') {
+                    const crop = CROPS[plot.crop];
+                    const remain = Math.max(0, plot.readyAt - Date.now());
+                    const secs = Math.floor(remain / 1000);
+                    const min = Math.floor(secs / 60);
+                    const sec = secs % 60;
+                    div.innerHTML = `<div style="font-size:3em">${crop.emoji}</div>
+                        <div class="crop-name">${crop.name}</div>
+                        <div class="timer">⏳ ${min}:${String(sec).padStart(2,'0')}</div>
+                        <div style="font-size:.7em;color:var(--text2)">ينمو...</div>`;
+                } else if (plot.status === 'ready') {
+                    const crop = CROPS[plot.crop];
+                    div.innerHTML = `<div style="font-size:3em">${crop.emoji}</div>
+                        <div class="crop-name">${crop.name}</div>
+                        <div class="ready">✅ جاهز</div>
+                        <button class="btn btn-orange" style="margin-top:8px;font-size:.8em;padding:6px 12px" onclick="harvestCrop(${idx})">🌾 حصاد</button>`;
+                }
+                grid.appendChild(div);
+            });
+            // Farm upgrade info
+            const farmLevel = state.player.farmLevel;
+            const nextCost = FARM_UPGRADE_COST[farmLevel];
+            const maxPlotsNext = PLOT_LEVELS[farmLevel + 1] || '—';
+            if (nextCost) {
+                document.getElementById('farmUpgradeInfo').textContent = `مستوى المزرعة ${farmLevel} — القطع: ${maxPlots} — الترقية: ${nextCost} جنيه → ${maxPlotsNext} قطعة`;
+            } else {
+                document.getElementById('farmUpgradeInfo').textContent = `مستوى المزرعة ${farmLevel} — القطع: ${maxPlots} — أقصى مستوى`;
+            }
+        }
+
+        // ====== PLANT MODAL ======
+        function showPlantModal(plotIdx) {
+            const plot = state.plots[plotIdx];
+            if (plot.status !== 'empty') return;
+            // Check if player has seeds
+            let options = '';
+            let hasSeed = false;
+            for (const [key, crop] of Object.entries(CROPS)) {
+                const seedKey = 'seed_' + key;
+                const qty = state.inventory[seedKey] || 0;
+                if (qty > 0) {
+                    hasSeed = true;
+                    options += `<button class="btn btn-green" style="width:100%;margin:5px 0" onclick="plantCrop(${plotIdx}, '${key}')">${crop.emoji} ${crop.name} (${qty})</button>`;
+                }
+            }
+            if (!hasSeed) {
+                options = '<p style="color:var(--text2)">لا تملك بذور! اشترِ من المتجر.</p>';
+            }
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay active';
+            modal.innerHTML = `<div class="modal-box">
+                <h3>🌱 زراعة</h3>
+                ${options}
+                <button class="btn btn-red" style="margin-top:10px" onclick="this.closest('.modal-overlay').remove()">إلغاء</button>
+            </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+        }
+
+        // ====== PLANT CROP ======
+        function plantCrop(plotIdx, cropType) {
+            const plot = state.plots[plotIdx];
+            if (plot.status !== 'empty') return;
+            const crop = CROPS[cropType];
+            const seedKey = 'seed_' + cropType;
+            if ((state.inventory[seedKey] || 0) <= 0) {
+                showToast('❌ لا تملك بذور');
+                return;
+            }
+            state.inventory[seedKey]--;
+            plot.crop = cropType;
+            plot.status = 'growing';
+            plot.plantedAt = Date.now();
+            plot.readyAt = Date.now() + crop.growTime * 1000;
+            // Remove modal
+            document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+            showToast('🌱 تمت الزراعة');
+            saveGame();
+            renderFarm();
+        }
+
+        // ====== HARVEST CROP ======
+        function harvestCrop(plotIdx) {
+            const plot = state.plots[plotIdx];
+            if (plot.status !== 'ready') return;
+            const crop = CROPS[plot.crop];
+            state.inventory[plot.crop] = (state.inventory[plot.crop] || 0) + 1;
+            state.player.xp += crop.xp;
+            state.stats.cropsHarvested++;
+            // Check level up
+            checkLevelUp();
+            // Reset plot
+            plot.crop = null;
+            plot.plantedAt = null;
+            plot.readyAt = null;
+            plot.status = 'empty';
+            showToast(`🌾 حصاد ${crop.name}! +${crop.xp} XP`);
+            saveGame();
+            renderFarm();
+            renderInventory();
+        }
+
+        // ====== CHECK LEVEL UP ======
+        function checkLevelUp() {
+            const p = state.player;
+            const xpNeeded = p.level * 100;
+            if (p.xp >= xpNeeded) {
+                p.xp -= xpNeeded;
+                p.level++;
+                p.energy = Math.min(100, p.energy + 20);
+                showToast(`🎉 ارتقيت إلى المستوى ${p.level}!`);
+            }
+        }
+
+        // ====== RENDER ANIMALS ======
+        function renderAnimals() {
+            const grid = document.getElementById('animalsGrid');
+            grid.innerHTML = '';
+            if (state.animals.length === 0) {
+                grid.innerHTML = '<p style="color:var(--text2);text-align:center;width:100%;padding:30px">لا يوجد حيوانات بعد! اشترِ حيوانًا من المتجر.</p>';
+            }
+            // Check production
+            state.animals.forEach((animal, idx) => {
+                if (animal.status === 'producing' && animal.produceReadyAt && Date.now() >= animal.produceReadyAt) {
+                    animal.status = 'ready';
+                }
+            });
+            state.animals.forEach((animal, idx) => {
+                const info = ANIMALS[animal.type];
+                const card = document.createElement('div');
+                card.className = 'animal-card';
+                if (animal.status === 'waiting') {
+                    const remain = Math.max(0, animal.produceReadyAt - Date.now());
+                    const secs = Math.floor(remain / 1000);
+                    const min = Math.floor(secs / 60);
+                    const sec = secs % 60;
+                    card.innerHTML = `<div class="animal-emoji">${info.emoji}</div>
+                        <div style="font-weight:700">${info.name}</div>
+                        <div style="font-size:.8em;color:var(--text2)">منتج: ${PRODUCTS[info.produce].emoji} ${PRODUCTS[info.produce].name}</div>
+                        <div class="timer">⏳ ${min}:${String(sec).padStart(2,'0')}</div>
+                        <button class="btn btn-orange" style="font-size:.8em;margin-top:5px;padding:5px 10px" onclick="collectProduct(${idx})">📦 جمع</button>`;
+                } else if (animal.status === 'ready') {
+                    card.innerHTML = `<div class="animal-emoji">${info.emoji}</div>
+                        <div style="font-weight:700">${info.name}</div>
+                        <div style="font-size:.8em;color:var(--text2)">منتج: ${PRODUCTS[info.produce].emoji} ${PRODUCTS[info.produce].name}</div>
+                        <div class="ready" style="margin:5px 0">✅ جاهز</div>
+                        <button class="btn btn-green" style="font-size:.8em;margin-top:5px;padding:5px 10px" onclick="collectProduct(${idx})">📦 جمع</button>`;
+                }
+                grid.appendChild(card);
+            });
+            // Buy animals grid
+            const buyGrid = document.getElementById('buyAnimalsGrid');
+            buyGrid.innerHTML = '';
+            const maxAnimals = ANIMAL_LIMITS[state.player.farmLevel] || 2;
+            const currentCount = state.animals.length;
+            if (currentCount >= maxAnimals) {
+                buyGrid.innerHTML = '<p style="color:var(--text2);width:100%;text-align:center">لا يمكنك شراء المزيد من الحيوانات — قم بترقية المزرعة!</p>';
+            } else {
+                for (const [type, info] of Object.entries(ANIMALS)) {
+                    const item = document.createElement('div');
+                    item.className = 'shop-item';
+                    item.innerHTML = `<div style="font-size:2.5em">${info.emoji}</div>
+                        <div style="font-weight:700">${info.name}</div>
+                        <div class="price">💰 ${info.price}</div>
+                        <button class="btn btn-green" style="font-size:.8em;padding:5px 10px" onclick="buyAnimal('${type}')">شراء</button>`;
+                    buyGrid.appendChild(item);
+                }
+            }
+        }
+
+        // ====== BUY ANIMAL ======
+        function buyAnimal(type) {
+            const info = ANIMALS[type];
+            const maxAnimals = ANIMAL_LIMITS[state.player.farmLevel] || 2;
+            if (state.animals.length >= maxAnimals) {
+                showToast('❌ لا يمكنك شراء المزيد من الحيوانات');
+                return;
+            }
+            if (state.player.money < info.price) {
+                showToast('❌ رصيدك غير كافٍ');
+                return;
+            }
+            state.player.money -= info.price;
+            state.stats.totalSpent += info.price;
+            state.stats.animalsBought++;
+            state.animals.push({
+                id: state.animals.length + 1,
+                type: type,
+                status: 'waiting',
+                fedAt: Date.now(),
+                produceReadyAt: Date.now() + info.produceTime * 1000
+            });
+            showToast(`🐄 تم شراء ${info.name}`);
+            saveGame();
+            renderAnimals();
+        }
+
+        // ====== COLLECT PRODUCT ======
+        function collectProduct(animalIdx) {
+            const animal = state.animals[animalIdx];
+            if (animal.status === 'waiting') return;
+            const info = ANIMALS[animal.type];
+            const product = info.produce;
+            state.inventory[product] = (state.inventory[product] || 0) + 1;
+            state.player.xp += info.xp;
+            state.stats.productsCollected++;
+            checkLevelUp();
+            // Reset
+            animal.status = 'waiting';
+            animal.produceReadyAt = Date.now() + info.produceTime * 1000;
+            showToast(`📦 تم جمع ${PRODUCTS[product].name}! +${info.xp} XP`);
+            saveGame();
+            renderAnimals();
+            renderInventory();
+        }
+
+        // ====== RENDER SHOP ======
+        function renderShop() {
+            // Seeds
+            const seedsGrid = document.getElementById('shopSeedsGrid');
+            seedsGrid.innerHTML = '';
+            for (const [key, crop] of Object.entries(CROPS)) {
+                const item = document.createElement('div');
+                item.className = 'shop-item';
+                const seedKey = 'seed_' + key;
+                item.innerHTML = `<div style="font-size:2.5em">${crop.emoji}</div>
+                    <div style="font-weight:700">بذور ${crop.name}</div>
+                    <div class="price">💰 ${crop.seedPrice}</div>
+                    <div style="font-size:.75em;color:var(--text2)">تملك: ${state.inventory[seedKey] || 0}</div>
+                    <button class="btn btn-green" style="font-size:.8em;padding:5px 10px" onclick="buySeed('${key}')">شراء</button>`;
+                seedsGrid.appendChild(item);
+            }
+            // Resources
+            const resGrid = document.getElementById('shopResourcesGrid');
+            resGrid.innerHTML = '';
+            const resources = [
+                { key: 'feed', name: 'علف الحيوانات', emoji: '🌿', price: 5 },
+                { key: 'water', name: 'مياه', emoji: '💧', price: 3 },
+                { key: 'food', name: 'طعام', emoji: '🍲', price: 10 },
+                { key: 'fertilizer', name: 'سماد', emoji: '🧪', price: 15 },
+                { key: 'tool', name: 'أدوات', emoji: '🛠️', price: 25 },
+            ];
+            resources.forEach(res => {
+                const item = document.createElement('div');
+                item.className = 'shop-item';
+                item.innerHTML = `<div style="font-size:2.5em">${res.emoji}</div>
+                    <div style="font-weight:700">${res.name}</div>
+                    <div class="price">💰 ${res.price}</div>
+                    <div style="font-size:.75em;color:var(--text2)">تملك: ${state.inventory[res.key] || 0}</div>
+                    <button class="btn btn-green" style="font-size:.8em;padding:5px 10px" onclick="buyResource('${res.key}','${res.name}','${res.price}')">شراء</button>`;
+                resGrid.appendChild(item);
+            });
+        }
+
+        // ====== BUY SEED ======
+        function buySeed(cropType) {
+            const crop = CROPS[cropType];
+            const seedKey = 'seed_' + cropType;
+            if (state.player.money < crop.seedPrice) {
+                showToast('❌ رصيدك غير كافٍ');
+                return;
+            }
+            state.player.money -= crop.seedPrice;
+            state.inventory[seedKey] = (state.inventory[seedKey] || 0) + 1;
+            state.stats.totalSpent += crop.seedPrice;
+            state.stats.seedsBought++;
+            showToast(`🌱 تم شراء بذور ${crop.name}`);
+            saveGame();
+            renderShop();
+            renderInventory();
+        }
+
+        // ====== BUY RESOURCE ======
+        function buyResource(key, name, price) {
+            const p = parseInt(price);
+            if (state.player.money < p) {
+                showToast('❌ رصيدك غير كافٍ');
+                return;
+            }
+            state.player.money -= p;
+            state.inventory[key] = (state.inventory[key] || 0) + 1;
+            state.stats.totalSpent += p;
+            showToast(`✅ تم شراء ${name}`);
+            saveGame();
+            renderShop();
+            renderInventory();
+        }
+
+        // ====== RENDER SELL ======
+        function renderSell() {
+            const sellList = document.getElementById('sellList');
+            sellList.innerHTML = '';
+            let items = [];
+            // Crops
+            for (const [key, crop] of Object.entries(CROPS)) {
+                const qty = state.inventory[key] || 0;
+                if (qty > 0) {
+                    items.push({ key, name: crop.name, emoji: crop.emoji, price: crop.sellPrice, qty, type: 'crop' });
+                }
+            }
+            // Products
+            for (const [key, prod] of Object.entries(PRODUCTS)) {
+                const qty = state.inventory[key] || 0;
+                if (qty > 0) {
+                    items.push({ key, name: prod.name, emoji: prod.emoji, price: prod.sellPrice, qty, type: 'product' });
+                }
+            }
+            if (items.length === 0) {
+                sellList.innerHTML = '<p style="color:var(--text2);text-align:center;padding:20px">لا توجد منتجات للبيع</p>';
+                return;
+            }
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.style.cssText = 'padding:15px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px';
+                div.innerHTML = `<div style="font-size:2em">${item.emoji}</div>
+                    <div style="flex:1"><strong>${item.name}</strong><br><span style="color:var(--text2);font-size:.85em">المتاح: ${item.qty}</span></div>
+                    <div class="price" style="font-size:1.1em;font-weight:700;color:var(--orange)">💰 ${item.price}</div>
+                    <button class="btn btn-green" style="font-size:.8em;padding:5px 10px" onclick="sellItem('${item.key}',1,${item.price})">بيع 1</button>
+                    <button class="btn btn-orange" style="font-size:.8em;padding:5px 10px" onclick="sellItem('${item.key}',5,${item.price})">بيع 5</button>`;
+                sellList.appendChild(div);
+            });
+        }
+
+        // ====== SELL ITEM ======
+        function sellItem(key, qty, price) {
+            const available = state.inventory[key] || 0;
+            if (available < qty) {
+                showToast('❌ الكمية غير كافية');
+                return;
+            }
+            state.inventory[key] -= qty;
+            const earned = price * qty;
+            state.player.money += earned;
+            state.stats.totalEarned += earned;
+            showToast(`💰 تم البيع! +${earned} جنيه`);
+            saveGame();
+            renderSell();
+            renderInventory();
+            renderTopBar();
+            renderHome();
+        }
+
+        // ====== RENDER INVENTORY ======
+        function renderInventory() {
+            const grid = document.getElementById('inventoryGrid');
+            grid.innerHTML = '';
+            const items = [
+                { key: 'wheat', name: 'قمح', emoji: '🌾' },
+                { key: 'corn', name: 'ذرة', emoji: '🌽' },
+                { key: 'tomato', name: 'طماطم', emoji: '🍅' },
+                { key: 'carrot', name: 'جزر', emoji: '🥕' },
+                { key: 'potato', name: 'بطاطس', emoji: '🥔' },
+                { key: 'egg', name: 'بيض', emoji: '🥚' },
+                { key: 'wool', name: 'صوف', emoji: '🧶' },
+                { key: 'milk', name: 'حليب', emoji: '🥛' },
+                { key: 'seed_wheat', name: 'بذور قمح', emoji: '🌱' },
+                { key: 'seed_corn', name: 'بذور ذرة', emoji: '🌱' },
+                { key: 'seed_tomato', name: 'بذور طماطم', emoji: '🌱' },
+                { key: 'seed_carrot', name: 'بذور جزر', emoji: '🌱' },
+                { key: 'seed_potato', name: 'بذور بطاطس', emoji: '🌱' },
+                { key: 'feed', name: 'علف', emoji: '🌿' },
+                { key: 'water', name: 'مياه', emoji: '💧' },
+                { key: 'food', name: 'طعام', emoji: '🍲' },
+                { key: 'fertilizer', name: 'سماد', emoji: '🧪' },
+                { key: 'tool', name: 'أدوات', emoji: '🛠️' },
+            ];
+            items.forEach(item => {
+                const qty = state.inventory[item.key] || 0;
+                const div = document.createElement('div');
+                div.className = 'inv-item';
+                div.innerHTML = `<div class="emoji">${item.emoji}</div>
+                    <div style="font-size:.8em;color:var(--text2)">${item.name}</div>
+                    <div class="qty">${qty}</div>`;
+                grid.appendChild(div);
+            });
+        }
+
+        // ====== RENDER STATS ======
+        function renderStats() {
+            const list = document.getElementById('statsList');
+            const s = state.stats;
+            const p = state.player;
+            const statsData = [
+                { label: 'الرصيد الحالي', value: formatMoney(p.money) },
+                { label: 'إجمالي الأموال المكتسبة', value: formatMoney(s.totalEarned) },
+                { label: 'إجمالي الأموال المصروفة', value: formatMoney(s.totalSpent) },
+                { label: 'المحاصيل المحصودة', value: s.cropsHarvested },
+                { label: 'الحيوانات المشتراة', value: s.animalsBought },
+                { label: 'الحيوانات المباعة', value: s.animalsSold },
+                { label: 'المنتجات المجموعة', value: s.productsCollected },
+                { label: 'البذور المشتراة', value: s.seedsBought },
+                { label: 'مستوى اللاعب', value: p.level },
+                { label: 'XP الحالي', value: Math.floor(p.xp) + ' / ' + (p.level * 100) },
+                { label: 'اليوم الحالي', value: p.day },
+                { label: 'مستوى المنزل', value: p.homeLevel },
+                { label: 'مستوى المزرعة', value: p.farmLevel },
+            ];
+            list.innerHTML = '';
+            statsData.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${item.label}</span><strong>${item.value}</strong>`;
+                list.appendChild(li);
+            });
+        }
+
+        // ====== RENDER SETTINGS ======
+        function renderSettings() {
+            // Settings page is static, nothing to render
+        }
+
+        // ====== SLEEP ======
+        function sleep() {
+            const p = state.player;
+            if (p.energy >= 100) {
+                showToast('⚡ طاقتك ممتلئة بالفعل');
+                return;
+            }
+            p.day++;
+            p.energy = 100;
+            p.hunger = Math.max(0, p.hunger - 15);
+            p.thirst = Math.max(0, p.thirst - 20);
+            if (p.hunger < 20 || p.thirst < 20) {
+                p.health = Math.max(0, p.health - 5);
+            } else {
+                p.health = Math.min(100, p.health + 3);
+            }
+            showToast('😴 نمت وبدأت يوم جديد');
+            saveGame();
+            renderAll();
+        }
+
+        // ====== EAT ======
+        function eatFood() {
+            const p = state.player;
+            if (state.inventory.food <= 0) {
+                showToast('❌ لا تملك طعام! اشترِ من المتجر');
+                return;
+            }
+            state.inventory.food--;
+            p.hunger = Math.min(100, p.hunger + 30);
+            p.health = Math.min(100, p.health + 2);
+            showToast('🍲 أكلت طعامًا');
+            saveGame();
+            renderHome();
+            renderInventory();
+        }
+
+        // ====== DRINK ======
+        function drinkWater() {
+            const p = state.player;
+            if (state.inventory.water <= 0) {
+                showToast('❌ لا تملك مياه! اشترِ من المتجر');
+                return;
+            }
+            state.inventory.water--;
+            p.thirst = Math.min(100, p.thirst + 30);
+            showToast('💧 شربت ماء');
+            saveGame();
+            renderHome();
+            renderInventory();
+        }
+
+        // ====== UPGRADE HOME ======
+        function upgradeHome() {
+            const p = state.player;
+            const cost = HOME_UPGRADE_COST[p.homeLevel];
+            if (!cost) {
+                showToast('🏠 المنزل في أقصى مستوى');
+                return;
+            }
+            if (p.money < cost) {
+                showToast('❌ رصيدك غير كافٍ');
+                return;
+            }
+            p.money -= cost;
+            p.homeLevel++;
+            p.energy = 100;
+            p.health = Math.min(100, p.health + 10);
+            state.stats.totalSpent += cost;
+            showToast('🏠 تم ترقية المنزل!');
+            saveGame();
+            renderHome();
+        }
+
+        // ====== UPGRADE FARM ======
+        function upgradeFarm() {
+            const p = state.player;
+            const cost = FARM_UPGRADE_COST[p.farmLevel];
+            if (!cost) {
+                showToast('🌾 المزرعة في أقصى مستوى');
+                return;
+            }
+            if (p.money < cost) {
+                showToast('❌ رصيدك غير كافٍ');
+                return;
+            }
+            p.money -= cost;
+            p.farmLevel++;
+            state.stats.totalSpent += cost;
+            // Add new plots
+            const maxPlots = PLOT_LEVELS[p.farmLevel] || 4;
+            while (state.plots.length < maxPlots) {
+                state.plots.push({ id: state.plots.length + 1, crop: null, plantedAt: null, readyAt: null, status: 'empty' });
+            }
+            showToast('🌾 تم ترقية المزرعة!');
+            saveGame();
+            renderFarm();
+            renderHome();
+        }
+
+        // ====== FORMAT MONEY ======
+        function formatMoney(amount) {
+            return Math.floor(amount).toLocaleString('ar-EG');
+        }
+
+        // ====== INITIALIZE ======
+        // Handle Enter key on login
+        document.getElementById('loginPassword').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+        document.getElementById('loginEmail').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        // Also handle auto-update of timers
+        setInterval(() => {
+            if (state && currentUser) {
+                // Update crop timers
+                let needsRender = false;
+                state.plots.forEach(plot => {
+                    if (plot.status === 'growing' && plot.readyAt && Date.now() >= plot.readyAt) {
+                        plot.status = 'ready';
+                        needsRender = true;
+                    }
+                });
+                state.animals.forEach(animal => {
+                    if (animal.status === 'waiting' && animal.produceReadyAt && Date.now() >= animal.produceReadyAt) {
+                        animal.status = 'ready';
+                        needsRender = true;
+                    }
+                });
+                if (needsRender) {
+                    renderFarm();
+                    renderAnimals();
+                    // Show notification for ready items
+                    const readyCrops = state.plots.filter(p => p.status === 'ready').length;
+                    const readyAnimals = state.animals.filter(a => a.status === 'ready').length;
+                    if (readyCrops > 0 && readyAnimals > 0) {
+                        showToast(`🌾 ${readyCrops} محصول جاهز! 🐄 ${readyAnimals} منتج جاهز!`);
+                    } else if (readyCrops > 0) {
+                        showToast(`🌾 ${readyCrops} محصول جاهز للحصاد!`);
+                    } else if (readyAnimals > 0) {
+                        showToast(`🐄 ${readyAnimals} منتج جاهز!`);
+                    }
+                }
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
