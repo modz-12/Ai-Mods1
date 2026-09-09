@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌾 محاكي المزرعة</title>
+    <title>🌾 محاكي المزرعة المتقدم</title>
     <style>
         * {
             box-sizing: border-box;
@@ -11,497 +11,944 @@
             padding: 0;
         }
         :root {
-            --bg: #0f1923;
-            --card: #1a2a3a;
-            --card2: #223546;
+            --bg: #0a1628;
+            --bg2: #111f33;
+            --card: rgba(20, 40, 60, 0.85);
+            --card2: rgba(30, 55, 80, 0.7);
+            --border: rgba(255, 255, 255, 0.08);
             --green: #4caf50;
-            --green2: #2d6a4f;
+            --green2: #2e7d32;
+            --gold: #ffd700;
             --orange: #ff9800;
-            --red: #e74c3c;
-            --text: #e8e8e8;
-            --text2: #9ab0c0;
-            --shadow: 0 4px 20px rgba(0, 0, 0, .4);
-            --radius: 16px;
+            --red: #ef5350;
+            --blue: #42a5f5;
+            --purple: #ab47bc;
+            --text: #e8edf2;
+            --text2: #8aa3b8;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --radius: 18px;
+            --glow: 0 0 30px rgba(76, 175, 80, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .light-theme {
+            --bg: #f0f4f8;
+            --bg2: #dce4ec;
+            --card: rgba(255, 255, 255, 0.85);
+            --card2: rgba(240, 245, 250, 0.7);
+            --border: rgba(0, 0, 0, 0.08);
+            --text: #1a2634;
+            --text2: #4a5a6e;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+        html {
+            scroll-behavior: smooth;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
+            transition: var(--transition);
         }
-        /* Login */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--green);
+            border-radius: 8px;
+        }
+
+        /* ===== LOGIN ===== */
         #loginScreen {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #0f1923 0%, #1a2a3a 50%, #0d1f0d 100%);
+            background: linear-gradient(145deg, #0a1628, #0d1f33, #0a1a0a);
+            position: relative;
+            overflow: hidden;
+        }
+        #loginScreen::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234caf50' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
         .login-box {
             background: var(--card);
-            padding: 40px;
-            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            padding: 45px 40px;
+            border-radius: 28px;
             box-shadow: var(--shadow);
-            width: 90%;
-            max-width: 420px;
+            width: 92%;
+            max-width: 440px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, .1);
+            border: 1px solid var(--border);
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.6s ease;
         }
-        .login-box h2 {
-            font-size: 2em;
-            margin-bottom: 10px;
-            background: linear-gradient(45deg, #4caf50, #8bc34a);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .login-box .subtitle {
-            color: var(--text2);
-            margin-bottom: 30px;
-            font-size: .9em;
-        }
-        .login-box input {
-            width: 100%;
-            padding: 14px;
-            margin: 10px 0;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, .15);
-            background: rgba(0, 0, 0, .3);
-            color: var(--text);
-            font-size: 1em;
-            outline: none;
-            transition: .3s;
-        }
-        .login-box input:focus {
-            border-color: var(--green);
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, .2);
-        }
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #4caf50, #2d6a4f);
-            border: none;
-            border-radius: 12px;
-            color: #fff;
-            font-size: 1.1em;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: .3s;
-            font-weight: 700;
-        }
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(76, 175, 80, .3);
-        }
-        .login-error {
-            color: var(--red);
-            margin-top: 10px;
-            font-size: .85em;
-        }
-        /* Game Layout */
-        #gameScreen {
-            display: none;
-            height: 100vh;
-            flex-direction: column;
-        }
-        .top-bar {
-            background: linear-gradient(90deg, var(--card), var(--card2));
-            display: flex;
-            align-items: center;
-            padding: 10px 20px;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, .3);
-            z-index: 100;
-            position: fixed;
-            top: 0;
-            right: 0;
-            left: 0;
-            height: 60px;
-            gap: 10px;
-        }
-        .top-bar .logo {
-            font-size: 1.2em;
-            font-weight: 800;
-            white-space: nowrap;
-        }
-        .top-bar .info {
-            display: flex;
-            gap: 10px;
-            margin-right: auto;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .top-bar .info span {
-            background: rgba(0, 0, 0, .3);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: .85em;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        .hamburger {
-            background: none;
-            border: none;
-            color: var(--text);
-            font-size: 1.5em;
-            cursor: pointer;
-            display: none;
-        }
-        /* Sidebar */
-        .sidebar {
-            width: 220px;
-            background: var(--card);
-            position: fixed;
-            top: 60px;
-            right: 0;
-            bottom: 0;
-            padding: 15px 10px;
-            box-shadow: 2px 0 15px rgba(0, 0, 0, .3);
-            z-index: 99;
-            transition: transform .3s;
-            overflow-y: auto;
-        }
-        .nav-btn {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            padding: 14px 12px;
-            background: transparent;
-            border: none;
-            color: var(--text2);
-            font-size: .95em;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: .3s;
-            text-align: right;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-        .nav-btn:hover {
-            background: rgba(76, 175, 80, .15);
-            color: var(--text);
-        }
-        .nav-btn.active {
-            background: linear-gradient(135deg, #4caf50, #2d6a4f);
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, .3);
-        }
-        /* Main Content */
-        .main-content {
-            margin-right: 220px;
-            margin-top: 60px;
-            padding: 20px;
-            min-height: calc(100vh - 60px);
-        }
-        .page {
-            display: none;
-            animation: fadeIn .3s;
-        }
-        .page.active {
-            display: block;
-        }
-        @keyframes fadeIn {
+        @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(40px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        /* Cards */
-        .card {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 20px;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, .05);
+        .login-box .farm-icon {
+            font-size: 4em;
+            display: block;
+            margin-bottom: 5px;
         }
-        .card h3 {
-            margin-bottom: 15px;
+        .login-box h2 {
+            font-size: 2em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4caf50, #8bc34a, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .login-box .subtitle {
+            color: var(--text2);
+            margin-bottom: 25px;
+            font-size: .9em;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 16px 18px;
+            margin: 8px 0;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.25);
+            color: var(--text);
+            font-size: 1em;
+            outline: none;
+            transition: var(--transition);
+        }
+        .login-box input:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.15);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            border: none;
+            border-radius: 14px;
+            color: #fff;
             font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: var(--transition);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(76, 175, 80, 0.35);
+        }
+        .login-error {
+            color: var(--red);
+            margin-top: 12px;
+            font-size: .85em;
+            min-height: 1.5em;
+        }
+
+        /* ===== GAME LAYOUT ===== */
+        #gameScreen {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .top-bar {
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            padding: 8px 20px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 64px;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .top-bar .logo {
+            font-size: 1.15em;
+            font-weight: 800;
+            white-space: nowrap;
             display: flex;
             align-items: center;
             gap: 8px;
         }
+        .top-bar .logo span {
+            background: linear-gradient(135deg, #4caf50, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .top-bar .info {
+            display: flex;
+            gap: 8px;
+            margin-right: auto;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .top-bar .info .badge {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: .8em;
+            font-weight: 600;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            backdrop-filter: blur(4px);
+            border: 1px solid var(--border);
+        }
+        .top-bar .info .badge .icon {
+            font-size: 1.1em;
+        }
+        .hamburger {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.6em;
+            cursor: pointer;
+            display: none;
+            padding: 0 8px;
+        }
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.3em;
+            cursor: pointer;
+            padding: 0 8px;
+            transition: var(--transition);
+        }
+        .theme-toggle:hover {
+            transform: rotate(30deg);
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 230px;
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            position: fixed;
+            top: 64px;
+            right: 0;
+            bottom: 0;
+            padding: 12px 8px;
+            box-shadow: -4px 0 25px rgba(0, 0, 0, 0.2);
+            z-index: 99;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .sidebar .nav-section {
+            font-size: .65em;
+            text-transform: uppercase;
+            color: var(--text2);
+            padding: 8px 12px 4px;
+            letter-spacing: 1px;
+            opacity: 0.6;
+        }
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px 14px;
+            background: transparent;
+            border: none;
+            color: var(--text2);
+            font-size: .92em;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: right;
+            font-weight: 500;
+        }
+        .nav-btn:hover {
+            background: rgba(76, 175, 80, 0.12);
+            color: var(--text);
+        }
+        .nav-btn.active {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.25), rgba(46, 125, 50, 0.15));
+            color: #4caf50;
+            box-shadow: inset 0 0 0 1px rgba(76, 175, 80, 0.2);
+        }
+        .nav-btn .nav-icon {
+            font-size: 1.2em;
+            width: 28px;
+            text-align: center;
+        }
+        .nav-btn.logout-btn {
+            margin-top: auto;
+            color: var(--red);
+            border-top: 1px solid var(--border);
+            padding-top: 14px;
+        }
+        .nav-btn.logout-btn:hover {
+            background: rgba(239, 83, 80, 0.12);
+        }
+
+        /* ===== MAIN ===== */
+        .main-content {
+            margin-right: 230px;
+            margin-top: 64px;
+            padding: 20px 24px;
+            min-height: calc(100vh - 64px);
+            transition: var(--transition);
+        }
+        .page {
+            display: none;
+            animation: fadeSlide 0.4s ease;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--card);
+            backdrop-filter: blur(8px);
+            border-radius: var(--radius);
+            padding: 22px 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .card:hover {
+            border-color: rgba(76, 175, 80, 0.15);
+        }
+        .card h3 {
+            margin-bottom: 16px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* ===== STATS GRID ===== */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 14px;
         }
         .stat-box {
             text-align: center;
-            padding: 15px;
+            padding: 16px 10px;
             background: var(--card2);
-            border-radius: 12px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .stat-box:hover {
+            transform: translateY(-2px);
+            border-color: rgba(76, 175, 80, 0.2);
         }
         .stat-box .value {
-            font-size: 1.6em;
+            font-size: 1.5em;
             font-weight: 800;
-            margin-top: 5px;
+            margin-top: 4px;
         }
         .stat-box .label {
-            font-size: .8em;
+            font-size: .75em;
             color: var(--text2);
+            font-weight: 500;
         }
-        /* Bars */
+
+        /* ===== BARS ===== */
         .bar-container {
-            margin: 10px 0;
-            height: 22px;
-            background: rgba(0, 0, 0, .4);
-            border-radius: 12px;
+            margin: 8px 0;
+            height: 26px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 14px;
             overflow: hidden;
             position: relative;
+            border: 1px solid var(--border);
         }
         .bar-fill {
             height: 100%;
-            border-radius: 12px;
-            transition: width .5s;
+            border-radius: 14px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: .7em;
             font-weight: 700;
             color: #fff;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, .5);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .bar-fill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
         }
         .bar-energy {
             background: linear-gradient(90deg, #ff9800, #ffc107);
         }
         .bar-hunger {
-            background: linear-gradient(90deg, #e74c3c, #ff6b6b);
+            background: linear-gradient(90deg, #ef5350, #ff8a80);
         }
         .bar-thirst {
-            background: linear-gradient(90deg, #2196f3, #00bcd4);
+            background: linear-gradient(90deg, #42a5f5, #4dd0e1);
         }
         .bar-health {
-            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            background: linear-gradient(90deg, #4caf50, #81c784);
         }
-        /* Buttons */
+        .bar-happiness {
+            background: linear-gradient(90deg, #ab47bc, #ce93d8);
+        }
+        .bar-weather {
+            background: linear-gradient(90deg, #42a5f5, #ffd54f);
+        }
+
+        /* ===== BUTTONS ===== */
         .btn {
-            padding: 10px 20px;
+            padding: 10px 22px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: .9em;
             font-weight: 600;
-            transition: .3s;
+            transition: var(--transition);
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
         }
-        .btn-green {
-            background: linear-gradient(135deg, #4caf50, #2d6a4f);
-            color: #fff;
-        }
-        .btn-orange {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
-            color: #fff;
-        }
-        .btn-red {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: #fff;
-        }
-        .btn-blue {
-            background: linear-gradient(135deg, #2196f3, #0d47a1);
-            color: #fff;
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+            pointer-events: none;
         }
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, .2);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+        }
+        .btn:active {
+            transform: scale(0.96);
         }
         .btn:disabled {
-            opacity: .5;
+            opacity: 0.5;
             cursor: not-allowed;
-            transform: none;
+            transform: none !important;
         }
-        /* Farm Plots */
+        .btn-green {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: #fff;
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, #ffd700, #f9a825);
+            color: #1a1a2e;
+        }
+        .btn-orange {
+            background: linear-gradient(135deg, #ff9800, #e65100);
+            color: #fff;
+        }
+        .btn-red {
+            background: linear-gradient(135deg, #ef5350, #c62828);
+            color: #fff;
+        }
+        .btn-blue {
+            background: linear-gradient(135deg, #42a5f5, #0d47a1);
+            color: #fff;
+        }
+        .btn-purple {
+            background: linear-gradient(135deg, #ab47bc, #4a148c);
+            color: #fff;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover {
+            border-color: var(--green);
+            background: rgba(76, 175, 80, 0.08);
+        }
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: .78em;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* ===== PLOTS ===== */
         .plots-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 15px;
+            gap: 16px;
         }
         .plot {
             background: var(--card2);
             border-radius: 16px;
-            padding: 15px;
+            padding: 16px 12px;
             text-align: center;
-            min-height: 150px;
+            min-height: 160px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             border: 2px solid transparent;
-            transition: .3s;
+            transition: var(--transition);
             position: relative;
+            backdrop-filter: blur(4px);
         }
         .plot:hover {
-            border-color: rgba(76, 175, 80, .4);
+            border-color: rgba(76, 175, 80, 0.25);
+            transform: translateY(-2px);
         }
         .plot .crop-emoji {
-            font-size: 3em;
-            margin-bottom: 5px;
+            font-size: 3.2em;
+            margin-bottom: 4px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
         }
         .plot .crop-name {
             font-size: .85em;
-            margin: 5px 0;
+            margin: 4px 0;
+            font-weight: 600;
         }
         .plot .timer {
             font-size: .75em;
             color: var(--text2);
-            background: rgba(0, 0, 0, .3);
-            padding: 4px 10px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 3px 12px;
             border-radius: 10px;
-            margin: 5px 0;
+            margin: 4px 0;
             font-family: monospace;
+            font-weight: 600;
         }
-        .plot .ready {
+        .plot .ready-badge {
             background: var(--green);
             color: #fff;
-            padding: 4px 10px;
+            padding: 3px 14px;
             border-radius: 10px;
             font-size: .8em;
+            font-weight: 700;
+            animation: pulse 1.5s infinite;
         }
-        /* Animals */
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        .plot .plot-status {
+            font-size: .7em;
+            color: var(--text2);
+            margin-top: 4px;
+        }
+        .plot .quality-badge {
+            font-size: .65em;
+            padding: 2px 10px;
+            border-radius: 8px;
+            background: var(--gold);
+            color: #1a1a2e;
+            font-weight: 700;
+        }
+
+        /* ===== ANIMALS ===== */
         .animals-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 16px;
         }
         .animal-card {
             background: var(--card2);
             border-radius: 16px;
-            padding: 15px;
+            padding: 16px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, .05);
-            transition: .3s;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            backdrop-filter: blur(4px);
         }
         .animal-card:hover {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, .2);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+            border-color: rgba(76, 175, 80, 0.2);
         }
         .animal-emoji {
             font-size: 3em;
+            display: block;
         }
-        /* Shop */
+        .animal-name {
+            font-weight: 700;
+            margin: 4px 0;
+        }
+        .animal-status {
+            font-size: .8em;
+            color: var(--text2);
+        }
+        .happiness-bar {
+            height: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            margin: 6px 0;
+            overflow: hidden;
+        }
+        .happiness-fill {
+            height: 100%;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #ef5350, #ffd700, #4caf50);
+            transition: width 0.5s;
+        }
+
+        /* ===== SHOP ===== */
         .shop-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
         }
         .shop-item {
             background: var(--card2);
             border-radius: 16px;
-            padding: 15px;
+            padding: 18px 12px;
             text-align: center;
-            transition: .3s;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(4px);
         }
         .shop-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, .2);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+            border-color: rgba(76, 175, 80, 0.2);
+        }
+        .shop-item .item-icon {
+            font-size: 2.8em;
+            display: block;
+        }
+        .shop-item .item-name {
+            font-weight: 600;
+            margin: 6px 0 2px;
         }
         .shop-item .price {
+            font-size: 1em;
+            font-weight: 700;
+            color: var(--gold);
+            margin: 6px 0;
+        }
+        .shop-item .stock {
+            font-size: .7em;
+            color: var(--text2);
+        }
+
+        /* ===== INVENTORY ===== */
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+        }
+        .inv-item {
+            background: var(--card2);
+            border-radius: 14px;
+            padding: 14px 10px;
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+        .inv-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(76, 175, 80, 0.2);
+        }
+        .inv-item .emoji {
+            font-size: 2.2em;
+            display: block;
+        }
+        .inv-item .name {
+            font-size: .75em;
+            color: var(--text2);
+            margin: 4px 0 2px;
+        }
+        .inv-item .qty {
             font-size: 1.1em;
             font-weight: 700;
-            color: var(--orange);
-            margin: 8px 0;
         }
-        /* Toast */
+
+        /* ===== TOAST ===== */
         .toast {
             position: fixed;
-            bottom: 20px;
+            bottom: 24px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--card);
+            backdrop-filter: blur(16px);
             color: var(--text);
-            padding: 15px 25px;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, .4);
+            padding: 14px 28px;
+            border-radius: 14px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
             z-index: 9999;
             font-size: .9em;
             font-weight: 600;
-            animation: toastIn .3s, toastOut .3s 2.7s forwards;
-            border: 1px solid rgba(255, 255, 255, .1);
+            animation: toastIn 0.4s ease, toastOut 0.4s 2.8s ease forwards;
+            border: 1px solid var(--border);
             text-align: center;
-            max-width: 90%;
+            max-width: 92%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         @keyframes toastIn {
             from {
                 opacity: 0;
-                transform: translateX(-50%) translateY(20px);
+                transform: translateX(-50%) translateY(30px) scale(0.95);
             }
             to {
                 opacity: 1;
-                transform: translateX(-50%) translateY(0);
+                transform: translateX(-50%) translateY(0) scale(1);
             }
         }
         @keyframes toastOut {
             from {
                 opacity: 1;
+                transform: translateX(-50%) translateY(0) scale(1);
             }
             to {
                 opacity: 0;
+                transform: translateX(-50%) translateY(20px) scale(0.95);
             }
         }
-        /* Offline Banner */
+
+        /* ===== OFFLINE BANNER ===== */
         .offline-banner {
             position: fixed;
-            top: 60px;
+            top: 64px;
             left: 0;
             right: 0;
-            background: #e74c3c;
+            background: linear-gradient(90deg, #c62828, #ef5350);
             color: #fff;
-            padding: 8px;
+            padding: 8px 16px;
             text-align: center;
             font-size: .85em;
             z-index: 999;
             display: none;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, .3);
+            box-shadow: 0 2px 16px rgba(198, 40, 40, 0.3);
+            font-weight: 600;
         }
-        /* Inventory */
-        .inventory-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 12px;
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
         }
-        .inv-item {
-            background: var(--card2);
-            border-radius: 12px;
-            padding: 12px;
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-box {
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 32px 28px;
+            max-width: 440px;
+            width: 92%;
             text-align: center;
-            transition: .3s;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            transform: scale(0.9);
+            transition: var(--transition);
+            max-height: 90vh;
+            overflow-y: auto;
         }
-        .inv-item .emoji {
-            font-size: 2em;
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
         }
-        .inv-item .qty {
+        .modal-box h3 {
+            font-size: 1.3em;
+            margin-bottom: 16px;
+        }
+
+        /* ===== WEATHER WIDGET ===== */
+        .weather-widget {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 18px;
+            background: var(--card2);
+            border-radius: 14px;
+            border: 1px solid var(--border);
+        }
+        .weather-widget .weather-icon {
+            font-size: 2.2em;
+        }
+        .weather-widget .weather-info {
+            flex: 1;
+        }
+        .weather-widget .weather-info .temp {
             font-size: 1.2em;
             font-weight: 700;
-            margin-top: 5px;
         }
-        /* Responsive */
-        @media(max-width:768px) {
+        .weather-widget .weather-info .desc {
+            font-size: .85em;
+            color: var(--text2);
+        }
+
+        /* ===== QUEST ===== */
+        .quest-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            background: var(--card2);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .quest-item:hover {
+            border-color: rgba(76, 175, 80, 0.2);
+        }
+        .quest-item .quest-icon {
+            font-size: 1.8em;
+        }
+        .quest-item .quest-info {
+            flex: 1;
+        }
+        .quest-item .quest-info .qtitle {
+            font-weight: 600;
+        }
+        .quest-item .quest-info .qdesc {
+            font-size: .8em;
+            color: var(--text2);
+        }
+        .quest-item .quest-progress {
+            font-size: .8em;
+            font-weight: 700;
+            color: var(--gold);
+        }
+        .quest-item .quest-reward {
+            font-size: .75em;
+            color: var(--green);
+            font-weight: 600;
+        }
+        .quest-item.completed {
+            opacity: 0.6;
+            border-color: var(--green);
+        }
+        .quest-item.completed .quest-icon {
+            filter: grayscale(1);
+        }
+
+        /* ===== ACHIEVEMENT ===== */
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+        .achievement-item {
+            background: var(--card2);
+            border-radius: 14px;
+            padding: 16px 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .achievement-item.locked {
+            opacity: 0.4;
+            filter: grayscale(0.8);
+        }
+        .achievement-item .ach-icon {
+            font-size: 2.4em;
+            display: block;
+        }
+        .achievement-item .ach-name {
+            font-size: .8em;
+            font-weight: 600;
+            margin: 4px 0;
+        }
+        .achievement-item .ach-desc {
+            font-size: .65em;
+            color: var(--text2);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:820px) {
             .sidebar {
                 transform: translateX(100%);
-                width: 250px;
+                width: 260px;
             }
             .sidebar.open {
                 transform: translateX(0);
             }
             .main-content {
                 margin-right: 0;
-                padding: 15px;
+                padding: 16px;
             }
             .hamburger {
                 display: block;
             }
             .top-bar .logo {
-                font-size: .9em;
+                font-size: .95em;
             }
-            .top-bar .info span {
-                font-size: .75em;
-                padding: 4px 8px;
+            .top-bar .info .badge {
+                font-size: .7em;
+                padding: 3px 10px;
             }
             .plots-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -512,186 +959,388 @@
             .shop-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-        }
-        @media(max-width:400px) {
-            .top-bar .info span {
-                display: none;
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
-            .top-bar .info span:first-child {
-                display: inline;
+            .inventory-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media(max-width:480px) {
+            .top-bar .info .badge.hide-mobile {
+                display: none;
             }
             .plots-grid {
                 grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .animals-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .shop-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .inventory-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            .card {
+                padding: 16px;
+            }
+            .modal-box {
+                padding: 24px 16px;
+            }
+            .login-box {
+                padding: 30px 20px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .stat-box .value {
+                font-size: 1.2em;
+            }
+            .btn {
+                font-size: .8em;
+                padding: 8px 16px;
             }
         }
-        /* Settings */
-        .settings-btns {
+
+        /* ===== SETTINGS ===== */
+        .settings-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
+            margin: 8px 0;
         }
-        .settings-btns .btn {
+        .settings-group .btn {
             flex: 1;
-            min-width: 140px;
+            min-width: 120px;
             justify-content: center;
         }
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, .7);
+        .toggle-switch {
             display: flex;
             align-items: center;
-            justify-content: center;
-            z-index: 999;
-            opacity: 0;
-            visibility: hidden;
-            transition: .3s;
-        }
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-box {
-            background: var(--card);
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, .4);
-        }
-        /* Stats Page */
-        .stats-list {
-            list-style: none;
-        }
-        .stats-list li {
+            gap: 12px;
+            cursor: pointer;
             padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, .05);
-            display: flex;
-            justify-content: space-between;
         }
-        .stats-list li:last-child {
-            border: none;
+        .toggle-switch input {
+            display: none;
+        }
+        .toggle-slider {
+            width: 48px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            position: relative;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+        .toggle-slider::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            right: 2px;
+            transition: var(--transition);
+        }
+        .toggle-switch input:checked+.toggle-slider {
+            background: var(--green);
+        }
+        .toggle-switch input:checked+.toggle-slider::after {
+            transform: translateX(-22px);
+        }
+
+        /* ===== MARKET ===== */
+        .market-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+        }
+        .market-item {
+            background: var(--card2);
+            border-radius: 14px;
+            padding: 14px 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .market-item .m-icon {
+            font-size: 2em;
+        }
+        .market-item .m-name {
+            font-size: .8em;
+            font-weight: 600;
+        }
+        .market-item .m-price {
+            font-size: 1em;
+            font-weight: 700;
+            color: var(--gold);
+        }
+        .market-item .m-change {
+            font-size: .7em;
+        }
+        .market-item .m-change.up {
+            color: var(--green);
+        }
+        .market-item .m-change.down {
+            color: var(--red);
+        }
+
+        /* ===== EVENT ===== */
+        .event-banner {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 152, 0, 0.08));
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            animation: pulse 2s infinite;
+        }
+        .event-banner .event-icon {
+            font-size: 2.2em;
+        }
+        .event-banner .event-info {
+            flex: 1;
+        }
+        .event-banner .event-info .etitle {
+            font-weight: 700;
+            color: var(--gold);
+        }
+        .event-banner .event-info .edesc {
+            font-size: .85em;
+            color: var(--text2);
+        }
+
+        /* ===== SCROLLBAR STYLING ===== */
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--green);
+            border-radius: 4px;
+        }
+
+        /* ===== SELL LIST ===== */
+        .sell-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            background: var(--card2);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .sell-item .s-icon {
+            font-size: 2em;
+        }
+        .sell-item .s-info {
+            flex: 1;
+            min-width: 100px;
+        }
+        .sell-item .s-info .s-name {
+            font-weight: 600;
+        }
+        .sell-item .s-info .s-qty {
+            font-size: .8em;
+            color: var(--text2);
+        }
+        .sell-item .s-price {
+            font-weight: 700;
+            color: var(--gold);
+            font-size: 1em;
+        }
+        .sell-item .s-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
         }
     </style>
 </head>
 <body>
 
-    <!-- Login Screen -->
+    <!-- ===== LOGIN ===== -->
     <div id="loginScreen">
         <div class="login-box">
-            <h2>🌾 محاكي المزرعة</h2>
-            <p class="subtitle">Modz Farm Simulator</p>
-            <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" autocomplete="username">
-            <input type="password" id="loginPassword" placeholder="كلمة المرور" autocomplete="current-password">
-            <button class="login-btn" onclick="handleLogin()">🔐 تسجيل الدخول</button>
+            <span class="farm-icon">🌾</span>
+            <h2>محاكي المزرعة</h2>
+            <p class="subtitle">🌱 Modz Farm Simulator — الإصدار المتقدم</p>
+            <input type="email" id="loginEmail" placeholder="📧 البريد الإلكتروني" autocomplete="username">
+            <input type="password" id="loginPassword" placeholder="🔑 كلمة المرور" autocomplete="current-password">
+            <button class="login-btn" onclick="handleLogin()">🚀 تسجيل الدخول</button>
             <p class="login-error" id="loginError"></p>
         </div>
     </div>
 
-    <!-- Game Screen -->
+    <!-- ===== GAME ===== -->
     <div id="gameScreen">
+
         <!-- Offline Banner -->
-        <div class="offline-banner" id="offlineBanner">⚠️ انقطع اتصال الإنترنت — الحفظ المحلي ما زال يعمل</div>
+        <div class="offline-banner" id="offlineBanner">⚠️ انقطع الاتصال — الحفظ المحلي يعمل</div>
 
         <!-- Top Bar -->
         <header class="top-bar">
             <button class="hamburger" onclick="toggleSidebar()">☰</button>
-            <div class="logo">🌾 محاكي المزرعة</div>
+            <div class="logo">🌾 <span>المزرعة</span></div>
             <div class="info">
-                <span>💰 <span id="topMoney">5,000</span></span>
-                <span>📅 يوم <span id="topDay">1</span></span>
-                <span id="onlineStatus">🟢 متصل</span>
+                <span class="badge"><span class="icon">💰</span> <span id="topMoney">5,000</span></span>
+                <span class="badge hide-mobile"><span class="icon">📅</span> يوم <span id="topDay">1</span></span>
+                <span class="badge hide-mobile"><span class="icon">⭐</span> Lv.<span id="topLevel">1</span></span>
+                <span class="badge" id="onlineStatus">🟢 متصل</span>
+                <button class="theme-toggle" onclick="toggleTheme()" title="تبديل المظهر">🌓</button>
             </div>
         </header>
 
         <!-- Sidebar -->
         <nav class="sidebar" id="sidebar">
-            <button class="nav-btn active" data-page="home" onclick="navigateTo('home')">🏠 المنزل</button>
-            <button class="nav-btn" data-page="farm" onclick="navigateTo('farm')">🌱 المزرعة</button>
-            <button class="nav-btn" data-page="animals" onclick="navigateTo('animals')">🐄 الحيوانات</button>
-            <button class="nav-btn" data-page="shop" onclick="navigateTo('shop')">🛒 المتجر</button>
-            <button class="nav-btn" data-page="sell" onclick="navigateTo('sell')">🏪 البيع</button>
-            <button class="nav-btn" data-page="inventory" onclick="navigateTo('inventory')">🎒 المخزون</button>
-            <button class="nav-btn" data-page="stats" onclick="navigateTo('stats')">📊 الإحصائيات</button>
-            <button class="nav-btn" data-page="settings" onclick="navigateTo('settings')">⚙️ الإعدادات</button>
-            <button class="nav-btn" onclick="logout()" style="color:#e74c3c">🚪 تسجيل الخروج</button>
+            <div class="nav-section">📍 التنقل</div>
+            <button class="nav-btn active" data-page="home" onclick="navigateTo('home')"><span class="nav-icon">🏠</span> الرئيسية</button>
+            <button class="nav-btn" data-page="farm" onclick="navigateTo('farm')"><span class="nav-icon">🌱</span> المزرعة</button>
+            <button class="nav-btn" data-page="animals" onclick="navigateTo('animals')"><span class="nav-icon">🐄</span> الحيوانات</button>
+            <button class="nav-btn" data-page="shop" onclick="navigateTo('shop')"><span class="nav-icon">🛒</span> المتجر</button>
+            <button class="nav-btn" data-page="sell" onclick="navigateTo('sell')"><span class="nav-icon">🏪</span> البيع</button>
+            <button class="nav-btn" data-page="inventory" onclick="navigateTo('inventory')"><span class="nav-icon">🎒</span> المخزون</button>
+            <div class="nav-section">📊 متقدم</div>
+            <button class="nav-btn" data-page="quests" onclick="navigateTo('quests')"><span class="nav-icon">📋</span> المهام</button>
+            <button class="nav-btn" data-page="market" onclick="navigateTo('market')"><span class="nav-icon">📈</span> السوق</button>
+            <button class="nav-btn" data-page="stats" onclick="navigateTo('stats')"><span class="nav-icon">📊</span> الإحصائيات</button>
+            <button class="nav-btn" data-page="settings" onclick="navigateTo('settings')"><span class="nav-icon">⚙️</span> الإعدادات</button>
+            <button class="nav-btn logout-btn" onclick="logout()"><span class="nav-icon">🚪</span> تسجيل الخروج</button>
         </nav>
 
-        <!-- Main Content -->
+        <!-- Main -->
         <main class="main-content">
-            <!-- Home Page -->
+
+            <!-- ===== HOME ===== -->
             <div id="homePage" class="page active">
                 <div class="card">
-                    <h3>🏠 المنزل</h3>
+                    <div class="card-header">
+                        <h3>🏠 لوحة التحكم</h3>
+                        <span style="font-size:.85em;color:var(--text2)">اليوم <span id="homeDayNum">1</span></span>
+                    </div>
                     <div class="stats-grid">
                         <div class="stat-box"><div class="value">💰 <span id="homeMoney">5,000</span></div><div class="label">المال</div></div>
-                        <div class="stat-box"><div class="value">📅 <span id="homeDay">1</span></div><div class="label">اليوم</div></div>
-                        <div class="stat-box"><div class="value">🏠 <span id="homeLevel">1</span></div><div class="label">مستوى المنزل</div></div>
+                        <div class="stat-box"><div class="value">⭐ <span id="homeLevel">1</span></div><div class="label">المستوى</div></div>
+                        <div class="stat-box"><div class="value">🏠 <span id="homeLevel2">1</span></div><div class="label">المنزل</div></div>
+                        <div class="stat-box"><div class="value">🌾 <span id="homeFarmLevel">1</span></div><div class="label">المزرعة</div></div>
                     </div>
-                    <h4 style="margin-top:20px">الحالة</h4>
-                    <div class="bar-container"><div class="bar-fill bar-energy" id="energyBar">⚡ 100</div></div>
-                    <div class="bar-container"><div class="bar-fill bar-hunger" id="hungerBar">🍲 100</div></div>
-                    <div class="bar-container"><div class="bar-fill bar-thirst" id="thirstBar">💧 100</div></div>
-                    <div class="bar-container"><div class="bar-fill bar-health" id="healthBar">❤️ 100</div></div>
+                    <div style="margin-top:16px">
+                        <div class="bar-container"><div class="bar-fill bar-energy" id="energyBar">⚡ 100%</div></div>
+                        <div class="bar-container"><div class="bar-fill bar-hunger" id="hungerBar">🍲 100%</div></div>
+                        <div class="bar-container"><div class="bar-fill bar-thirst" id="thirstBar">💧 100%</div></div>
+                        <div class="bar-container"><div class="bar-fill bar-health" id="healthBar">❤️ 100%</div></div>
+                        <div class="bar-container"><div class="bar-fill bar-happiness" id="happinessBar">😊 100%</div></div>
+                    </div>
                 </div>
+
+                <!-- Weather -->
                 <div class="card">
-                    <h3>🛏️ الأنشطة</h3>
-                    <div style="display:flex;gap:10px;flex-wrap:wrap">
+                    <h3>🌤️ الطقس والموسم</h3>
+                    <div class="weather-widget" id="weatherWidget">
+                        <div class="weather-icon" id="weatherIcon">☀️</div>
+                        <div class="weather-info">
+                            <div class="temp" id="weatherTemp">25°C</div>
+                            <div class="desc" id="weatherDesc">مشمس</div>
+                        </div>
+                        <div style="margin-right:auto;font-size:.85em;color:var(--text2)" id="seasonDisplay">🍂 الخريف</div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <h3>⚡ إجراءات سريعة</h3>
+                    <div class="btn-group">
                         <button class="btn btn-blue" onclick="sleep()">🛏️ النوم</button>
                         <button class="btn btn-green" onclick="eatFood()">🍲 أكل</button>
                         <button class="btn btn-orange" onclick="drinkWater()">💧 شرب</button>
+                        <button class="btn btn-purple" onclick="petAnimal()">🐾 تربية</button>
+                        <button class="btn btn-gold" onclick="collectAllReady()">📦 جمع الكل</button>
                     </div>
                 </div>
+
+                <!-- Active Events -->
+                <div id="activeEventContainer"></div>
+
+                <!-- Home Upgrade -->
                 <div class="card">
                     <h3>🏗️ تطوير المنزل</h3>
-                    <p id="homeUpgradeInfo" style="color:var(--text2);margin-bottom:10px">مستوى المنزل 1 — يمنح استعادة طاقة 50%</p>
-                    <button class="btn btn-green" onclick="upgradeHome()">🔨 ترقية المنزل</button>
+                    <p id="homeUpgradeInfo" style="color:var(--text2);margin-bottom:10px;font-size:.9em">المستوى 1 — استعادة طاقة 50%</p>
+                    <button class="btn btn-green" onclick="upgradeHome()">🔨 ترقية (💰 <span id="homeUpgradeCost">800</span>)</button>
                 </div>
             </div>
 
-            <!-- Farm Page -->
+            <!-- ===== FARM ===== -->
             <div id="farmPage" class="page">
                 <div class="card">
-                    <h3>🌱 قطع الأرض</h3>
+                    <h3>🌱 قطع الأرض <span style="font-size:.75em;color:var(--text2);font-weight:400" id="plotCount">(0/0)</span></h3>
                     <div class="plots-grid" id="plotsGrid"></div>
                 </div>
                 <div class="card">
-                    <h3>🏗️ تطوير المزرعة</h3>
-                    <p id="farmUpgradeInfo" style="color:var(--text2);margin-bottom:10px">مستوى المزرعة 1 — 4 قطع أرض</p>
-                    <button class="btn btn-green" onclick="upgradeFarm()">🔨 ترقية المزرعة</button>
+                    <div class="card-header">
+                        <h3>🏗️ تطوير المزرعة</h3>
+                        <span style="font-size:.85em;color:var(--text2)" id="farmLevelDisplay">المستوى 1</span>
+                    </div>
+                    <p id="farmUpgradeInfo" style="color:var(--text2);margin-bottom:10px;font-size:.9em">4 قطع أرض</p>
+                    <button class="btn btn-green" onclick="upgradeFarm()">🔨 ترقية (💰 <span id="farmUpgradeCost">500</span>)</button>
+                </div>
+                <!-- Irrigation & Fertilizer -->
+                <div class="card">
+                    <h3>🧪 الإدارة</h3>
+                    <div class="btn-group">
+                        <button class="btn btn-blue" onclick="irrigateAll()">💧 ري الكل</button>
+                        <button class="btn btn-purple" onclick="fertilizeAll()">🧪 تسميد الكل</button>
+                        <button class="btn btn-red" onclick="clearPests()">🐛 مكافحة الآفات</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Animals Page -->
+            <!-- ===== ANIMALS ===== -->
             <div id="animalsPage" class="page">
                 <div class="card">
-                    <h3>🐄 الحيوانات</h3>
+                    <h3>🐄 الحيوانات <span style="font-size:.75em;color:var(--text2);font-weight:400" id="animalCount">(0)</span></h3>
                     <div class="animals-grid" id="animalsGrid"></div>
                 </div>
                 <div class="card">
-                    <h3>🐾 شراء حيوان</h3>
+                    <h3>🛒 شراء حيوان</h3>
                     <div class="shop-grid" id="buyAnimalsGrid"></div>
+                </div>
+                <div class="card">
+                    <h3>🧬 التربية</h3>
+                    <p style="color:var(--text2);font-size:.9em;margin-bottom:10px">حيوانان سعيدان يمكنهما التكاثر</p>
+                    <button class="btn btn-purple" onclick="breedAnimals()">🧬 تربية</button>
                 </div>
             </div>
 
-            <!-- Shop Page -->
+            <!-- ===== SHOP ===== -->
             <div id="shopPage" class="page">
                 <div class="card">
-                    <h3>🌱 بذور</h3>
+                    <h3>🌱 البذور</h3>
                     <div class="shop-grid" id="shopSeedsGrid"></div>
                 </div>
                 <div class="card">
-                    <h3>🌿 أعلاف وموارد</h3>
+                    <h3>📦 الموارد</h3>
                     <div class="shop-grid" id="shopResourcesGrid"></div>
+                </div>
+                <div class="card">
+                    <h3>🎨 الزينة</h3>
+                    <div class="shop-grid" id="shopDecorGrid"></div>
                 </div>
             </div>
 
-            <!-- Sell Page -->
+            <!-- ===== SELL ===== -->
             <div id="sellPage" class="page">
                 <div class="card">
                     <h3>🏪 بيع المنتجات</h3>
@@ -699,71 +1348,176 @@
                 </div>
             </div>
 
-            <!-- Inventory Page -->
+            <!-- ===== INVENTORY ===== -->
             <div id="inventoryPage" class="page">
                 <div class="card">
-                    <h3>🎒 المخزون</h3>
+                    <h3>🎒 المخزون <span style="font-size:.75em;color:var(--text2);font-weight:400" id="invTotal">(0 صنف)</span></h3>
                     <div class="inventory-grid" id="inventoryGrid"></div>
                 </div>
             </div>
 
-            <!-- Statistics Page -->
-            <div id="statsPage" class="page">
+            <!-- ===== QUESTS ===== -->
+            <div id="questsPage" class="page">
                 <div class="card">
-                    <h3>📊 الإحصائيات</h3>
-                    <ul class="stats-list" id="statsList"></ul>
+                    <h3>📋 المهام اليومية</h3>
+                    <div id="dailyQuestsContainer"></div>
+                </div>
+                <div class="card">
+                    <h3>🏆 الإنجازات</h3>
+                    <div class="achievement-grid" id="achievementsGrid"></div>
                 </div>
             </div>
 
-            <!-- Settings Page -->
+            <!-- ===== MARKET ===== -->
+            <div id="marketPage" class="page">
+                <div class="card">
+                    <h3>📈 السوق <span style="font-size:.75em;color:var(--text2);font-weight:400">(أسعار متغيرة)</span></h3>
+                    <div class="market-grid" id="marketGrid"></div>
+                </div>
+            </div>
+
+            <!-- ===== STATS ===== -->
+            <div id="statsPage" class="page">
+                <div class="card">
+                    <h3>📊 الإحصائيات التفصيلية</h3>
+                    <ul class="stats-list" id="statsList" style="list-style:none;padding:0"></ul>
+                </div>
+            </div>
+
+            <!-- ===== SETTINGS ===== -->
             <div id="settingsPage" class="page">
                 <div class="card">
                     <h3>⚙️ الإعدادات</h3>
-                    <div class="settings-btns">
-                        <button class="btn btn-green" onclick="saveGame()">💾 حفظ اللعبة</button>
-                        <button class="btn btn-blue" onclick="exportSave()">📦 تصدير الحفظ</button>
-                        <button class="btn btn-orange" onclick="document.getElementById('importFile').click()">📥 استيراد الحفظ</button>
+                    <div class="settings-group">
+                        <button class="btn btn-green" onclick="saveGame()">💾 حفظ</button>
+                        <button class="btn btn-blue" onclick="exportSave()">📦 تصدير</button>
+                        <button class="btn btn-orange" onclick="document.getElementById('importFile').click()">📥 استيراد</button>
                         <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+                        <button class="btn btn-red" onclick="resetGame()">🔄 إعادة ضبط</button>
                     </div>
-                    <p style="color:var(--text2);margin-top:10px;font-size:.85em">يتم الحفظ تلقائيًا كل 30 ثانية</p>
+                    <div style="margin-top:16px">
+                        <label class="toggle-switch">
+                            <span>🔊 المؤثرات الصوتية</span>
+                            <input type="checkbox" id="soundToggle" checked onchange="toggleSound()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <label class="toggle-switch">
+                            <span>🌓 المظهر الداكن</span>
+                            <input type="checkbox" id="darkToggle" checked onchange="toggleTheme()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p style="color:var(--text2);margin-top:14px;font-size:.8em">💾 حفظ تلقائي كل 30 ثانية</p>
+                </div>
+                <div class="card">
+                    <h3>📋 معلومات</h3>
+                    <p style="color:var(--text2);font-size:.9em">🌾 محاكي المزرعة المتقدم v2.0<br>جميع الحقوق محفوظة © 2026</p>
                 </div>
             </div>
+
         </main>
     </div>
 
     <script>
-        // ====== CONSTANTS ======
+        // ========================================================================
+        //  CONSTANTS
+        // ========================================================================
         const CROPS = {
-            wheat: { name: 'قمح', emoji: '🌾', seedPrice: 10, sellPrice: 25, growTime: 45, xp: 5 },
-            corn: { name: 'ذرة', emoji: '🌽', seedPrice: 20, sellPrice: 45, growTime: 70, xp: 8 },
-            tomato: { name: 'طماطم', emoji: '🍅', seedPrice: 15, sellPrice: 32, growTime: 60, xp: 6 },
-            carrot: { name: 'جزر', emoji: '🥕', seedPrice: 12, sellPrice: 28, growTime: 55, xp: 6 },
-            potato: { name: 'بطاطس', emoji: '🥔', seedPrice: 18, sellPrice: 36, growTime: 80, xp: 7 }
+            wheat: { name: 'قمح', emoji: '🌾', seedPrice: 10, sellPrice: 25, growTime: 40, xp: 5, season: 'all' },
+            corn: { name: 'ذرة', emoji: '🌽', seedPrice: 20, sellPrice: 45, growTime: 65, xp: 8, season: 'summer' },
+            tomato: { name: 'طماطم', emoji: '🍅', seedPrice: 15, sellPrice: 32, growTime: 55, xp: 6, season: 'summer' },
+            carrot: { name: 'جزر', emoji: '🥕', seedPrice: 12, sellPrice: 28, growTime: 50, xp: 6, season: 'all' },
+            potato: { name: 'بطاطس', emoji: '🥔', seedPrice: 18, sellPrice: 36, growTime: 75, xp: 7, season: 'all' },
+            strawberry: { name: 'فراولة', emoji: '🍓', seedPrice: 25, sellPrice: 55, growTime: 90, xp: 10, season: 'spring' },
+            pumpkin: { name: 'قرع', emoji: '🎃', seedPrice: 30, sellPrice: 65, growTime: 100, xp: 12, season: 'autumn' },
+            sunflower: { name: 'دوار الشمس', emoji: '🌻', seedPrice: 22, sellPrice: 50, growTime: 85, xp: 9, season: 'summer' },
+            garlic: { name: 'ثوم', emoji: '🧄', seedPrice: 14, sellPrice: 30, growTime: 60, xp: 7, season: 'all' },
+            pepper: { name: 'فلفل', emoji: '🌶️', seedPrice: 28, sellPrice: 58, growTime: 80, xp: 11, season: 'summer' }
         };
+
         const ANIMALS = {
-            chicken: { name: 'دجاج', emoji: '🐔', price: 80, produce: 'egg', produceTime: 50, xp: 10 },
-            sheep: { name: 'خروف', emoji: '🐑', price: 150, produce: 'wool', produceTime: 80, xp: 15 },
-            goat: { name: 'ماعز', emoji: '🐐', price: 120, produce: 'milk', produceTime: 70, xp: 12 },
-            cow: { name: 'بقرة', emoji: '🐄', price: 250, produce: 'milk', produceTime: 100, xp: 20 }
+            chicken: { name: 'دجاج', emoji: '🐔', price: 80, produce: 'egg', produceTime: 45, xp: 10, feed: 2 },
+            sheep: { name: 'خروف', emoji: '🐑', price: 150, produce: 'wool', produceTime: 75, xp: 15, feed: 3 },
+            goat: { name: 'ماعز', emoji: '🐐', price: 120, produce: 'milk', produceTime: 65, xp: 12, feed: 3 },
+            cow: { name: 'بقرة', emoji: '🐄', price: 250, produce: 'milk', produceTime: 95, xp: 20, feed: 4 },
+            pig: { name: 'خنزير', emoji: '🐷', price: 180, produce: 'truffle', produceTime: 110, xp: 18, feed: 4 },
+            duck: { name: 'بطة', emoji: '🦆', price: 100, produce: 'egg', produceTime: 50, xp: 11, feed: 2 }
         };
+
         const PRODUCTS = {
             egg: { name: 'بيض', emoji: '🥚', sellPrice: 8 },
             wool: { name: 'صوف', emoji: '🧶', sellPrice: 20 },
-            milk: { name: 'حليب', emoji: '🥛', sellPrice: 15 }
+            milk: { name: 'حليب', emoji: '🥛', sellPrice: 15 },
+            truffle: { name: 'كمأة', emoji: '🍄', sellPrice: 40 }
         };
+
+        const DECORATIONS = [
+            { key: 'fence', name: 'سياج', emoji: '🪵', price: 50 },
+            { key: 'scarecrow', name: 'فزاعة', emoji: '🧙', price: 80 },
+            { key: 'fountain', name: 'نافورة', emoji: '⛲', price: 150 },
+            { key: 'bench', name: 'مقعد', emoji: '🪑', price: 40 },
+            { key: 'lamp', name: 'فانوس', emoji: '🏮', price: 60 }
+        ];
+
         const VALID_ACCOUNTS = {
             'modz@gmail.com': 'modz wep',
             'thmanalshry22@gmail.com': 'apk133'
         };
-        const PLOT_LEVELS = { 1: 4, 2: 6, 3: 8, 4: 10, 5: 12 };
-        const ANIMAL_LIMITS = { 1: 2, 2: 4, 3: 6, 4: 8, 5: 10 };
-        const FARM_UPGRADE_COST = { 1: 500, 2: 1000, 3: 2000, 4: 4000 };
-        const HOME_UPGRADE_COST = { 1: 800, 2: 1500 };
 
-        // ====== STATE ======
+        const PLOT_LEVELS = { 1: 4, 2: 6, 3: 9, 4: 12, 5: 16 };
+        const ANIMAL_LIMITS = { 1: 2, 2: 4, 3: 6, 4: 9, 5: 12 };
+        const FARM_UPGRADE_COST = { 1: 500, 2: 1000, 3: 2000, 4: 4000 };
+        const HOME_UPGRADE_COST = { 1: 800, 2: 1500, 3: 2500 };
+
+        const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
+        const SEASON_NAMES = { spring: '🌱 الربيع', summer: '☀️ الصيف', autumn: '🍂 الخريف', winter: '❄️ الشتاء' };
+        const SEASON_BONUS = { spring: 1.2, summer: 1.0, autumn: 1.1, winter: 0.8 };
+
+        const WEATHERS = [
+            { id: 'sunny', icon: '☀️', name: 'مشمس', temp: 25, bonus: 1.1 },
+            { id: 'cloudy', icon: '⛅', name: 'غائم', temp: 20, bonus: 1.0 },
+            { id: 'rainy', icon: '🌧️', name: 'ممطر', temp: 18, bonus: 1.2 },
+            { id: 'stormy', icon: '⛈️', name: 'عاصف', temp: 15, bonus: 0.7 },
+            { id: 'snowy', icon: '❄️', name: 'مثلج', temp: 2, bonus: 0.6 }
+        ];
+
+        const DAILY_QUESTS = [
+            { id: 'harvest_5', name: 'حصاد 5 محاصيل', desc: 'احصد 5 محاصيل', icon: '🌾', target: 5, reward: 50, type: 'harvest' },
+            { id: 'collect_3', name: 'جمع 3 منتجات حيوانية', desc: 'اجمع 3 منتجات من الحيوانات', icon: '🥚', target: 3, reward: 40,
+                type: 'collect' },
+            { id: 'plant_3', name: 'زراعة 3 بذور', desc: 'ازرع 3 بذور جديدة', icon: '🌱', target: 3, reward: 30, type: 'plant' },
+            { id: 'sell_5', name: 'بيع 5 منتجات', desc: 'بع 5 منتجات من المخزون', icon: '💰', target: 5, reward: 60,
+            type: 'sell' },
+            { id: 'eat_2', name: 'أكل وشرب', desc: 'أكل مرتين واشرب مرتين', icon: '🍲', target: 2, reward: 25, type: 'eat' }
+        ];
+
+        const ACHIEVEMENTS = [
+            { id: 'first_harvest', name: 'أول حصاد', desc: 'احصد أول محصول', icon: '🌾', check: s => s.stats.cropsHarvested >=
+                    1 },
+            { id: 'farmer_10', name: 'مزارع متمرس', desc: 'احصد 10 محاصيل', icon: '🧑‍🌾', check: s => s.stats.cropsHarvested >=
+                    10 },
+            { id: 'farmer_50', name: 'مزارع خبير', desc: 'احصد 50 محصولًا', icon: '👨‍🌾', check: s => s.stats.cropsHarvested >=
+                    50 },
+            { id: 'animal_5', name: 'مربي حيوانات', desc: 'امتلك 5 حيوانات', icon: '🐄', check: s => s.animals.length >= 5 },
+            { id: 'rich_10k', name: 'ثري', desc: 'امتلك 10,000 جنيه', icon: '💰', check: s => s.player.money >= 10000 },
+            { id: 'rich_50k', name: 'مليونير صغير', desc: 'امتلك 50,000 جنيه', icon: '💎', check: s => s.player.money >= 50000 },
+            { id: 'level_5', name: 'مستوى 5', desc: 'وصل إلى المستوى 5', icon: '⭐', check: s => s.player.level >= 5 },
+            { id: 'level_10', name: 'مستوى 10', desc: 'وصل إلى المستوى 10', icon: '🌟', check: s => s.player.level >= 10 },
+            { id: 'collect_20', name: 'جامع محترف', desc: 'اجمع 20 منتجًا حيوانيًا', icon: '📦', check: s => s.stats
+                    .productsCollected >= 20 },
+            { id: 'decorate_3', name: 'مزين', desc: 'اشترِ 3 زينة', icon: '🎨', check: s => (s.stats.decorBought || 0) >= 3 }
+        ];
+
+        // ========================================================================
+        //  STATE
+        // ========================================================================
         let state = null;
         let currentUser = null;
         let autoSaveInterval = null;
+        let soundEnabled = true;
+        let weatherTimer = null;
+        let seasonTimer = null;
+        let gameLoopInterval = null;
 
         function createInitialState(email) {
             return {
@@ -776,6 +1530,7 @@
                     hunger: 100,
                     thirst: 100,
                     health: 100,
+                    happiness: 100,
                     day: 1,
                     homeLevel: 1,
                     farmLevel: 1
@@ -788,20 +1543,32 @@
                     tomato: 0,
                     carrot: 0,
                     potato: 0,
+                    strawberry: 0,
+                    pumpkin: 0,
+                    sunflower: 0,
+                    garlic: 0,
+                    pepper: 0,
                     egg: 0,
                     wool: 0,
                     milk: 0,
+                    truffle: 0,
                     seed_wheat: 5,
                     seed_corn: 3,
                     seed_tomato: 0,
                     seed_carrot: 0,
                     seed_potato: 0,
+                    seed_strawberry: 0,
+                    seed_pumpkin: 0,
+                    seed_sunflower: 0,
+                    seed_garlic: 0,
+                    seed_pepper: 0,
                     feed: 3,
                     water: 5,
                     food: 5,
                     fertilizer: 0,
                     tool: 1
                 },
+                decorations: [],
                 stats: {
                     totalEarned: 0,
                     totalSpent: 0,
@@ -809,14 +1576,26 @@
                     animalsBought: 0,
                     animalsSold: 0,
                     productsCollected: 0,
-                    seedsBought: 0
+                    seedsBought: 0,
+                    decorBought: 0,
+                    pestsKilled: 0,
+                    daysPlayed: 0
                 },
+                quests: {},
+                achievements: {},
+                weather: { id: 'sunny', until: Date.now() + 60000 },
+                season: 'spring',
+                seasonDay: 0,
+                marketPrices: {},
                 lastUpdateTime: Date.now(),
-                lastSaveTime: Date.now()
+                lastSaveTime: Date.now(),
+                dayStartTime: Date.now()
             };
         }
 
-        // ====== LOGIN ======
+        // ========================================================================
+        //  LOGIN
+        // ========================================================================
         function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim().toLowerCase();
             const password = document.getElementById('loginPassword').value;
@@ -828,19 +1607,19 @@
             if (VALID_ACCOUNTS[email] && VALID_ACCOUNTS[email] === password) {
                 currentUser = email;
                 errorEl.textContent = '';
-                // Load save
                 loadSave().then(saveData => {
                     if (saveData && saveData.accountEmail === email) {
-                        state = saveData;
+                        state = sanitizeState(saveData);
                     } else {
                         state = createInitialState(email);
                     }
-                    // Ensure all fields exist
                     state = sanitizeState(state);
+                    initGameState();
                     enterGame();
                     saveGame();
                 }).catch(() => {
                     state = createInitialState(email);
+                    initGameState();
                     enterGame();
                     saveGame();
                 });
@@ -858,51 +1637,80 @@
             document.getElementById('loginPassword').value = '';
             document.getElementById('loginEmail').value = '';
             clearInterval(autoSaveInterval);
+            clearInterval(gameLoopInterval);
+            clearInterval(weatherTimer);
+            clearInterval(seasonTimer);
         }
 
-        // ====== SANITIZE ======
+        // ========================================================================
+        //  STATE INIT
+        // ========================================================================
         function sanitizeState(s) {
             if (!s || !s.player) return createInitialState(currentUser);
             const defaults = createInitialState(currentUser);
-            // Merge player
             s.player = { ...defaults.player, ...s.player };
-            // Merge inventory
             s.inventory = { ...defaults.inventory, ...s.inventory };
-            // Merge stats
             s.stats = { ...defaults.stats, ...s.stats };
-            // Ensure plots array
-            const maxPlots = PLOT_LEVELS[s.player.farmLevel] || 4;
             if (!Array.isArray(s.plots)) s.plots = [];
+            const maxPlots = PLOT_LEVELS[s.player.farmLevel] || 4;
             while (s.plots.length < maxPlots) {
-                s.plots.push({ id: s.plots.length + 1, crop: null, plantedAt: null, readyAt: null, status: 'empty' });
+                s.plots.push({ id: s.plots.length + 1, crop: null, plantedAt: null, readyAt: null, status: 'empty',
+                    quality: 0, irrigated: false, fertilized: false, pest: false });
             }
-            // Ensure animals array
+            s.plots = s.plots.slice(0, maxPlots);
             if (!Array.isArray(s.animals)) s.animals = [];
-            // Ensure lastUpdateTime
+            if (!Array.isArray(s.decorations)) s.decorations = [];
+            if (!s.quests) s.quests = {};
+            if (!s.achievements) s.achievements = {};
+            if (!s.weather) s.weather = { id: 'sunny', until: Date.now() + 60000 };
+            if (!s.season) s.season = 'spring';
+            if (!s.seasonDay) s.seasonDay = 0;
+            if (!s.marketPrices) s.marketPrices = {};
             if (!s.lastUpdateTime) s.lastUpdateTime = Date.now();
+            if (!s.lastSaveTime) s.lastSaveTime = Date.now();
+            if (!s.dayStartTime) s.dayStartTime = Date.now();
+            // Init market prices
+            for (const [key, crop] of Object.entries(CROPS)) {
+                if (!s.marketPrices[key]) {
+                    s.marketPrices[key] = crop.sellPrice + Math.floor(Math.random() * 10 - 5);
+                }
+            }
+            for (const [key, prod] of Object.entries(PRODUCTS)) {
+                if (!s.marketPrices[key]) {
+                    s.marketPrices[key] = prod.sellPrice + Math.floor(Math.random() * 6 - 3);
+                }
+            }
             return s;
         }
 
-        // ====== ENTER GAME ======
-        function enterGame() {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('gameScreen').style.display = 'flex';
-            // Start auto-save
-            if (autoSaveInterval) clearInterval(autoSaveInterval);
-            autoSaveInterval = setInterval(saveGame, 30000);
-            // Setup online/offline
-            setupOnlineDetection();
-            // Render
-            navigateTo('home');
-            renderAll();
-            // Show welcome toast
-            showToast('🌾 أهلاً بك في مزرعتك!');
+        function initGameState() {
+            // Init quests
+            for (const q of DAILY_QUESTS) {
+                if (!state.quests[q.id]) {
+                    state.quests[q.id] = { progress: 0, completed: false, claimed: false };
+                }
+            }
+            // Init achievements
+            for (const a of ACHIEVEMENTS) {
+                if (!state.achievements[a.id]) {
+                    state.achievements[a.id] = { unlocked: false };
+                }
+            }
+            // Init weather
+            if (!state.weather || !state.weather.id) {
+                state.weather = { id: 'sunny', until: Date.now() + 60000 };
+            }
+            // Init season
+            if (!state.season) state.season = 'spring';
+            if (!state.seasonDay) state.seasonDay = 0;
         }
 
-        // ====== SAVE/LOAD ======
+        // ========================================================================
+        //  SAVE / LOAD
+        // ========================================================================
         function openDB() {
             return new Promise((resolve, reject) => {
-                const req = indexedDB.open('FarmSimulator', 1);
+                const req = indexedDB.open('FarmSimulatorPro', 1);
                 req.onupgradeneeded = (e) => {
                     const db = e.target.result;
                     if (!db.objectStoreNames.contains('gameState')) {
@@ -924,9 +1732,7 @@
                     tx.oncomplete = () => resolve();
                     tx.onerror = (e) => reject(e.target.error);
                 });
-            } catch (e) {
-                console.error('IndexedDB error:', e);
-            }
+            } catch (e) { console.error('IndexedDB error:', e); }
         }
 
         async function loadFromIndexedDB() {
@@ -939,36 +1745,24 @@
                     req.onsuccess = () => resolve(req.result ? req.result.state : null);
                     req.onerror = (e) => reject(e.target.error);
                 });
-            } catch (e) {
-                return null;
-            }
+            } catch (e) { return null; }
         }
 
         function saveToLocalStorage(state) {
-            try {
-                localStorage.setItem('farm_sim_backup', JSON.stringify(state));
-            } catch (e) {
-                console.error('localStorage error:', e);
-            }
+            try { localStorage.setItem('farm_sim_pro_backup', JSON.stringify(state)); } catch (e) {}
         }
 
         function loadFromLocalStorage() {
             try {
-                const data = localStorage.getItem('farm_sim_backup');
+                const data = localStorage.getItem('farm_sim_pro_backup');
                 return data ? JSON.parse(data) : null;
-            } catch (e) {
-                return null;
-            }
+            } catch (e) { return null; }
         }
 
         async function loadSave() {
-            // Try IndexedDB first
             const dbData = await loadFromIndexedDB();
             if (dbData) return dbData;
-            // Try localStorage backup
-            const lsData = loadFromLocalStorage();
-            if (lsData) return lsData;
-            return null;
+            return loadFromLocalStorage();
         }
 
         async function saveGame() {
@@ -976,18 +1770,20 @@
             state.lastSaveTime = Date.now();
             await saveToIndexedDB(state);
             saveToLocalStorage(state);
-            showToast('💾 تم حفظ اللعبة');
+            showToast('💾 تم الحفظ');
         }
 
-        // ====== EXPORT/IMPORT ======
+        // ========================================================================
+        //  EXPORT / IMPORT / RESET
+        // ========================================================================
         function exportSave() {
             if (!state) return;
-            const saveData = JSON.stringify(state, null, 2);
-            const blob = new Blob([saveData], { type: 'application/json' });
+            const data = JSON.stringify(state, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'farm_simulator_save.json';
+            a.download = 'farm_sim_pro_save.json';
             a.click();
             URL.revokeObjectURL(url);
             showToast('📦 تم تصدير الحفظ');
@@ -1003,68 +1799,118 @@
                     if (data && data.player && data.player.money !== undefined) {
                         if (data.accountEmail === currentUser) {
                             state = sanitizeState(data);
+                            initGameState();
                             saveGame();
                             renderAll();
-                            showToast('✅ تم استيراد الحفظ بنجاح');
+                            showToast('✅ تم استيراد الحفظ');
                         } else {
                             showToast('❌ هذا الحفظ لا يخص حسابك');
                         }
                     } else {
-                        showToast('❌ ملف الحفظ غير صالح');
+                        showToast('❌ ملف غير صالح');
                     }
                 } catch (err) {
-                    showToast('❌ ملف الحفظ تالف');
+                    showToast('❌ ملف تالف');
                 }
             };
             reader.readAsText(file);
             event.target.value = '';
         }
 
-        // ====== ONLINE DETECTION ======
-        function setupOnlineDetection() {
-            const onlineStatus = document.getElementById('onlineStatus');
-            const offlineBanner = document.getElementById('offlineBanner');
-            window.addEventListener('online', () => {
-                onlineStatus.textContent = '🟢 متصل';
-                offlineBanner.style.display = 'none';
-                showToast('✅ تم استعادة الاتصال');
-            });
-            window.addEventListener('offline', () => {
-                onlineStatus.textContent = '🔴 غير متصل';
-                offlineBanner.style.display = 'block';
-                showToast('⚠️ انقطع اتصال الإنترنت');
-            });
-            // Initial
-            if (navigator.onLine) {
-                onlineStatus.textContent = '🟢 متصل';
-                offlineBanner.style.display = 'none';
-            } else {
-                onlineStatus.textContent = '🔴 غير متصل';
-                offlineBanner.style.display = 'block';
+        function resetGame() {
+            if (confirm('⚠️ هل أنت متأكد؟ سيتم حذف كل التقدم!')) {
+                state = createInitialState(currentUser);
+                initGameState();
+                saveGame();
+                renderAll();
+                showToast('🔄 تم إعادة الضبط');
             }
         }
 
-        // ====== TOAST ======
-        function showToast(msg) {
+        // ========================================================================
+        //  ENTER GAME
+        // ========================================================================
+        function enterGame() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'flex';
+            if (autoSaveInterval) clearInterval(autoSaveInterval);
+            autoSaveInterval = setInterval(saveGame, 30000);
+            if (gameLoopInterval) clearInterval(gameLoopInterval);
+            gameLoopInterval = setInterval(gameLoop, 1000);
+            setupOnlineDetection();
+            updateWeather();
+            startWeatherCycle();
+            startSeasonCycle();
+            navigateTo('home');
+            renderAll();
+            showToast('🌾 أهلاً بك في المزرعة المتقدمة!');
+            // Load sound setting
+            const soundSetting = localStorage.getItem('farm_sound_enabled');
+            if (soundSetting !== null) {
+                soundEnabled = soundSetting === 'true';
+                document.getElementById('soundToggle').checked = soundEnabled;
+            }
+            const themeSetting = localStorage.getItem('farm_theme_dark');
+            if (themeSetting !== null && themeSetting === 'false') {
+                document.body.classList.remove('light-theme');
+                document.getElementById('darkToggle').checked = false;
+            } else {
+                document.body.classList.add('light-theme');
+                document.getElementById('darkToggle').checked = true;
+            }
+        }
+
+        // ========================================================================
+        //  ONLINE DETECTION
+        // ========================================================================
+        function setupOnlineDetection() {
+            const status = document.getElementById('onlineStatus');
+            const banner = document.getElementById('offlineBanner');
+            window.addEventListener('online', () => {
+                status.textContent = '🟢 متصل';
+                banner.style.display = 'none';
+                showToast('✅ تم استعادة الاتصال');
+            });
+            window.addEventListener('offline', () => {
+                status.textContent = '🔴 غير متصل';
+                banner.style.display = 'block';
+                showToast('⚠️ انقطع الاتصال');
+            });
+            if (navigator.onLine) {
+                status.textContent = '🟢 متصل';
+                banner.style.display = 'none';
+            } else {
+                status.textContent = '🔴 غير متصل';
+                banner.style.display = 'block';
+            }
+        }
+
+        // ========================================================================
+        //  TOAST
+        // ========================================================================
+        function showToast(msg, icon = '📢') {
             const existing = document.querySelectorAll('.toast');
             existing.forEach(t => t.remove());
             const toast = document.createElement('div');
             toast.className = 'toast';
-            toast.textContent = msg;
+            toast.innerHTML = `<span>${icon}</span> ${msg}`;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // ====== NAVIGATION ======
+        // ========================================================================
+        //  NAVIGATION
+        // ========================================================================
         let currentPage = 'home';
 
         function navigateTo(page) {
             currentPage = page;
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(page + 'Page').classList.add('active');
+            const target = document.getElementById(page + 'Page');
+            if (target) target.classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`.nav-btn[data-page="${page}"]`).classList.add('active');
-            // Close sidebar on mobile
+            const navBtn = document.querySelector(`.nav-btn[data-page="${page}"]`);
+            if (navBtn) navBtn.classList.add('active');
             document.getElementById('sidebar').classList.remove('open');
             renderAll();
         }
@@ -1073,7 +1919,181 @@
             document.getElementById('sidebar').classList.toggle('open');
         }
 
-        // ====== RENDER ======
+        // ========================================================================
+        //  THEME / SOUND
+        // ========================================================================
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const dark = document.body.classList.contains('light-theme');
+            document.getElementById('darkToggle').checked = dark;
+            localStorage.setItem('farm_theme_dark', String(dark));
+        }
+
+        function toggleSound() {
+            soundEnabled = document.getElementById('soundToggle').checked;
+            localStorage.setItem('farm_sound_enabled', String(soundEnabled));
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = new(window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                if (type === 'harvest') {
+                    osc.frequency.value = 800;
+                    gain.gain.value = 0.1;
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.1);
+                } else if (type === 'buy') {
+                    osc.frequency.value = 600;
+                    gain.gain.value = 0.08;
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.15);
+                } else if (type === 'collect') {
+                    osc.frequency.value = 1000;
+                    gain.gain.value = 0.1;
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.08);
+                } else if (type === 'levelup') {
+                    osc.frequency.value = 523;
+                    gain.gain.value = 0.1;
+                    osc.start(ctx.currentTime);
+                    osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+                    osc.stop(ctx.currentTime + 0.2);
+                } else {
+                    osc.frequency.value = 440;
+                    gain.gain.value = 0.06;
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.05);
+                }
+            } catch (e) {}
+        }
+
+        // ========================================================================
+        //  WEATHER & SEASONS
+        // ========================================================================
+        function startWeatherCycle() {
+            if (weatherTimer) clearInterval(weatherTimer);
+            weatherTimer = setInterval(() => {
+                if (!state) return;
+                const now = Date.now();
+                if (now >= state.weather.until) {
+                    const w = WEATHERS[Math.floor(Math.random() * WEATHERS.length)];
+                    state.weather.id = w.id;
+                    state.weather.until = now + 30000 + Math.random() * 60000;
+                    updateWeather();
+                    renderAll();
+                    showToast(`🌤️ تغير الطقس: ${w.icon} ${w.name}`, '🌤️');
+                }
+            }, 5000);
+        }
+
+        function startSeasonCycle() {
+            if (seasonTimer) clearInterval(seasonTimer);
+            seasonTimer = setInterval(() => {
+                if (!state) return;
+                state.seasonDay++;
+                if (state.seasonDay >= 7) {
+                    state.seasonDay = 0;
+                    const idx = SEASONS.indexOf(state.season);
+                    state.season = SEASONS[(idx + 1) % SEASONS.length];
+                    showToast(`🍂 تغير الموسم إلى ${SEASON_NAMES[state.season]}`, '🌿');
+                    renderAll();
+                }
+            }, 60000);
+        }
+
+        function updateWeather() {
+            const w = WEATHERS.find(w => w.id === state.weather.id) || WEATHERS[0];
+            document.getElementById('weatherIcon').textContent = w.icon;
+            document.getElementById('weatherTemp').textContent = w.temp + '°C';
+            document.getElementById('weatherDesc').textContent = w.name;
+            document.getElementById('seasonDisplay').textContent = SEASON_NAMES[state.season] || '🍂 الخريف';
+        }
+
+        function getSeasonBonus() {
+            return SEASON_BONUS[state.season] || 1.0;
+        }
+
+        function getWeatherBonus() {
+            const w = WEATHERS.find(w => w.id === state.weather.id);
+            return w ? w.bonus : 1.0;
+        }
+
+        // ========================================================================
+        //  GAME LOOP
+        // ========================================================================
+        function gameLoop() {
+            if (!state || !currentUser) return;
+            const now = Date.now();
+            // Check crops
+            let needsRender = false;
+            state.plots.forEach(plot => {
+                if (plot.status === 'growing' && plot.readyAt && now >= plot.readyAt) {
+                    plot.status = 'ready';
+                    needsRender = true;
+                }
+                // Pests
+                if (plot.status === 'growing' && !plot.pest && Math.random() < 0.0005) {
+                    plot.pest = true;
+                    showToast('🐛 ظهرت آفات في أحد المحاصيل!', '🐛');
+                    needsRender = true;
+                }
+            });
+            state.animals.forEach(animal => {
+                if (animal.status === 'waiting' && animal.produceReadyAt && now >= animal.produceReadyAt) {
+                    animal.status = 'ready';
+                    needsRender = true;
+                }
+                // Happiness decay
+                if (animal.happiness !== undefined) {
+                    animal.happiness = Math.max(0, (animal.happiness || 100) - 0.02);
+                    if (animal.happiness < 30 && Math.random() < 0.001) {
+                        showToast(`😢 ${ANIMALS[animal.type].name} غير سعيد!`, '😢');
+                    }
+                }
+            });
+            // Hunger/thirst decay
+            const p = state.player;
+            if (now - state.lastUpdateTime > 10000) {
+                p.hunger = Math.max(0, p.hunger - 0.5);
+                p.thirst = Math.max(0, p.thirst - 0.4);
+                p.happiness = Math.max(0, p.happiness - 0.1);
+                if (p.hunger < 20 || p.thirst < 20) {
+                    p.health = Math.max(0, p.health - 0.3);
+                } else {
+                    p.health = Math.min(100, p.health + 0.05);
+                }
+                state.lastUpdateTime = now;
+                needsRender = true;
+            }
+            // Check day change
+            if (now - state.dayStartTime > 120000) {
+                state.dayStartTime = now;
+                p.day++;
+                state.stats.daysPlayed++;
+                // Daily quest reset
+                for (const q of DAILY_QUESTS) {
+                    if (state.quests[q.id]) {
+                        state.quests[q.id].progress = 0;
+                        state.quests[q.id].completed = false;
+                        state.quests[q.id].claimed = false;
+                    }
+                }
+                showToast(`📅 يوم جديد! اليوم ${p.day}`, '📅');
+                needsRender = true;
+            }
+            if (needsRender) {
+                renderAll();
+            }
+        }
+
+        // ========================================================================
+        //  RENDER ALL
+        // ========================================================================
         function renderAll() {
             if (!state) return;
             renderTopBar();
@@ -1083,101 +2103,131 @@
             renderShop();
             renderSell();
             renderInventory();
+            renderQuests();
+            renderMarket();
             renderStats();
             renderSettings();
+            updateWeather();
+            renderEvents();
         }
 
-        // ====== RENDER TOP BAR ======
         function renderTopBar() {
             document.getElementById('topMoney').textContent = formatMoney(state.player.money);
             document.getElementById('topDay').textContent = state.player.day;
+            document.getElementById('topLevel').textContent = state.player.level;
         }
 
-        // ====== RENDER HOME ======
+        // ========================================================================
+        //  RENDER HOME
+        // ========================================================================
         function renderHome() {
             const p = state.player;
             document.getElementById('homeMoney').textContent = formatMoney(p.money);
-            document.getElementById('homeDay').textContent = p.day;
-            document.getElementById('homeLevel').textContent = p.homeLevel;
-            // Bars
-            document.getElementById('energyBar').style.width = p.energy + '%';
-            document.getElementById('energyBar').textContent = '⚡ ' + Math.floor(p.energy);
-            document.getElementById('hungerBar').style.width = p.hunger + '%';
-            document.getElementById('hungerBar').textContent = '🍲 ' + Math.floor(p.hunger);
-            document.getElementById('thirstBar').style.width = p.thirst + '%';
-            document.getElementById('thirstBar').textContent = '💧 ' + Math.floor(p.thirst);
-            document.getElementById('healthBar').style.width = p.health + '%';
-            document.getElementById('healthBar').textContent = '❤️ ' + Math.floor(p.health);
-            // Home upgrade info
-            const nextCost = HOME_UPGRADE_COST[p.homeLevel];
-            if (nextCost) {
-                document.getElementById('homeUpgradeInfo').textContent = `مستوى المنزل ${p.homeLevel} — الترقية التالية: ${nextCost} جنيه`;
+            document.getElementById('homeDayNum').textContent = p.day;
+            document.getElementById('homeLevel').textContent = p.level;
+            document.getElementById('homeLevel2').textContent = p.homeLevel;
+            document.getElementById('homeFarmLevel').textContent = p.farmLevel;
+            const bars = [
+                { el: 'energyBar', val: p.energy, icon: '⚡' },
+                { el: 'hungerBar', val: p.hunger, icon: '🍲' },
+                { el: 'thirstBar', val: p.thirst, icon: '💧' },
+                { el: 'healthBar', val: p.health, icon: '❤️' },
+                { el: 'happinessBar', val: p.happiness || 100, icon: '😊' }
+            ];
+            bars.forEach(b => {
+                const el = document.getElementById(b.el);
+                const v = Math.floor(b.val);
+                el.style.width = v + '%';
+                el.textContent = `${b.icon} ${v}%`;
+            });
+            const cost = HOME_UPGRADE_COST[p.homeLevel];
+            if (cost) {
+                document.getElementById('homeUpgradeInfo').textContent = `المستوى ${p.homeLevel} — استعادة طاقة ${50 + p.homeLevel * 10}%`;
+                document.getElementById('homeUpgradeCost').textContent = cost;
             } else {
-                document.getElementById('homeUpgradeInfo').textContent = 'المنزل في أقصى مستوى';
+                document.getElementById('homeUpgradeInfo').textContent = '🏠 المنزل في أقصى مستوى';
+                document.getElementById('homeUpgradeCost').textContent = '—';
             }
         }
 
-        // ====== RENDER FARM ======
+        // ========================================================================
+        //  RENDER FARM
+        // ========================================================================
         function renderFarm() {
             const grid = document.getElementById('plotsGrid');
             grid.innerHTML = '';
             const maxPlots = PLOT_LEVELS[state.player.farmLevel] || 4;
-            // Ensure plots array
             while (state.plots.length < maxPlots) {
-                state.plots.push({ id: state.plots.length + 1, crop: null, plantedAt: null, readyAt: null, status: 'empty' });
+                state.plots.push({ id: state.plots.length + 1, crop: null, plantedAt: null, readyAt: null, status: 'empty',
+                    quality: 0, irrigated: false, fertilized: false, pest: false });
             }
-            // Remove extra plots if farm level decreased (shouldn't happen but just in case)
             state.plots = state.plots.slice(0, maxPlots);
-            // Check crops
-            for (let i = 0; i < state.plots.length; i++) {
-                const plot = state.plots[i];
+            document.getElementById('plotCount').textContent = `(${state.plots.filter(p => p.status !== 'empty').length}/${maxPlots})`;
+            // Check ready
+            state.plots.forEach(plot => {
                 if (plot.status === 'growing' && plot.readyAt && Date.now() >= plot.readyAt) {
                     plot.status = 'ready';
                 }
-            }
-            // Render
+            });
             state.plots.forEach((plot, idx) => {
                 const div = document.createElement('div');
                 div.className = 'plot';
                 if (plot.status === 'empty') {
-                    div.innerHTML = `<div style="font-size:2em;color:var(--text2)">🟫</div>
-                        <div style="font-size:.8em;color:var(--text2)">أرض فارغة</div>
-                        <button class="btn btn-green" style="margin-top:8px;font-size:.8em;padding:6px 12px" onclick="showPlantModal(${idx})">🌱 زراعة</button>`;
+                    const irrigatedIcon = plot.irrigated ? '💧' : '';
+                    const fertIcon = plot.fertilized ? '🧪' : '';
+                    div.innerHTML =
+                        `<div style="font-size:2.2em;color:var(--text2)">🟫 ${irrigatedIcon} ${fertIcon}</div>
+                            <div style="font-size:.75em;color:var(--text2)">أرض فارغة</div>
+                            <button class="btn btn-green btn-sm" style="margin-top:8px" onclick="showPlantModal(${idx})">🌱 زراعة</button>`;
                 } else if (plot.status === 'growing') {
                     const crop = CROPS[plot.crop];
                     const remain = Math.max(0, plot.readyAt - Date.now());
                     const secs = Math.floor(remain / 1000);
                     const min = Math.floor(secs / 60);
                     const sec = secs % 60;
-                    div.innerHTML = `<div style="font-size:3em">${crop.emoji}</div>
-                        <div class="crop-name">${crop.name}</div>
-                        <div class="timer">⏳ ${min}:${String(sec).padStart(2,'0')}</div>
-                        <div style="font-size:.7em;color:var(--text2)">ينمو...</div>`;
+                    const q = plot.quality || 0;
+                    const qStars = q >= 80 ? '⭐' : q >= 50 ? '✦' : '';
+                    const pestIcon = plot.pest ? '🐛' : '';
+                    div.innerHTML =
+                        `<div style="font-size:3em">${crop.emoji} ${pestIcon}</div>
+                            <div class="crop-name">${crop.name} ${qStars}</div>
+                            <div class="timer">⏳ ${min}:${String(sec).padStart(2,'0')}</div>
+                            ${plot.irrigated ? '<span style="font-size:.6em;color:#4dd0e1">💧 مروي</span>' : ''}
+                            ${plot.fertilized ? '<span style="font-size:.6em;color:#ce93d8">🧪 مسمد</span>' : ''}
+                            <div class="plot-status">ينمو...</div>`;
                 } else if (plot.status === 'ready') {
                     const crop = CROPS[plot.crop];
-                    div.innerHTML = `<div style="font-size:3em">${crop.emoji}</div>
-                        <div class="crop-name">${crop.name}</div>
-                        <div class="ready">✅ جاهز</div>
-                        <button class="btn btn-orange" style="margin-top:8px;font-size:.8em;padding:6px 12px" onclick="harvestCrop(${idx})">🌾 حصاد</button>`;
+                    const q = plot.quality || 0;
+                    const qStars = q >= 80 ? '⭐' : q >= 50 ? '✦' : '';
+                    div.innerHTML =
+                        `<div style="font-size:3em">${crop.emoji}</div>
+                            <div class="crop-name">${crop.name} ${qStars}</div>
+                            <div class="ready-badge">✅ جاهز</div>
+                            <button class="btn btn-gold btn-sm" style="margin-top:8px" onclick="harvestCrop(${idx})">🌾 حصاد</button>`;
                 }
                 grid.appendChild(div);
             });
-            // Farm upgrade info
+            // Farm upgrade
             const farmLevel = state.player.farmLevel;
-            const nextCost = FARM_UPGRADE_COST[farmLevel];
+            const cost = FARM_UPGRADE_COST[farmLevel];
             const maxPlotsNext = PLOT_LEVELS[farmLevel + 1] || '—';
-            if (nextCost) {
-                document.getElementById('farmUpgradeInfo').textContent = `مستوى المزرعة ${farmLevel} — القطع: ${maxPlots} — الترقية: ${nextCost} جنيه → ${maxPlotsNext} قطعة`;
+            document.getElementById('farmLevelDisplay').textContent = `المستوى ${farmLevel}`;
+            if (cost) {
+                document.getElementById('farmUpgradeInfo').textContent =
+                    `القطع: ${maxPlots} → ${maxPlotsNext} | الترقية: ${cost} جنيه`;
+                document.getElementById('farmUpgradeCost').textContent = cost;
             } else {
-                document.getElementById('farmUpgradeInfo').textContent = `مستوى المزرعة ${farmLevel} — القطع: ${maxPlots} — أقصى مستوى`;
+                document.getElementById('farmUpgradeInfo').textContent = `القطع: ${maxPlots} — أقصى مستوى`;
+                document.getElementById('farmUpgradeCost').textContent = '—';
             }
         }
 
-        // ====== PLANT MODAL ======
+        // ========================================================================
+        //  PLANT MODAL
+        // ========================================================================
         function showPlantModal(plotIdx) {
             const plot = state.plots[plotIdx];
             if (plot.status !== 'empty') return;
-            // Check if player has seeds
             let options = '';
             let hasSeed = false;
             for (const [key, crop] of Object.entries(CROPS)) {
@@ -1185,146 +2235,265 @@
                 const qty = state.inventory[seedKey] || 0;
                 if (qty > 0) {
                     hasSeed = true;
-                    options += `<button class="btn btn-green" style="width:100%;margin:5px 0" onclick="plantCrop(${plotIdx}, '${key}')">${crop.emoji} ${crop.name} (${qty})</button>`;
+                    const seasonOk = crop.season === 'all' || crop.season === state.season;
+                    const seasonLabel = seasonOk ? '' : ' (خارج الموسم)';
+                    options +=
+                        `<button class="btn btn-green" style="width:100%;margin:4px 0;${!seasonOk ? 'opacity:0.5;' : ''}" onclick="plantCrop(${plotIdx}, '${key}')">${crop.emoji} ${crop.name} (${qty})${seasonLabel}</button>`;
                 }
             }
             if (!hasSeed) {
-                options = '<p style="color:var(--text2)">لا تملك بذور! اشترِ من المتجر.</p>';
+                options = '<p style="color:var(--text2)">❌ لا تملك بذور! اشترِ من المتجر.</p>';
             }
             const modal = document.createElement('div');
             modal.className = 'modal-overlay active';
             modal.innerHTML = `<div class="modal-box">
-                <h3>🌱 زراعة</h3>
-                ${options}
-                <button class="btn btn-red" style="margin-top:10px" onclick="this.closest('.modal-overlay').remove()">إلغاء</button>
-            </div>`;
+                    <h3>🌱 زراعة قطعة ${plotIdx+1}</h3>
+                    <div style="margin:12px 0">${options}</div>
+                    <button class="btn btn-red btn-sm" onclick="this.closest('.modal-overlay').remove()">إلغاء</button>
+                </div>`;
             document.body.appendChild(modal);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) modal.remove();
-            });
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
         }
 
-        // ====== PLANT CROP ======
+        // ========================================================================
+        //  PLANT CROP
+        // ========================================================================
         function plantCrop(plotIdx, cropType) {
             const plot = state.plots[plotIdx];
             if (plot.status !== 'empty') return;
             const crop = CROPS[cropType];
             const seedKey = 'seed_' + cropType;
             if ((state.inventory[seedKey] || 0) <= 0) {
-                showToast('❌ لا تملك بذور');
+                showToast('❌ لا تملك بذور', '❌');
+                return;
+            }
+            // Season check
+            if (crop.season !== 'all' && crop.season !== state.season) {
+                showToast('⚠️ هذا المحصول خارج الموسم', '⚠️');
                 return;
             }
             state.inventory[seedKey]--;
             plot.crop = cropType;
             plot.status = 'growing';
             plot.plantedAt = Date.now();
-            plot.readyAt = Date.now() + crop.growTime * 1000;
-            // Remove modal
+            let growTime = crop.growTime;
+            // Apply bonuses
+            const seasonBonus = getSeasonBonus();
+            const weatherBonus = getWeatherBonus();
+            const fertBonus = plot.fertilized ? 0.7 : 1.0;
+            const irrigBonus = plot.irrigated ? 0.8 : 1.0;
+            growTime = growTime * (1 / seasonBonus) * (1 / weatherBonus) * fertBonus * irrigBonus;
+            plot.readyAt = Date.now() + Math.max(10, growTime * 1000);
+            plot.quality = Math.min(100, 50 + Math.random() * 40 + (plot.fertilized ? 20 : 0) + (plot.irrigated ? 10 : 0));
+            // Reset irrigation/fertilizer
+            plot.irrigated = false;
+            plot.fertilized = false;
+            // Quest tracking
+            if (state.quests['plant_3']) {
+                state.quests['plant_3'].progress = (state.quests['plant_3'].progress || 0) + 1;
+                checkQuest('plant_3');
+            }
             document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
-            showToast('🌱 تمت الزراعة');
+            showToast(`🌱 تم زراعة ${crop.name}`, '🌱');
+            playSound('buy');
             saveGame();
             renderFarm();
         }
 
-        // ====== HARVEST CROP ======
+        // ========================================================================
+        //  HARVEST CROP
+        // ========================================================================
         function harvestCrop(plotIdx) {
             const plot = state.plots[plotIdx];
             if (plot.status !== 'ready') return;
             const crop = CROPS[plot.crop];
-            state.inventory[plot.crop] = (state.inventory[plot.crop] || 0) + 1;
-            state.player.xp += crop.xp;
+            const quality = plot.quality || 50;
+            const qty = quality >= 80 ? 2 : 1;
+            const bonus = Math.floor(quality / 20);
+            state.inventory[plot.crop] = (state.inventory[plot.crop] || 0) + qty;
+            const xpGain = crop.xp + bonus;
+            state.player.xp += xpGain;
             state.stats.cropsHarvested++;
-            // Check level up
+            // Quest
+            if (state.quests['harvest_5']) {
+                state.quests['harvest_5'].progress = (state.quests['harvest_5'].progress || 0) + qty;
+                checkQuest('harvest_5');
+            }
             checkLevelUp();
-            // Reset plot
+            const qStars = quality >= 80 ? '⭐' : quality >= 50 ? '✦' : '';
             plot.crop = null;
             plot.plantedAt = null;
             plot.readyAt = null;
             plot.status = 'empty';
-            showToast(`🌾 حصاد ${crop.name}! +${crop.xp} XP`);
+            plot.quality = 0;
+            plot.pest = false;
+            showToast(`🌾 حصاد ${crop.name} ${qStars} (${qty}x) +${xpGain} XP`, '🌾');
+            playSound('harvest');
             saveGame();
             renderFarm();
             renderInventory();
         }
 
-        // ====== CHECK LEVEL UP ======
+        // ========================================================================
+        //  IRRIGATE / FERTILIZE / PESTS
+        // ========================================================================
+        function irrigateAll() {
+            let count = 0;
+            state.plots.forEach(plot => {
+                if (plot.status === 'growing' && !plot.irrigated) {
+                    plot.irrigated = true;
+                    count++;
+                }
+            });
+            if (count === 0) {
+                showToast('💧 لا توجد محاصيل تحتاج ري', '💧');
+                return;
+            }
+            showToast(`💧 تم ري ${count} محصول`, '💧');
+            saveGame();
+            renderFarm();
+        }
+
+        function fertilizeAll() {
+            if ((state.inventory.fertilizer || 0) <= 0) {
+                showToast('❌ لا تملك سماد! اشترِ من المتجر', '❌');
+                return;
+            }
+            let count = 0;
+            state.plots.forEach(plot => {
+                if (plot.status === 'growing' && !plot.fertilized) {
+                    plot.fertilized = true;
+                    count++;
+                }
+            });
+            if (count === 0) {
+                showToast('🧪 لا توجد محاصيل تحتاج تسميد', '🧪');
+                return;
+            }
+            state.inventory.fertilizer = Math.max(0, (state.inventory.fertilizer || 0) - 1);
+            showToast(`🧪 تم تسميد ${count} محصول`, '🧪');
+            saveGame();
+            renderFarm();
+            renderInventory();
+        }
+
+        function clearPests() {
+            let count = 0;
+            state.plots.forEach(plot => {
+                if (plot.pest) {
+                    plot.pest = false;
+                    count++;
+                    state.stats.pestsKilled = (state.stats.pestsKilled || 0) + 1;
+                }
+            });
+            if (count === 0) {
+                showToast('🐛 لا توجد آفات', '🐛');
+                return;
+            }
+            showToast(`🐛 تم مكافحة ${count} آفة`, '🐛');
+            playSound('collect');
+            saveGame();
+            renderFarm();
+        }
+
+        // ========================================================================
+        //  CHECK LEVEL UP
+        // ========================================================================
         function checkLevelUp() {
             const p = state.player;
-            const xpNeeded = p.level * 100;
-            if (p.xp >= xpNeeded) {
+            const xpNeeded = p.level * 120;
+            while (p.xp >= xpNeeded) {
                 p.xp -= xpNeeded;
                 p.level++;
-                p.energy = Math.min(100, p.energy + 20);
-                showToast(`🎉 ارتقيت إلى المستوى ${p.level}!`);
+                p.energy = Math.min(100, p.energy + 25);
+                p.happiness = Math.min(100, p.happiness + 10);
+                showToast(`🎉 ارتقيت إلى المستوى ${p.level}!`, '🎉');
+                playSound('levelup');
+                // Check achievement
+                if (p.level >= 5) checkAchievement('level_5');
+                if (p.level >= 10) checkAchievement('level_10');
             }
         }
 
-        // ====== RENDER ANIMALS ======
+        // ========================================================================
+        //  RENDER ANIMALS
+        // ========================================================================
         function renderAnimals() {
             const grid = document.getElementById('animalsGrid');
             grid.innerHTML = '';
-            if (state.animals.length === 0) {
-                grid.innerHTML = '<p style="color:var(--text2);text-align:center;width:100%;padding:30px">لا يوجد حيوانات بعد! اشترِ حيوانًا من المتجر.</p>';
-            }
-            // Check production
+            document.getElementById('animalCount').textContent = `(${state.animals.length})`;
             state.animals.forEach((animal, idx) => {
-                if (animal.status === 'producing' && animal.produceReadyAt && Date.now() >= animal.produceReadyAt) {
+                if (animal.status === 'waiting' && animal.produceReadyAt && Date.now() >= animal.produceReadyAt) {
                     animal.status = 'ready';
                 }
-            });
-            state.animals.forEach((animal, idx) => {
                 const info = ANIMALS[animal.type];
+                if (!info) return;
                 const card = document.createElement('div');
                 card.className = 'animal-card';
-                if (animal.status === 'waiting') {
+                const happiness = animal.happiness !== undefined ? Math.floor(animal.happiness) : 100;
+                const isReady = animal.status === 'ready';
+                const waiting = animal.status === 'waiting';
+                let timeDisplay = '';
+                if (waiting && animal.produceReadyAt) {
                     const remain = Math.max(0, animal.produceReadyAt - Date.now());
                     const secs = Math.floor(remain / 1000);
                     const min = Math.floor(secs / 60);
                     const sec = secs % 60;
-                    card.innerHTML = `<div class="animal-emoji">${info.emoji}</div>
-                        <div style="font-weight:700">${info.name}</div>
-                        <div style="font-size:.8em;color:var(--text2)">منتج: ${PRODUCTS[info.produce].emoji} ${PRODUCTS[info.produce].name}</div>
-                        <div class="timer">⏳ ${min}:${String(sec).padStart(2,'0')}</div>
-                        <button class="btn btn-orange" style="font-size:.8em;margin-top:5px;padding:5px 10px" onclick="collectProduct(${idx})">📦 جمع</button>`;
-                } else if (animal.status === 'ready') {
-                    card.innerHTML = `<div class="animal-emoji">${info.emoji}</div>
-                        <div style="font-weight:700">${info.name}</div>
-                        <div style="font-size:.8em;color:var(--text2)">منتج: ${PRODUCTS[info.produce].emoji} ${PRODUCTS[info.produce].name}</div>
-                        <div class="ready" style="margin:5px 0">✅ جاهز</div>
-                        <button class="btn btn-green" style="font-size:.8em;margin-top:5px;padding:5px 10px" onclick="collectProduct(${idx})">📦 جمع</button>`;
+                    timeDisplay = `<div class="timer">⏳ ${min}:${String(sec).padStart(2,'0')}</div>`;
                 }
+                card.innerHTML = `
+                        <span class="animal-emoji">${info.emoji}</span>
+                        <div class="animal-name">${info.name}</div>
+                        <div class="animal-status">${isReady ? '✅ جاهز' : waiting ? '⏳ ينتج...' : '😊 سعيد'}</div>
+                        ${timeDisplay}
+                        <div class="happiness-bar"><div class="happiness-fill" style="width:${happiness}%"></div></div>
+                        <div style="font-size:.7em;color:var(--text2);margin-bottom:4px">السعادة ${happiness}%</div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+                            ${isReady ? `<button class="btn btn-gold btn-sm" onclick="collectProduct(${idx})">📦 جمع</button>` : ''}
+                            <button class="btn btn-blue btn-sm" onclick="feedAnimal(${idx})">🌿 إطعام</button>
+                            <button class="btn btn-purple btn-sm" onclick="petAnimalIdx(${idx})">🐾 تربية</button>
+                        </div>
+                    `;
                 grid.appendChild(card);
             });
-            // Buy animals grid
+            if (state.animals.length === 0) {
+                grid.innerHTML =
+                '<p style="color:var(--text2);text-align:center;width:100%;padding:30px">🐄 لا توجد حيوانات! اشترِ من المتجر</p>';
+            }
+            // Buy animals
             const buyGrid = document.getElementById('buyAnimalsGrid');
             buyGrid.innerHTML = '';
             const maxAnimals = ANIMAL_LIMITS[state.player.farmLevel] || 2;
-            const currentCount = state.animals.length;
-            if (currentCount >= maxAnimals) {
-                buyGrid.innerHTML = '<p style="color:var(--text2);width:100%;text-align:center">لا يمكنك شراء المزيد من الحيوانات — قم بترقية المزرعة!</p>';
+            if (state.animals.length >= maxAnimals) {
+                buyGrid.innerHTML =
+                    `<p style="color:var(--text2);width:100%;text-align:center;padding:10px">⚠️ لا يمكن شراء المزيد — ارفع مستوى المزرعة</p>`;
             } else {
                 for (const [type, info] of Object.entries(ANIMALS)) {
                     const item = document.createElement('div');
                     item.className = 'shop-item';
-                    item.innerHTML = `<div style="font-size:2.5em">${info.emoji}</div>
-                        <div style="font-weight:700">${info.name}</div>
-                        <div class="price">💰 ${info.price}</div>
-                        <button class="btn btn-green" style="font-size:.8em;padding:5px 10px" onclick="buyAnimal('${type}')">شراء</button>`;
+                    item.innerHTML = `
+                            <span class="item-icon">${info.emoji}</span>
+                            <div class="item-name">${info.name}</div>
+                            <div class="price">💰 ${info.price}</div>
+                            <button class="btn btn-green btn-sm" onclick="buyAnimal('${type}')">شراء</button>
+                        `;
                     buyGrid.appendChild(item);
                 }
             }
         }
 
-        // ====== BUY ANIMAL ======
+        // ========================================================================
+        //  BUY ANIMAL
+        // ========================================================================
         function buyAnimal(type) {
             const info = ANIMALS[type];
             const maxAnimals = ANIMAL_LIMITS[state.player.farmLevel] || 2;
             if (state.animals.length >= maxAnimals) {
-                showToast('❌ لا يمكنك شراء المزيد من الحيوانات');
+                showToast('❌ لا يمكن شراء المزيد', '❌');
                 return;
             }
             if (state.player.money < info.price) {
-                showToast('❌ رصيدك غير كافٍ');
+                showToast('❌ رصيد غير كافٍ', '❌');
                 return;
             }
             state.player.money -= info.price;
@@ -1335,152 +2504,317 @@
                 type: type,
                 status: 'waiting',
                 fedAt: Date.now(),
-                produceReadyAt: Date.now() + info.produceTime * 1000
+                produceReadyAt: Date.now() + info.produceTime * 1000,
+                happiness: 100,
+                lastPet: Date.now()
             });
-            showToast(`🐄 تم شراء ${info.name}`);
-            saveGame();
-            renderAnimals();
-        }
-
-        // ====== COLLECT PRODUCT ======
-        function collectProduct(animalIdx) {
-            const animal = state.animals[animalIdx];
-            if (animal.status === 'waiting') return;
-            const info = ANIMALS[animal.type];
-            const product = info.produce;
-            state.inventory[product] = (state.inventory[product] || 0) + 1;
-            state.player.xp += info.xp;
-            state.stats.productsCollected++;
-            checkLevelUp();
-            // Reset
-            animal.status = 'waiting';
-            animal.produceReadyAt = Date.now() + info.produceTime * 1000;
-            showToast(`📦 تم جمع ${PRODUCTS[product].name}! +${info.xp} XP`);
+            showToast(`🐄 تم شراء ${info.name}`, '🐄');
+            playSound('buy');
             saveGame();
             renderAnimals();
             renderInventory();
         }
 
-        // ====== RENDER SHOP ======
+        // ========================================================================
+        //  COLLECT PRODUCT
+        // ========================================================================
+        function collectProduct(animalIdx) {
+            const animal = state.animals[animalIdx];
+            if (animal.status !== 'ready') return;
+            const info = ANIMALS[animal.type];
+            const product = info.produce;
+            const happinessBonus = Math.floor((animal.happiness || 100) / 20);
+            const qty = 1 + (happinessBonus >= 5 ? 1 : 0);
+            state.inventory[product] = (state.inventory[product] || 0) + qty;
+            const xpGain = info.xp + happinessBonus;
+            state.player.xp += xpGain;
+            state.stats.productsCollected += qty;
+            checkLevelUp();
+            if (state.quests['collect_3']) {
+                state.quests['collect_3'].progress = (state.quests['collect_3'].progress || 0) + qty;
+                checkQuest('collect_3');
+            }
+            animal.status = 'waiting';
+            animal.produceReadyAt = Date.now() + info.produceTime * 1000;
+            animal.happiness = Math.min(100, (animal.happiness || 100) + 2);
+            showToast(`📦 ${PRODUCTS[product].emoji} ${PRODUCTS[product].name} (${qty}x) +${xpGain} XP`, '📦');
+            playSound('collect');
+            saveGame();
+            renderAnimals();
+            renderInventory();
+        }
+
+        // ========================================================================
+        //  FEED / PET ANIMAL
+        // ========================================================================
+        function feedAnimal(idx) {
+            const animal = state.animals[idx];
+            if (!animal) return;
+            if ((state.inventory.feed || 0) <= 0) {
+                showToast('❌ لا تملك علف! اشترِ من المتجر', '❌');
+                return;
+            }
+            state.inventory.feed--;
+            animal.happiness = Math.min(100, (animal.happiness || 100) + 15);
+            animal.fedAt = Date.now();
+            showToast(`🌿 تم إطعام ${ANIMALS[animal.type].name}`, '🌿');
+            saveGame();
+            renderAnimals();
+            renderInventory();
+        }
+
+        function petAnimalIdx(idx) {
+            const animal = state.animals[idx];
+            if (!animal) return;
+            animal.happiness = Math.min(100, (animal.happiness || 100) + 8);
+            animal.lastPet = Date.now();
+            showToast(`🐾 ${ANIMALS[animal.type].name} سعيد!`, '🐾');
+            saveGame();
+            renderAnimals();
+        }
+
+        function petAnimal() {
+            if (state.animals.length === 0) {
+                showToast('🐾 لا توجد حيوانات لتربيتها', '🐾');
+                return;
+            }
+            const animal = state.animals[Math.floor(Math.random() * state.animals.length)];
+            animal.happiness = Math.min(100, (animal.happiness || 100) + 10);
+            animal.lastPet = Date.now();
+            showToast(`🐾 ${ANIMALS[animal.type].emoji} سعيد!`, '🐾');
+            saveGame();
+            renderAnimals();
+        }
+
+        // ========================================================================
+        //  BREED ANIMALS
+        // ========================================================================
+        function breedAnimals() {
+            const happyAnimals = state.animals.filter(a => (a.happiness || 100) >= 70);
+            if (happyAnimals.length < 2) {
+                showToast('⚠️ تحتاج حيوانين سعيدين على الأقل (70%+)', '⚠️');
+                return;
+            }
+            const maxAnimals = ANIMAL_LIMITS[state.player.farmLevel] || 2;
+            if (state.animals.length >= maxAnimals) {
+                showToast('❌ المزرعة ممتلئة', '❌');
+                return;
+            }
+            const parent1 = happyAnimals[Math.floor(Math.random() * happyAnimals.length)];
+            let parent2 = happyAnimals[Math.floor(Math.random() * happyAnimals.length)];
+            while (parent2 === parent1 && happyAnimals.length > 1) {
+                parent2 = happyAnimals[Math.floor(Math.random() * happyAnimals.length)];
+            }
+            const type = parent1.type;
+            const info = ANIMALS[type];
+            state.animals.push({
+                id: state.animals.length + 1,
+                type: type,
+                status: 'waiting',
+                fedAt: Date.now(),
+                produceReadyAt: Date.now() + info.produceTime * 1000,
+                happiness: 80,
+                lastPet: Date.now()
+            });
+            parent1.happiness = Math.max(0, (parent1.happiness || 100) - 10);
+            parent2.happiness = Math.max(0, (parent2.happiness || 100) - 10);
+            showToast(`🧬 تم تربية ${info.emoji} جديد!`, '🧬');
+            playSound('levelup');
+            saveGame();
+            renderAnimals();
+        }
+
+        // ========================================================================
+        //  RENDER SHOP
+        // ========================================================================
         function renderShop() {
             // Seeds
             const seedsGrid = document.getElementById('shopSeedsGrid');
             seedsGrid.innerHTML = '';
             for (const [key, crop] of Object.entries(CROPS)) {
+                const seedKey = 'seed_' + key;
                 const item = document.createElement('div');
                 item.className = 'shop-item';
-                const seedKey = 'seed_' + key;
-                item.innerHTML = `<div style="font-size:2.5em">${crop.emoji}</div>
-                    <div style="font-weight:700">بذور ${crop.name}</div>
-                    <div class="price">💰 ${crop.seedPrice}</div>
-                    <div style="font-size:.75em;color:var(--text2)">تملك: ${state.inventory[seedKey] || 0}</div>
-                    <button class="btn btn-green" style="font-size:.8em;padding:5px 10px" onclick="buySeed('${key}')">شراء</button>`;
+                const seasonOk = crop.season === 'all' || crop.season === state.season;
+                item.innerHTML = `
+                        <span class="item-icon">${crop.emoji}</span>
+                        <div class="item-name">بذور ${crop.name}</div>
+                        <div class="price">💰 ${crop.seedPrice}</div>
+                        <div class="stock">📦 ${state.inventory[seedKey] || 0}</div>
+                        ${!seasonOk ? '<div style="font-size:.6em;color:var(--orange)">⛔ خارج الموسم</div>' : ''}
+                        <button class="btn btn-green btn-sm" onclick="buySeed('${key}')" ${!seasonOk ? 'disabled' : ''}>شراء</button>
+                    `;
                 seedsGrid.appendChild(item);
             }
             // Resources
             const resGrid = document.getElementById('shopResourcesGrid');
             resGrid.innerHTML = '';
             const resources = [
-                { key: 'feed', name: 'علف الحيوانات', emoji: '🌿', price: 5 },
+                { key: 'feed', name: 'علف', emoji: '🌿', price: 5 },
                 { key: 'water', name: 'مياه', emoji: '💧', price: 3 },
                 { key: 'food', name: 'طعام', emoji: '🍲', price: 10 },
                 { key: 'fertilizer', name: 'سماد', emoji: '🧪', price: 15 },
-                { key: 'tool', name: 'أدوات', emoji: '🛠️', price: 25 },
+                { key: 'tool', name: 'أدوات', emoji: '🛠️', price: 25 }
             ];
             resources.forEach(res => {
                 const item = document.createElement('div');
                 item.className = 'shop-item';
-                item.innerHTML = `<div style="font-size:2.5em">${res.emoji}</div>
-                    <div style="font-weight:700">${res.name}</div>
-                    <div class="price">💰 ${res.price}</div>
-                    <div style="font-size:.75em;color:var(--text2)">تملك: ${state.inventory[res.key] || 0}</div>
-                    <button class="btn btn-green" style="font-size:.8em;padding:5px 10px" onclick="buyResource('${res.key}','${res.name}','${res.price}')">شراء</button>`;
+                item.innerHTML = `
+                        <span class="item-icon">${res.emoji}</span>
+                        <div class="item-name">${res.name}</div>
+                        <div class="price">💰 ${res.price}</div>
+                        <div class="stock">📦 ${state.inventory[res.key] || 0}</div>
+                        <button class="btn btn-green btn-sm" onclick="buyResource('${res.key}','${res.name}',${res.price})">شراء</button>
+                    `;
                 resGrid.appendChild(item);
+            });
+            // Decorations
+            const decorGrid = document.getElementById('shopDecorGrid');
+            decorGrid.innerHTML = '';
+            DECORATIONS.forEach(dec => {
+                const owned = state.decorations.filter(d => d.key === dec.key).length;
+                const item = document.createElement('div');
+                item.className = 'shop-item';
+                item.innerHTML = `
+                        <span class="item-icon">${dec.emoji}</span>
+                        <div class="item-name">${dec.name}</div>
+                        <div class="price">💰 ${dec.price}</div>
+                        <div class="stock">✅ ${owned}</div>
+                        <button class="btn btn-purple btn-sm" onclick="buyDecoration('${dec.key}','${dec.name}',${dec.price})">شراء</button>
+                    `;
+                decorGrid.appendChild(item);
             });
         }
 
-        // ====== BUY SEED ======
+        // ========================================================================
+        //  BUY SEED
+        // ========================================================================
         function buySeed(cropType) {
             const crop = CROPS[cropType];
             const seedKey = 'seed_' + cropType;
             if (state.player.money < crop.seedPrice) {
-                showToast('❌ رصيدك غير كافٍ');
+                showToast('❌ رصيد غير كافٍ', '❌');
+                return;
+            }
+            if (crop.season !== 'all' && crop.season !== state.season) {
+                showToast('⚠️ هذا المحصول خارج الموسم', '⚠️');
                 return;
             }
             state.player.money -= crop.seedPrice;
             state.inventory[seedKey] = (state.inventory[seedKey] || 0) + 1;
             state.stats.totalSpent += crop.seedPrice;
             state.stats.seedsBought++;
-            showToast(`🌱 تم شراء بذور ${crop.name}`);
+            showToast(`🌱 تم شراء بذور ${crop.name}`, '🌱');
+            playSound('buy');
             saveGame();
             renderShop();
             renderInventory();
         }
 
-        // ====== BUY RESOURCE ======
+        // ========================================================================
+        //  BUY RESOURCE
+        // ========================================================================
         function buyResource(key, name, price) {
-            const p = parseInt(price);
-            if (state.player.money < p) {
-                showToast('❌ رصيدك غير كافٍ');
+            if (state.player.money < price) {
+                showToast('❌ رصيد غير كافٍ', '❌');
                 return;
             }
-            state.player.money -= p;
+            state.player.money -= price;
             state.inventory[key] = (state.inventory[key] || 0) + 1;
-            state.stats.totalSpent += p;
-            showToast(`✅ تم شراء ${name}`);
+            state.stats.totalSpent += price;
+            showToast(`✅ تم شراء ${name}`, '✅');
+            playSound('buy');
             saveGame();
             renderShop();
             renderInventory();
         }
 
-        // ====== RENDER SELL ======
+        // ========================================================================
+        //  BUY DECORATION
+        // ========================================================================
+        function buyDecoration(key, name, price) {
+            if (state.player.money < price) {
+                showToast('❌ رصيد غير كافٍ', '❌');
+                return;
+            }
+            state.player.money -= price;
+            state.decorations.push({ key, name, boughtAt: Date.now() });
+            state.stats.totalSpent += price;
+            state.stats.decorBought = (state.stats.decorBought || 0) + 1;
+            showToast(`🎨 تم شراء ${name}`, '🎨');
+            playSound('buy');
+            saveGame();
+            renderShop();
+            renderInventory();
+            checkAchievement('decorate_3');
+        }
+
+        // ========================================================================
+        //  RENDER SELL
+        // ========================================================================
         function renderSell() {
             const sellList = document.getElementById('sellList');
             sellList.innerHTML = '';
             let items = [];
-            // Crops
             for (const [key, crop] of Object.entries(CROPS)) {
                 const qty = state.inventory[key] || 0;
                 if (qty > 0) {
-                    items.push({ key, name: crop.name, emoji: crop.emoji, price: crop.sellPrice, qty, type: 'crop' });
+                    const price = state.marketPrices[key] || crop.sellPrice;
+                    items.push({ key, name: crop.name, emoji: crop.emoji, price, qty, type: 'crop' });
                 }
             }
-            // Products
             for (const [key, prod] of Object.entries(PRODUCTS)) {
                 const qty = state.inventory[key] || 0;
                 if (qty > 0) {
-                    items.push({ key, name: prod.name, emoji: prod.emoji, price: prod.sellPrice, qty, type: 'product' });
+                    const price = state.marketPrices[key] || prod.sellPrice;
+                    items.push({ key, name: prod.name, emoji: prod.emoji, price, qty, type: 'product' });
                 }
             }
             if (items.length === 0) {
-                sellList.innerHTML = '<p style="color:var(--text2);text-align:center;padding:20px">لا توجد منتجات للبيع</p>';
+                sellList.innerHTML = '<p style="color:var(--text2);text-align:center;padding:30px">📭 لا توجد منتجات للبيع</p>';
                 return;
             }
             items.forEach(item => {
                 const div = document.createElement('div');
-                div.className = 'card';
-                div.style.cssText = 'padding:15px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px';
-                div.innerHTML = `<div style="font-size:2em">${item.emoji}</div>
-                    <div style="flex:1"><strong>${item.name}</strong><br><span style="color:var(--text2);font-size:.85em">المتاح: ${item.qty}</span></div>
-                    <div class="price" style="font-size:1.1em;font-weight:700;color:var(--orange)">💰 ${item.price}</div>
-                    <button class="btn btn-green" style="font-size:.8em;padding:5px 10px" onclick="sellItem('${item.key}',1,${item.price})">بيع 1</button>
-                    <button class="btn btn-orange" style="font-size:.8em;padding:5px 10px" onclick="sellItem('${item.key}',5,${item.price})">بيع 5</button>`;
+                div.className = 'sell-item';
+                div.innerHTML = `
+                        <span class="s-icon">${item.emoji}</span>
+                        <div class="s-info">
+                            <div class="s-name">${item.name}</div>
+                            <div class="s-qty">المتاح: ${item.qty}</div>
+                        </div>
+                        <div class="s-price">💰 ${item.price}</div>
+                        <div class="s-actions">
+                            <button class="btn btn-green btn-sm" onclick="sellItem('${item.key}',1,${item.price})">بيع 1</button>
+                            <button class="btn btn-orange btn-sm" onclick="sellItem('${item.key}',5,${item.price})">بيع 5</button>
+                            <button class="btn btn-gold btn-sm" onclick="sellItem('${item.key}',${Math.min(10,item.qty)},${item.price})">بيع 10</button>
+                        </div>
+                    `;
                 sellList.appendChild(div);
             });
         }
 
-        // ====== SELL ITEM ======
+        // ========================================================================
+        //  SELL ITEM
+        // ========================================================================
         function sellItem(key, qty, price) {
             const available = state.inventory[key] || 0;
-            if (available < qty) {
-                showToast('❌ الكمية غير كافية');
+            const actualQty = Math.min(qty, available);
+            if (actualQty <= 0) {
+                showToast('❌ الكمية غير كافية', '❌');
                 return;
             }
-            state.inventory[key] -= qty;
-            const earned = price * qty;
+            state.inventory[key] -= actualQty;
+            const earned = price * actualQty;
             state.player.money += earned;
             state.stats.totalEarned += earned;
-            showToast(`💰 تم البيع! +${earned} جنيه`);
+            // Quest
+            if (state.quests['sell_5']) {
+                state.quests['sell_5'].progress = (state.quests['sell_5'].progress || 0) + actualQty;
+                checkQuest('sell_5');
+            }
+            showToast(`💰 بيع! +${earned} جنيه`, '💰');
+            playSound('collect');
             saveGame();
             renderSell();
             renderInventory();
@@ -1488,181 +2822,480 @@
             renderHome();
         }
 
-        // ====== RENDER INVENTORY ======
+        // ========================================================================
+        //  RENDER INVENTORY
+        // ========================================================================
         function renderInventory() {
             const grid = document.getElementById('inventoryGrid');
             grid.innerHTML = '';
-            const items = [
-                { key: 'wheat', name: 'قمح', emoji: '🌾' },
-                { key: 'corn', name: 'ذرة', emoji: '🌽' },
-                { key: 'tomato', name: 'طماطم', emoji: '🍅' },
-                { key: 'carrot', name: 'جزر', emoji: '🥕' },
-                { key: 'potato', name: 'بطاطس', emoji: '🥔' },
-                { key: 'egg', name: 'بيض', emoji: '🥚' },
-                { key: 'wool', name: 'صوف', emoji: '🧶' },
-                { key: 'milk', name: 'حليب', emoji: '🥛' },
-                { key: 'seed_wheat', name: 'بذور قمح', emoji: '🌱' },
-                { key: 'seed_corn', name: 'بذور ذرة', emoji: '🌱' },
-                { key: 'seed_tomato', name: 'بذور طماطم', emoji: '🌱' },
-                { key: 'seed_carrot', name: 'بذور جزر', emoji: '🌱' },
-                { key: 'seed_potato', name: 'بذور بطاطس', emoji: '🌱' },
+            const items = [];
+            for (const [key, crop] of Object.entries(CROPS)) {
+                items.push({ key, name: crop.name, emoji: crop.emoji });
+            }
+            for (const [key, prod] of Object.entries(PRODUCTS)) {
+                items.push({ key, name: prod.name, emoji: prod.emoji });
+            }
+            const seeds = ['wheat', 'corn', 'tomato', 'carrot', 'potato', 'strawberry', 'pumpkin', 'sunflower', 'garlic',
+                'pepper'
+            ];
+            seeds.forEach(s => {
+                const seedKey = 'seed_' + s;
+                const crop = CROPS[s];
+                if (crop) {
+                    items.push({ key: seedKey, name: `بذور ${crop.name}`, emoji: '🌱' });
+                }
+            });
+            const resources = [
                 { key: 'feed', name: 'علف', emoji: '🌿' },
                 { key: 'water', name: 'مياه', emoji: '💧' },
                 { key: 'food', name: 'طعام', emoji: '🍲' },
                 { key: 'fertilizer', name: 'سماد', emoji: '🧪' },
-                { key: 'tool', name: 'أدوات', emoji: '🛠️' },
+                { key: 'tool', name: 'أدوات', emoji: '🛠️' }
             ];
+            resources.forEach(r => items.push(r));
+            let totalItems = 0;
             items.forEach(item => {
                 const qty = state.inventory[item.key] || 0;
+                if (qty > 0) totalItems++;
                 const div = document.createElement('div');
                 div.className = 'inv-item';
-                div.innerHTML = `<div class="emoji">${item.emoji}</div>
-                    <div style="font-size:.8em;color:var(--text2)">${item.name}</div>
-                    <div class="qty">${qty}</div>`;
+                div.innerHTML = `
+                        <span class="emoji">${item.emoji}</span>
+                        <div class="name">${item.name}</div>
+                        <div class="qty">${qty}</div>
+                    `;
+                grid.appendChild(div);
+            });
+            document.getElementById('invTotal').textContent = `(${totalItems} صنف)`;
+        }
+
+        // ========================================================================
+        //  RENDER QUESTS
+        // ========================================================================
+        function renderQuests() {
+            // Daily quests
+            const container = document.getElementById('dailyQuestsContainer');
+            container.innerHTML = '';
+            let completedAll = true;
+            for (const q of DAILY_QUESTS) {
+                const data = state.quests[q.id];
+                if (!data) continue;
+                const progress = data.progress || 0;
+                const done = data.completed || progress >= q.target;
+                if (!done) completedAll = false;
+                const div = document.createElement('div');
+                div.className = `quest-item${done ? ' completed' : ''}`;
+                div.innerHTML = `
+                        <span class="quest-icon">${q.icon}</span>
+                        <div class="quest-info">
+                            <div class="qtitle">${q.name}</div>
+                            <div class="qdesc">${q.desc}</div>
+                        </div>
+                        <div class="quest-progress">${Math.min(progress,q.target)}/${q.target}</div>
+                        ${done && !data.claimed ? `<button class="btn btn-gold btn-sm" onclick="claimQuest('${q.id}')">🎁 استلام</button>` : ''}
+                        ${data.claimed ? '<span style="color:var(--green);font-size:.8em">✅ مكتمل</span>' : ''}
+                        <div class="quest-reward">🎁 ${q.reward} جنيه</div>
+                    `;
+                container.appendChild(div);
+            }
+            if (completedAll) {
+                const bonus = document.createElement('div');
+                bonus.style.cssText =
+                    'padding:12px;background:rgba(255,215,0,0.1);border-radius:12px;text-align:center;border:1px solid rgba(255,215,0,0.2);margin-top:10px';
+                bonus.innerHTML = '🎉 كل المهام اليومية مكتملة! +50 جنيه مكافأة';
+                container.appendChild(bonus);
+            }
+
+            // Achievements
+            const achGrid = document.getElementById('achievementsGrid');
+            achGrid.innerHTML = '';
+            for (const a of ACHIEVEMENTS) {
+                const unlocked = state.achievements[a.id]?.unlocked || false;
+                const div = document.createElement('div');
+                div.className = `achievement-item${unlocked ? '' : ' locked'}`;
+                div.innerHTML = `
+                        <span class="ach-icon">${a.icon}</span>
+                        <div class="ach-name">${a.name}</div>
+                        <div class="ach-desc">${a.desc}</div>
+                        ${unlocked ? '✅' : '🔒'}
+                    `;
+                achGrid.appendChild(div);
+            }
+        }
+
+        // ========================================================================
+        //  QUEST / ACHIEVEMENT SYSTEM
+        // ========================================================================
+        function checkQuest(id) {
+            const q = DAILY_QUESTS.find(q => q.id === id);
+            if (!q) return;
+            const data = state.quests[id];
+            if (!data) return;
+            if (data.progress >= q.target && !data.completed) {
+                data.completed = true;
+                showToast(`✅ تم إكمال المهمة: ${q.name}!`, '✅');
+                playSound('levelup');
+            }
+        }
+
+        function claimQuest(id) {
+            const q = DAILY_QUESTS.find(q => q.id === id);
+            if (!q) return;
+            const data = state.quests[id];
+            if (!data || !data.completed || data.claimed) return;
+            data.claimed = true;
+            state.player.money += q.reward;
+            state.stats.totalEarned += q.reward;
+            showToast(`🎁 استلمت ${q.reward} جنيه من ${q.name}`, '🎁');
+            playSound('buy');
+            saveGame();
+            renderQuests();
+            renderTopBar();
+            renderHome();
+        }
+
+        function checkAchievement(id) {
+            const a = ACHIEVEMENTS.find(a => a.id === id);
+            if (!a) return;
+            if (!state.achievements[id]) {
+                state.achievements[id] = { unlocked: false };
+            }
+            if (!state.achievements[id].unlocked && a.check(state)) {
+                state.achievements[id].unlocked = true;
+                showToast(`🏆 إنجاز جديد: ${a.name}!`, '🏆');
+                playSound('levelup');
+                // Bonus reward
+                state.player.money += 50;
+                showToast(`🎁 +50 جنيه مكافأة`, '🎁');
+                saveGame();
+                renderQuests();
+            }
+        }
+
+        function checkAllAchievements() {
+            for (const a of ACHIEVEMENTS) {
+                if (!state.achievements[a.id]) {
+                    state.achievements[a.id] = { unlocked: false };
+                }
+                if (!state.achievements[a.id].unlocked && a.check(state)) {
+                    state.achievements[a.id].unlocked = true;
+                    showToast(`🏆 إنجاز: ${a.name}!`, '🏆');
+                    state.player.money += 50;
+                    saveGame();
+                }
+            }
+        }
+
+        // ========================================================================
+        //  RENDER MARKET
+        // ========================================================================
+        function renderMarket() {
+            const grid = document.getElementById('marketGrid');
+            grid.innerHTML = '';
+            // Update market prices
+            for (const [key, crop] of Object.entries(CROPS)) {
+                const base = crop.sellPrice;
+                const current = state.marketPrices[key] || base;
+                // Random walk
+                const change = Math.floor(Math.random() * 7 - 3);
+                state.marketPrices[key] = Math.max(1, current + change);
+            }
+            for (const [key, prod] of Object.entries(PRODUCTS)) {
+                const base = prod.sellPrice;
+                const current = state.marketPrices[key] || base;
+                const change = Math.floor(Math.random() * 5 - 2);
+                state.marketPrices[key] = Math.max(1, current + change);
+            }
+            // Display
+            const allItems = [
+                ...Object.entries(CROPS).map(([k, v]) => ({ key: k, name: v.name, emoji: v.emoji, base: v.sellPrice })),
+                ...Object.entries(PRODUCTS).map(([k, v]) => ({ key: k, name: v.name, emoji: v.emoji, base: v.sellPrice }))
+            ];
+            allItems.forEach(item => {
+                const price = state.marketPrices[item.key] || item.base;
+                const change = price - item.base;
+                const pct = item.base > 0 ? Math.round((change / item.base) * 100) : 0;
+                const div = document.createElement('div');
+                div.className = 'market-item';
+                div.innerHTML = `
+                        <span class="m-icon">${item.emoji}</span>
+                        <div class="m-name">${item.name}</div>
+                        <div class="m-price">💰 ${price}</div>
+                        <div class="m-change ${change >= 0 ? 'up' : 'down'}">${change >= 0 ? '▲' : '▼'} ${Math.abs(pct)}%</div>
+                    `;
                 grid.appendChild(div);
             });
         }
 
-        // ====== RENDER STATS ======
+        // ========================================================================
+        //  RENDER STATS
+        // ========================================================================
         function renderStats() {
             const list = document.getElementById('statsList');
             const s = state.stats;
             const p = state.player;
+            const totalPlots = state.plots.length;
+            const activePlots = state.plots.filter(pl => pl.status !== 'empty').length;
             const statsData = [
-                { label: 'الرصيد الحالي', value: formatMoney(p.money) },
-                { label: 'إجمالي الأموال المكتسبة', value: formatMoney(s.totalEarned) },
-                { label: 'إجمالي الأموال المصروفة', value: formatMoney(s.totalSpent) },
-                { label: 'المحاصيل المحصودة', value: s.cropsHarvested },
-                { label: 'الحيوانات المشتراة', value: s.animalsBought },
-                { label: 'الحيوانات المباعة', value: s.animalsSold },
-                { label: 'المنتجات المجموعة', value: s.productsCollected },
-                { label: 'البذور المشتراة', value: s.seedsBought },
-                { label: 'مستوى اللاعب', value: p.level },
-                { label: 'XP الحالي', value: Math.floor(p.xp) + ' / ' + (p.level * 100) },
-                { label: 'اليوم الحالي', value: p.day },
-                { label: 'مستوى المنزل', value: p.homeLevel },
-                { label: 'مستوى المزرعة', value: p.farmLevel },
+                { label: '💰 الرصيد', value: formatMoney(p.money) },
+                { label: '⭐ المستوى', value: p.level },
+                { label: '📊 XP', value: Math.floor(p.xp) + ' / ' + (p.level * 120) },
+                { label: '📅 اليوم', value: p.day },
+                { label: '🏠 المنزل', value: p.homeLevel },
+                { label: '🌾 المزرعة', value: p.farmLevel + ' (' + totalPlots + ' قطعة)' },
+                { label: '🌱 القطع النشطة', value: activePlots },
+                { label: '🐄 الحيوانات', value: state.animals.length },
+                { label: '🌾 المحاصيل المحصودة', value: s.cropsHarvested },
+                { label: '🥚 المنتجات المجموعة', value: s.productsCollected },
+                { label: '🐾 الحيوانات المشتراة', value: s.animalsBought },
+                { label: '💰 إجمالي المكتسب', value: formatMoney(s.totalEarned) },
+                { label: '💰 إجمالي المصروف', value: formatMoney(s.totalSpent) },
+                { label: '🌱 البذور المشتراة', value: s.seedsBought },
+                { label: '🎨 الزينة المشتراة', value: s.decorBought || 0 },
+                { label: '🐛 الآفات المكافحة', value: s.pestsKilled || 0 },
+                { label: '📅 الأيام التي لعبتها', value: s.daysPlayed || 0 },
+                { label: '🌤️ الطقس', value: (WEATHERS.find(w => w.id === state.weather.id) || WEATHERS[0]).name },
+                { label: '🍂 الموسم', value: SEASON_NAMES[state.season] || 'الربيع' }
             ];
             list.innerHTML = '';
             statsData.forEach(item => {
                 const li = document.createElement('li');
-                li.innerHTML = `<span>${item.label}</span><strong>${item.value}</strong>`;
+                li.style.cssText =
+                    'padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center';
+                li.innerHTML = `<span style="color:var(--text2)">${item.label}</span><strong>${item.value}</strong>`;
                 list.appendChild(li);
+            });
+            // Check achievements from stats
+            checkAllAchievements();
+        }
+
+        // ========================================================================
+        //  RENDER SETTINGS / EVENTS
+        // ========================================================================
+        function renderSettings() {}
+
+        function renderEvents() {
+            const container = document.getElementById('activeEventContainer');
+            container.innerHTML = '';
+            // Check for random events
+            const events = [];
+            // Season events
+            if (state.season === 'spring') {
+                events.push({ icon: '🌸', title: 'موسم الربيع', desc: 'نمو المحاصيل أسرع +20%' });
+            } else if (state.season === 'summer') {
+                events.push({ icon: '☀️', title: 'موسم الصيف', desc: 'نمو المحاصيل طبيعي' });
+            } else if (state.season === 'autumn') {
+                events.push({ icon: '🍂', title: 'موسم الخريف', desc: 'نمو المحاصيل +10%' });
+            } else if (state.season === 'winter') {
+                events.push({ icon: '❄️', title: 'موسم الشتاء', desc: 'نمو المحاصيل أبطأ -20%' });
+            }
+            // Weather event
+            const w = WEATHERS.find(w => w.id === state.weather.id);
+            if (w) {
+                if (w.id === 'rainy') events.push({ icon: '🌧️', title: 'ممطر', desc: 'المحاصيل تنمو أسرع' });
+                if (w.id === 'stormy') events.push({ icon: '⛈️', title: 'عاصف', desc: 'المحاصيل تنمو أبطأ' });
+                if (w.id === 'snowy') events.push({ icon: '❄️', title: 'مثلج', desc: 'المحاصيل تنمو أبطأ' });
+            }
+            // Check for crop ready
+            const readyCrops = state.plots.filter(p => p.status === 'ready').length;
+            if (readyCrops > 0) {
+                events.push({ icon: '🌾', title: `${readyCrops} محصول جاهز`, desc: 'احصدهم الآن!' });
+            }
+            const readyAnimals = state.animals.filter(a => a.status === 'ready').length;
+            if (readyAnimals > 0) {
+                events.push({ icon: '🥚', title: `${readyAnimals} منتج جاهز`, desc: 'اجمع المنتجات!' });
+            }
+            if (events.length === 0) {
+                events.push({ icon: '🌿', title: 'كل شيء هادئ', desc: 'استمر في العمل على مزرعتك' });
+            }
+            events.forEach(ev => {
+                const div = document.createElement('div');
+                div.className = 'event-banner';
+                div.innerHTML = `
+                        <span class="event-icon">${ev.icon}</span>
+                        <div class="event-info">
+                            <div class="etitle">${ev.title}</div>
+                            <div class="edesc">${ev.desc}</div>
+                        </div>
+                    `;
+                container.appendChild(div);
             });
         }
 
-        // ====== RENDER SETTINGS ======
-        function renderSettings() {
-            // Settings page is static, nothing to render
+        // ========================================================================
+        //  COLLECT ALL READY
+        // ========================================================================
+        function collectAllReady() {
+            let collected = 0;
+            // Crops
+            state.plots.forEach((plot, idx) => {
+                if (plot.status === 'ready') {
+                    harvestCrop(idx);
+                    collected++;
+                }
+            });
+            // Animals
+            state.animals.forEach((animal, idx) => {
+                if (animal.status === 'ready') {
+                    collectProduct(idx);
+                    collected++;
+                }
+            });
+            if (collected === 0) {
+                showToast('📦 لا يوجد شيء جاهز للجمع', '📦');
+            } else {
+                showToast(`📦 تم جمع ${collected} منتج`, '📦');
+            }
         }
 
-        // ====== SLEEP ======
+        // ========================================================================
+        //  SLEEP / EAT / DRINK
+        // ========================================================================
         function sleep() {
             const p = state.player;
             if (p.energy >= 100) {
-                showToast('⚡ طاقتك ممتلئة بالفعل');
+                showToast('⚡ طاقتك ممتلئة', '⚡');
                 return;
             }
             p.day++;
             p.energy = 100;
             p.hunger = Math.max(0, p.hunger - 15);
             p.thirst = Math.max(0, p.thirst - 20);
+            p.happiness = Math.min(100, p.happiness + 5);
             if (p.hunger < 20 || p.thirst < 20) {
                 p.health = Math.max(0, p.health - 5);
             } else {
                 p.health = Math.min(100, p.health + 3);
             }
-            showToast('😴 نمت وبدأت يوم جديد');
+            // Home bonus
+            const homeBonus = 0.5 + (p.homeLevel - 1) * 0.1;
+            p.energy = Math.min(100, p.energy + 20 * homeBonus);
+            showToast(`😴 نمت وبدأت يوم ${p.day}`, '😴');
             saveGame();
             renderAll();
         }
 
-        // ====== EAT ======
         function eatFood() {
             const p = state.player;
-            if (state.inventory.food <= 0) {
-                showToast('❌ لا تملك طعام! اشترِ من المتجر');
+            if ((state.inventory.food || 0) <= 0) {
+                showToast('❌ لا طعام! اشترِ من المتجر', '❌');
                 return;
             }
             state.inventory.food--;
-            p.hunger = Math.min(100, p.hunger + 30);
-            p.health = Math.min(100, p.health + 2);
-            showToast('🍲 أكلت طعامًا');
+            p.hunger = Math.min(100, p.hunger + 35);
+            p.health = Math.min(100, p.health + 3);
+            p.happiness = Math.min(100, p.happiness + 2);
+            if (state.quests['eat_2']) {
+                state.quests['eat_2'].progress = (state.quests['eat_2'].progress || 0) + 0.5;
+                if (state.quests['eat_2'].progress >= 2) {
+                    state.quests['eat_2'].progress = 2;
+                    checkQuest('eat_2');
+                }
+            }
+            showToast('🍲 أكلت طعامًا', '🍲');
+            playSound('collect');
             saveGame();
             renderHome();
             renderInventory();
         }
 
-        // ====== DRINK ======
         function drinkWater() {
             const p = state.player;
-            if (state.inventory.water <= 0) {
-                showToast('❌ لا تملك مياه! اشترِ من المتجر');
+            if ((state.inventory.water || 0) <= 0) {
+                showToast('❌ لا مياه! اشترِ من المتجر', '❌');
                 return;
             }
             state.inventory.water--;
-            p.thirst = Math.min(100, p.thirst + 30);
-            showToast('💧 شربت ماء');
+            p.thirst = Math.min(100, p.thirst + 35);
+            p.happiness = Math.min(100, p.happiness + 1);
+            if (state.quests['eat_2']) {
+                state.quests['eat_2'].progress = (state.quests['eat_2'].progress || 0) + 0.5;
+                if (state.quests['eat_2'].progress >= 2) {
+                    state.quests['eat_2'].progress = 2;
+                    checkQuest('eat_2');
+                }
+            }
+            showToast('💧 شربت ماء', '💧');
             saveGame();
             renderHome();
             renderInventory();
         }
 
-        // ====== UPGRADE HOME ======
+        // ========================================================================
+        //  UPGRADE HOME / FARM
+        // ========================================================================
         function upgradeHome() {
             const p = state.player;
             const cost = HOME_UPGRADE_COST[p.homeLevel];
             if (!cost) {
-                showToast('🏠 المنزل في أقصى مستوى');
+                showToast('🏠 المنزل في أقصى مستوى', '🏠');
                 return;
             }
             if (p.money < cost) {
-                showToast('❌ رصيدك غير كافٍ');
+                showToast('❌ رصيد غير كافٍ', '❌');
                 return;
             }
             p.money -= cost;
             p.homeLevel++;
             p.energy = 100;
-            p.health = Math.min(100, p.health + 10);
+            p.health = Math.min(100, p.health + 15);
+            p.happiness = Math.min(100, p.happiness + 10);
             state.stats.totalSpent += cost;
-            showToast('🏠 تم ترقية المنزل!');
+            showToast(`🏠 تم ترقية المنزل إلى المستوى ${p.homeLevel}!`, '🏠');
+            playSound('levelup');
             saveGame();
             renderHome();
         }
 
-        // ====== UPGRADE FARM ======
         function upgradeFarm() {
             const p = state.player;
             const cost = FARM_UPGRADE_COST[p.farmLevel];
             if (!cost) {
-                showToast('🌾 المزرعة في أقصى مستوى');
+                showToast('🌾 المزرعة في أقصى مستوى', '🌾');
                 return;
             }
             if (p.money < cost) {
-                showToast('❌ رصيدك غير كافٍ');
+                showToast('❌ رصيد غير كافٍ', '❌');
                 return;
             }
             p.money -= cost;
             p.farmLevel++;
             state.stats.totalSpent += cost;
-            // Add new plots
             const maxPlots = PLOT_LEVELS[p.farmLevel] || 4;
             while (state.plots.length < maxPlots) {
-                state.plots.push({ id: state.plots.length + 1, crop: null, plantedAt: null, readyAt: null, status: 'empty' });
+                state.plots.push({ id: state.plots.length + 1, crop: null, plantedAt: null, readyAt: null, status: 'empty',
+                    quality: 0, irrigated: false, fertilized: false, pest: false });
             }
-            showToast('🌾 تم ترقية المزرعة!');
+            showToast(`🌾 تم ترقية المزرعة إلى المستوى ${p.farmLevel}!`, '🌾');
+            playSound('levelup');
             saveGame();
             renderFarm();
             renderHome();
         }
 
-        // ====== FORMAT MONEY ======
+        // ========================================================================
+        //  FORMAT
+        // ========================================================================
         function formatMoney(amount) {
             return Math.floor(amount).toLocaleString('ar-EG');
         }
 
-        // ====== INITIALIZE ======
-        // Handle Enter key on login
+        // ========================================================================
+        //  KEYBOARD SHORTCUTS
+        // ========================================================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+                document.getElementById('sidebar').classList.remove('open');
+            }
+            if (e.key === 'm' || e.key === 'M') {
+                toggleSidebar();
+            }
+        });
+
+        // ========================================================================
+        //  LOGIN ENTER KEY
+        // ========================================================================
         document.getElementById('loginPassword').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') handleLogin();
         });
@@ -1670,39 +3303,12 @@
             if (e.key === 'Enter') handleLogin();
         });
 
-        // Also handle auto-update of timers
-        setInterval(() => {
-            if (state && currentUser) {
-                // Update crop timers
-                let needsRender = false;
-                state.plots.forEach(plot => {
-                    if (plot.status === 'growing' && plot.readyAt && Date.now() >= plot.readyAt) {
-                        plot.status = 'ready';
-                        needsRender = true;
-                    }
-                });
-                state.animals.forEach(animal => {
-                    if (animal.status === 'waiting' && animal.produceReadyAt && Date.now() >= animal.produceReadyAt) {
-                        animal.status = 'ready';
-                        needsRender = true;
-                    }
-                });
-                if (needsRender) {
-                    renderFarm();
-                    renderAnimals();
-                    // Show notification for ready items
-                    const readyCrops = state.plots.filter(p => p.status === 'ready').length;
-                    const readyAnimals = state.animals.filter(a => a.status === 'ready').length;
-                    if (readyCrops > 0 && readyAnimals > 0) {
-                        showToast(`🌾 ${readyCrops} محصول جاهز! 🐄 ${readyAnimals} منتج جاهز!`);
-                    } else if (readyCrops > 0) {
-                        showToast(`🌾 ${readyCrops} محصول جاهز للحصاد!`);
-                    } else if (readyAnimals > 0) {
-                        showToast(`🐄 ${readyAnimals} منتج جاهز!`);
-                    }
-                }
-            }
-        }, 1000);
+        // ========================================================================
+        //  INIT
+        // ========================================================================
+        console.log('🌾 محاكي المزرعة المتقدم v2.0');
+        console.log('📌 تم التحميل بنجاح!');
     </script>
+
 </body>
 </html>
